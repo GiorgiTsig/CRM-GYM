@@ -1,0 +1,64 @@
+{
+  "trainees": [
+    {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "username": "John.Doe",
+      "password": "password123",
+      "isActive": true,
+      "dateOfBirth": "1990-01-15",
+      "address": "123 Main St, City"
+    },
+    {
+      "id": 2,
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "username": "Jane.Smith",
+      "password": "password456",
+      "isActive": true,
+      "dateOfBirth": "1992-05-20",
+      "address": "456 Oak Ave, Town"
+    }
+  ],
+  "trainers": [
+    {
+      "id": 10,
+      "firstName": "Mike",
+      "lastName": "Johnson",
+      "username": "Mike.Johnson",
+      "password": "trainer123",
+      "isActive": true,
+      "specialization": "Yoga"
+    },
+    {
+      "id": 11,
+      "firstName": "Sarah",
+      "lastName": "Williams",
+      "username": "Sarah.Williams",
+      "password": "trainer456",
+      "isActive": true,
+      "specialization": "MMA"
+    }
+  ],
+  "trainings": [
+    {
+      "id": 100,
+      "traineeId": 1,
+      "trainerId": 10,
+      "name": "Morning Yoga Session",
+      "type": "Yoga",
+      "date": "2026-02-15",
+      "duration": "60"
+    },
+    {
+      "id": 101,
+      "traineeId": 2,
+      "trainerId": 11,
+      "name": "MMA Training",
+      "type": "MMA",
+      "date": "2026-02-16",
+      "duration": "90"
+    }
+  ]
+}
