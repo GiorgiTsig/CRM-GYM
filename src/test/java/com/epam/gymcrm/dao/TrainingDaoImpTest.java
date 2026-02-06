@@ -8,6 +8,7 @@ import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.storage.TrainingStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +26,7 @@ class TrainingDaoImpTest {
     void setUp() {
         trainingStorage = new TrainingStorage();
         dao = new TrainingDaoImp();
-        dao.setTraining(trainingStorage);
+        ReflectionTestUtils.setField(dao, "trainingStorage", trainingStorage);
     }
 
     private Training buildTraining(Long id) {

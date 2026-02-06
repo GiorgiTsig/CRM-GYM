@@ -16,12 +16,8 @@ import java.util.Optional;
 public class TrainingDaoImp implements Dao<Training> {
     private static final Logger log = LoggerFactory.getLogger(TrainingDaoImp.class);
 
-    private TrainingStorage trainingStorage;
-
     @Autowired
-    public void setTraining(TrainingStorage trainingStorage) {
-        this.trainingStorage = trainingStorage;
-    }
+    private TrainingStorage trainingStorage;
 
     @Override
     public Optional<Training> get(long id) {

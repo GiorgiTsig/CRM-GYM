@@ -5,6 +5,7 @@ import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.storage.TraineeStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,7 +23,7 @@ class TraineeDaoImpTest {
     void setUp() {
         traineeStorage = new TraineeStorage();
         dao = new TraineeDaoImp();
-        dao.setTraineeStorageStorage(traineeStorage);
+        ReflectionTestUtils.setField(dao, "traineeStorage", traineeStorage);
     }
 
     private Trainee buildTrainee(Long id) {

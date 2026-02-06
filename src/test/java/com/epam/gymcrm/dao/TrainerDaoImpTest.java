@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +22,7 @@ class TrainerDaoImpTest {
     void setUp() {
         trainersStorage = new TrainersStorage();
         daoImp = new TrainerDaoImp();
-        daoImp.setTrainersStorage(trainersStorage);
+        ReflectionTestUtils.setField(daoImp, "trainersStorage", trainersStorage);
     }
 
     private Trainer buildTrainer(Long id) {

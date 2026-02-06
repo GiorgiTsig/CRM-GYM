@@ -10,6 +10,7 @@ import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -32,10 +33,11 @@ class TrainerServiceTest {
         traineeStorage = new TraineeStorage();
         
         trainerDao = new TrainerDaoImp();
-        trainerDao.setTrainersStorage(trainersStorage);
+        ReflectionTestUtils.setField(trainerDao, "trainersStorage", trainersStorage);
+
         
         traineeDao = new TraineeDaoImp();
-        traineeDao.setTraineeStorageStorage(traineeStorage);
+        ReflectionTestUtils.setField(traineeDao, "traineeStorage", traineeStorage);
         
         usernameGenerator = new UsernameGenerator();
         usernameGenerator.setTraineeDao(traineeDao);
