@@ -14,14 +14,10 @@ import java.util.Optional;
 @Repository
 public class TraineeDaoImp implements Dao<Trainee> {
 
+    @Autowired
     private TraineeStorage traineeStorage;
 
     private static final Logger log = LoggerFactory.getLogger(TraineeDaoImp.class);
-
-    @Autowired
-    public void setTraineeStorageStorage(TraineeStorage traineeStorage) {
-        this.traineeStorage = traineeStorage;
-    }
 
     @Override
     public Optional<Trainee> get(long id) {

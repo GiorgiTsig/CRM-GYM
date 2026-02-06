@@ -10,6 +10,7 @@ import com.epam.gymcrm.storage.TrainingStorage;
 import com.epam.gymcrm.util.IdGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ class TrainingServiceTest {
         trainingStorage = new TrainingStorage();
         
         trainingDao = new TrainingDaoImp();
-        trainingDao.setTraining(trainingStorage);
+        ReflectionTestUtils.setField(trainingDao, "trainingStorage", trainingStorage);
         
         idGenerator = new IdGenerator();
         
