@@ -1,5 +1,8 @@
 package com.epam.gymcrm.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Training {
     private Long id;
     private final Trainee traineeId;
@@ -17,6 +20,17 @@ public class Training {
         this.type = type;
         this.date = date;
         this.duration = duration;
+    }
+
+    @JsonCreator
+    public Training(
+            @JsonProperty("traineeId") Trainee traineeId,
+            @JsonProperty("trainerId") Trainer trainerId,
+            @JsonProperty("type")      TrainingType type
+    ) {
+        this.traineeId = traineeId;
+        this.trainerId = trainerId;
+        this.type = type;
     }
 
     public Long getId() {

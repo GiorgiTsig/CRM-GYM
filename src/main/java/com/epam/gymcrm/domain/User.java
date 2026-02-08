@@ -1,5 +1,7 @@
 package com.epam.gymcrm.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 public class User {
@@ -8,6 +10,8 @@ public class User {
     private String lastName;
     private String username;
     private String password;
+
+    @JsonProperty("isActive")
     private boolean isActive;
 
     public User(Long id, String firstName, String lastName, String username, String password, boolean isActive) {
@@ -17,6 +21,9 @@ public class User {
         this.username = username;
         this.password = password;
         this.isActive = isActive;
+    }
+
+    public User() {
     }
 
     public Long getId() {
