@@ -10,6 +10,9 @@ public class Trainee extends User {
         this.address = address;
     }
 
+    public Trainee() {
+    }
+
     public String getDateOfBirth() {
         return dateOfBirth;
     }

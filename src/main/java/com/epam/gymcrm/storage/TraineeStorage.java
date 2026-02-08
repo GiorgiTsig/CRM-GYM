@@ -13,7 +13,4 @@ public class TraineeStorage {
     public Map<Long, Trainee> getTrainees() {
         return trainee;
     }
-
-
-
 }

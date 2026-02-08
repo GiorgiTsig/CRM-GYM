@@ -8,6 +8,9 @@ public class Trainer extends User {
         this.specialization = specialization;
     }
 
+    public Trainer() {
+    }
+
     public String getSpecialization() {
         return specialization;
     }
