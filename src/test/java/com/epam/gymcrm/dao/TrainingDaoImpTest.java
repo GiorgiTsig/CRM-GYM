@@ -1,19 +1,15 @@
 package com.epam.gymcrm.dao;
 
-import com.epam.gymcrm.domain.Trainee;
-import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.domain.TrainingType;
-import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.storage.TrainingStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,15 +26,8 @@ class TrainingDaoImpTest {
     }
 
     private Training buildTraining(Long id) {
-        LocalDate localDate = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLLL yyyy");
-        String formattedString = localDate.format(formatter);
-
-        User traineeUser = new User(id, "John", "Doe", "john.doe", "password123", true);
-        Trainee trainee = new Trainee(formattedString, "123 Main St", traineeUser);
-
-        User trainerUser = new User(id + 1, "Jane", "Smith", "jane.smith", "password456", true);
-        Trainer trainer = new Trainer(trainerUser, "Yoga");
+        Long trainee = new Random().nextLong();
+        Long trainer = new Random().nextLong();
 
         Training training = new Training(
                 id,

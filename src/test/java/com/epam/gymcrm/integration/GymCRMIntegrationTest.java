@@ -16,6 +16,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -94,8 +95,8 @@ class GymCRMIntegrationTest {
 
     @Test
     void createTraining_EndToEndFlow() {
-        Trainer trainer = gymFacade.createTrainer("Trainer", "One", "MMA");
-        Trainee trainee = gymFacade.createTrainee("Trainee", "One", "1995-05-15", "456 Test Ave");
+        Long trainer = new Random().nextLong();
+        Long trainee = new Random().nextLong();;
 
         String trainingName = "Integration Training";
         TrainingType type = TrainingType.MMA;

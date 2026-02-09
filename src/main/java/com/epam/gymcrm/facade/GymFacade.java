@@ -39,7 +39,7 @@ public class GymFacade {
         return traineeService.createTrainee(firstName, lastName, dateOfBirth, address);
     }
 
-    public Training createTraining(Trainee trainee, Trainer trainer, String name, TrainingType type, String date, String duration) {
+    public Training createTraining(Long trainee, Long trainer, String name, TrainingType type, String date, String duration) {
         return trainingService.createTraining(trainee, trainer, name, type, date, duration);
     }
 }

@@ -32,7 +32,7 @@ public class TrainingService {
         this.idGenerator = idGenerator;
     }
 
-    public Training createTraining(Trainee trainee, Trainer trainer, String name, TrainingType type, String date, String duration) {
+    public Training createTraining(Long trainee, Long trainer, String name, TrainingType type, String date, String duration) {
         log.info("Creating training with name: {}, type: {}, date: {}", name, type, date);
         
         if (trainee == null) {

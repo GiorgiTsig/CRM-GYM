@@ -43,6 +43,5 @@ public abstract class AbstractDataLoader implements GymDataLoader {
         }
     }
 
-    @Override
-    public abstract void processData(JsonNode rootNode);
+    protected abstract void processData(JsonNode rootNode);
 }
