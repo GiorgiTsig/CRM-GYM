@@ -9,6 +9,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,8 +26,8 @@ class TrainingDaoImpTest {
     }
 
     private Training buildTraining(Long id) {
-        Long trainee = id;
-        Long trainer = id+1;
+        Long trainee = new Random().nextLong();
+        Long trainer = new Random().nextLong();
 
         Training training = new Training(
                 id,

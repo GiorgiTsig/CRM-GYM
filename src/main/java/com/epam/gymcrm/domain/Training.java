@@ -2,8 +2,6 @@ package com.epam.gymcrm.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.UUID;
-
 public class Training {
     private Long id;
     private Long traineeId;
