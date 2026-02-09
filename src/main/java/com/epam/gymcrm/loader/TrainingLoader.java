@@ -26,18 +26,23 @@ public class TrainingLoader extends AbstractDataLoader {
 
     private TrainingStorage trainingStorage;
 
-    @Autowired
     public TrainersStorage trainersStorage;
 
-    @Autowired
     public TraineeStorage traineeStorage;
-
-    @Autowired
-    private TraineeLoader traineeLoader;
 
     @Autowired
     public void setTrainingStorage(TrainingStorage trainingStorage) {
         this.trainingStorage = trainingStorage;
+    }
+
+    @Autowired
+    public void setTrainersStorage(TrainersStorage trainersStorage) {
+        this.trainersStorage = trainersStorage;
+    }
+
+    @Autowired
+    public void setTraineeStorage(TraineeStorage traineeStorage) {
+        this.traineeStorage = traineeStorage;
     }
 
     @Override
