@@ -1,11 +1,8 @@
 package com.epam.gymcrm.service;
 
 import com.epam.gymcrm.dao.TrainingDaoImp;
-import com.epam.gymcrm.domain.Trainee;
-import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.domain.TrainingType;
-import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.storage.TrainingStorage;
 import com.epam.gymcrm.util.IdGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,20 +35,18 @@ class TrainingServiceTest {
         trainingService.setIdGenerator(idGenerator);
     }
 
-    private Trainee createTrainee(Long id) {
-        User user = new User(id, "John", "Doe", "john.doe", "password123", true);
-        return new Trainee("01 January 1990", "123 Main St", user);
+    private Long createTrainee() {
+        return new Random().nextLong();
     }
 
-    private Trainer createTrainer(Long id) {
-        User user = new User(id, "Jane", "Smith", "jane.smith", "password456", true);
-        return new Trainer(user, "Yoga");
+    private Long createTrainer() {
+        return new Random().nextLong();
     }
 
     @Test
     void createTraining() {
-        Trainee trainee = createTrainee(1L);
-        Trainer trainer = createTrainer(2L);
+        Long trainee = createTrainee();
+        Long trainer = createTrainee();
         String name = "Morning Yoga Session";
         TrainingType type = TrainingType.Yoga;
         String date = "2024-01-15";
@@ -73,11 +69,11 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_ShouldGenerateUniqueId() {
-        Trainee trainee1 = createTrainee(1L);
-        Trainer trainer1 = createTrainer(2L);
-        
-        Trainee trainee2 = createTrainee(3L);
-        Trainer trainer2 = createTrainer(4L);
+        Long trainee1 = createTrainee();
+        Long trainer1 = createTrainer();
+
+        Long trainee2 = createTrainee();
+        Long trainer2 = createTrainer();
 
         Training training1 = trainingService.createTraining(trainee1, trainer1, "Session 1", TrainingType.Yoga, "2024-01-15", "60");
         Training training2 = trainingService.createTraining(trainee2, trainer2, "Session 2", TrainingType.MMA, "2024-01-16", "90");
@@ -88,8 +84,8 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_WithDifferentTypes() {
-        Trainee trainee = createTrainee(1L);
-        Trainer trainer = createTrainer(2L);
+        Long trainee = createTrainee();
+        Long trainer = createTrainer();
 
         Training yogaTraining = trainingService.createTraining(trainee, trainer, "Yoga Class", TrainingType.Yoga, "2024-01-15", "60");
         Training mmaTraining = trainingService.createTraining(trainee, trainer, "MMA Class", TrainingType.MMA, "2024-01-16", "90");
@@ -104,12 +100,12 @@ class TrainingServiceTest {
 
     @Test
     void selectTraining_ExistingId_ShouldReturnTraining() {
-        Trainee trainee = createTrainee(1L);
-        Trainer trainer = createTrainer(2L);
+        Long trainee = createTrainee();
+        Long trainer = createTrainer();
         Training training = trainingService.createTraining(trainee, trainer, "Test Session", TrainingType.Yoga, "2024-01-15", "60");
-        
+
         Optional<Training> result = trainingService.selectTraining(training.getId());
-        
+
         assertTrue(result.isPresent());
         assertEquals(training.getId(), result.get().getId());
         assertEquals("Test Session", result.get().getName());
@@ -118,30 +114,30 @@ class TrainingServiceTest {
     @Test
     void selectTraining_NonExistingId_ShouldReturnEmpty() {
         Optional<Training> result = trainingService.selectTraining(999L);
-        
+
         assertFalse(result.isPresent());
     }
 
     @Test
     void selectAllTrainings_ShouldReturnAllTrainings() {
-        Trainee trainee1 = createTrainee(1L);
-        Trainer trainer1 = createTrainer(2L);
-        Trainee trainee2 = createTrainee(3L);
-        Trainer trainer2 = createTrainer(4L);
-        
+        Long trainee1 = createTrainee();
+        Long trainer1 = createTrainer();
+        Long trainee2 = createTrainee();
+        Long trainer2 = createTrainer();
+
         trainingService.createTraining(trainee1, trainer1, "Session 1", TrainingType.Yoga, "2024-01-15", "60");
         trainingService.createTraining(trainee2, trainer2, "Session 2", TrainingType.MMA, "2024-01-16", "90");
         trainingService.createTraining(trainee1, trainer2, "Session 3", TrainingType.Box, "2024-01-17", "45");
-        
+
         var allTrainings = trainingService.selectAllTrainings();
-        
+
         assertEquals(3, allTrainings.size());
     }
 
     @Test
     void createTraining_WithDifferentDurations() {
-        Trainee trainee = createTrainee(1L);
-        Trainer trainer = createTrainer(2L);
+        Long trainee = createTrainee();
+        Long trainer = createTrainer();
 
         Training shortSession = trainingService.createTraining(trainee, trainer, "Short Session", TrainingType.Yoga, "2024-01-15", "30 minutes");
         Training mediumSession = trainingService.createTraining(trainee, trainer, "Medium Session", TrainingType.MMA, "2024-01-16", "60 minutes");
