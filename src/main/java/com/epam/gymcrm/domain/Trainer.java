@@ -1,33 +1,64 @@
 package com.epam.gymcrm.domain;
 
-public class Trainer extends User {
-    private String specialization;
+import jakarta.persistence.*;
 
-    public Trainer(User user, String specialization) {
-        super(user.getId(), user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.isActive());
-        this.specialization = specialization;
-    }
+import java.util.*;
+
+@Entity
+public class Trainer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToMany
+    @JoinTable(
+            name = "trainer_trainee",
+            joinColumns = @JoinColumn(name = "trainer_id"),
+            inverseJoinColumns = @JoinColumn(name = "trainee_id")
+    )
+    private Set<Trainee> trainees = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "specialization_id", nullable = false)
+    private TrainingType trainingType;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public Trainer() {
     }
 
-    public String getSpecialization() {
-        return specialization;
+    public UUID getId() {
+        return id;
     }
 
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    @Override
-    public String toString() {
-        return "Trainer{" +
-                "id=" + getId() +
-                ", firstName='" + getFirstName() + '\'' +
-                ", lastName='" + getLastName() + '\'' +
-                ", username='" + getUsername() + '\'' +
-                ", specialization='" + specialization + '\'' +
-                ", isActive=" + isActive() +
-                '}';
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public TrainingType getTrainingType() {
+        return trainingType;
+    }
+
+    public void setTrainingType(TrainingType trainingType) {
+        this.trainingType = trainingType;
+    }
+
+    public Set<Trainee> getTrainees() {
+        return trainees;
+    }
+
+    public void setTrainees(Set<Trainee> trainees) {
+        this.trainees = trainees;
     }
 }

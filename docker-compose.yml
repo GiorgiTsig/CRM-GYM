@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  crm-mysql:
+    image: mysql:8.0
+    container_name: crm-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gym
+    ports:
+      - "3306:3306"
+    restart: unless-stopped

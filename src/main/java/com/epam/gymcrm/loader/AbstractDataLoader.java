@@ -1,5 +1,6 @@
 package com.epam.gymcrm.loader;
 
+import com.epam.gymcrm.loader.interfaces.GymDataLoader;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

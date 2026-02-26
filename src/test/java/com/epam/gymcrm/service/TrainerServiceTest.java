@@ -1,185 +1,79 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TraineeDaoImp;
 import com.epam.gymcrm.dao.TrainerDaoImp;
+import com.epam.gymcrm.dao.TrainingTypeDao;
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.storage.TraineeStorage;
-import com.epam.gymcrm.storage.TrainersStorage;
-import com.epam.gymcrm.util.IdGenerator;
-import com.epam.gymcrm.util.PasswordGenerator;
-import com.epam.gymcrm.util.UsernameGenerator;
+import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.exception.AuthenticationFailedException;
+import com.epam.gymcrm.util.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class TrainerServiceTest {
 
-    private TrainerService trainerService;
+    @Mock
     private TrainerDaoImp trainerDao;
-    private TraineeDaoImp traineeDao;
-    private TrainersStorage trainersStorage;
-    private TraineeStorage traineeStorage;
-    private UsernameGenerator usernameGenerator;
-    private PasswordGenerator passwordGenerator;
-    private IdGenerator idGenerator;
+    @Mock
+    private UserService userService;
+    @Mock
+    private Authentication authentication;
+    @Mock
+    private TrainingTypeDao trainingTypeDao;
+
+    private TrainerService trainerService;
 
     @BeforeEach
     void setUp() {
-        trainersStorage = new TrainersStorage();
-        traineeStorage = new TraineeStorage();
-        
-        trainerDao = new TrainerDaoImp();
-        ReflectionTestUtils.setField(trainerDao, "trainersStorage", trainersStorage);
-
-        
-        traineeDao = new TraineeDaoImp();
-        ReflectionTestUtils.setField(traineeDao, "traineeStorage", traineeStorage);
-        
-        usernameGenerator = new UsernameGenerator();
-        usernameGenerator.setTraineeDao(traineeDao);
-        usernameGenerator.setTrainerDao(trainerDao);
-        
-        passwordGenerator = new PasswordGenerator();
-        idGenerator = new IdGenerator();
-        
         trainerService = new TrainerService();
         trainerService.setTrainerDao(trainerDao);
-        trainerService.setUsernameGenerator(usernameGenerator);
-        trainerService.setPasswordGenerator(passwordGenerator);
-        trainerService.setIdGenerator(idGenerator);
+        trainerService.setUserService(userService);
+        trainerService.setAuthentication(authentication);
+        trainerService.setTrainingTypeDao(trainingTypeDao);
     }
 
     @Test
-    void createTrainer() {
-        String firstName = "John";
-        String lastName = "Smith";
-        String specialization = "Yoga";
+    void changeTrainerPassword_updatesPasswordWhenCredentialsAreValid() {
+        String username = "trainer.user";
+        String password = "oldPass";
+        String newPassword = "newPass";
 
-        Trainer createdTrainer = trainerService.createTrainer(firstName, lastName, specialization);
+        User user = new User();
+        user.setPassword(password);
+        Trainer trainer = new Trainer();
+        trainer.setUser(user);
 
-        assertNotNull(createdTrainer);
-        assertEquals(firstName, createdTrainer.getFirstName());
-        assertEquals(lastName, createdTrainer.getLastName());
-        assertEquals(specialization, createdTrainer.getSpecialization());
-        assertTrue(createdTrainer.isActive());
-        assertNotNull(createdTrainer.getUsername());
-        assertNotNull(createdTrainer.getPassword());
-        assertEquals(10, createdTrainer.getPassword().length());
-        assertEquals(firstName + "." + lastName, createdTrainer.getUsername());
-        
-        assertTrue(trainersStorage.getTrainers().containsKey(createdTrainer.getId()));
-        assertEquals(createdTrainer, trainersStorage.getTrainers().get(createdTrainer.getId()));
+        when(authentication.auth(username, password)).thenReturn(true);
+        when(trainerDao.get(username)).thenReturn(Optional.of(trainer));
+
+        trainerService.changeTrainerPassword(username, password, newPassword);
+
+        assertEquals(newPassword, trainer.getUser().getPassword());
+        verify(trainerDao).update(trainer);
     }
 
     @Test
-    void createTrainer_WithDuplicateName_ShouldAddSerialNumber() {
-        String firstName = "John";
-        String lastName = "Doe";
-        String specialization = "MMA";
+    void changeTrainerPassword_throwsWhenCredentialsAreInvalid() {
+        String username = "trainer.user";
+        String password = "wrongPass";
 
-        Trainer firstTrainer = trainerService.createTrainer(firstName, lastName, specialization);
-        assertEquals(firstName + "." + lastName, firstTrainer.getUsername());
+        when(authentication.auth(username, password)).thenReturn(false);
 
-        Trainer secondTrainer = trainerService.createTrainer(firstName, lastName, specialization);
-        assertEquals(firstName + "." + lastName + "1", secondTrainer.getUsername());
-
-        Trainer thirdTrainer = trainerService.createTrainer(firstName, lastName, specialization);
-        assertEquals(firstName + "." + lastName + "2", thirdTrainer.getUsername());
-    }
-
-    @Test
-    void createTrainer_ShouldGenerateUniqueId() {
-        Trainer trainer1 = trainerService.createTrainer("Alice", "Brown", "Pilates");
-        Trainer trainer2 = trainerService.createTrainer("Bob", "White", "Box");
-
-        assertNotEquals(trainer1.getId(), trainer2.getId());
-        assertTrue(trainer1.getId() < trainer2.getId());
-    }
-
-    @Test
-    void createTrainer_ShouldGeneratePassword() {
-        Trainer trainer = trainerService.createTrainer("Test", "User", "Yoga");
-
-        assertNotNull(trainer.getPassword());
-        assertEquals(10, trainer.getPassword().length());
-        assertTrue(trainer.getPassword().matches("[A-Za-z0-9]{10}"));
-    }
-
-    @Test
-    void createTrainer_WithExistingTraineeName_ShouldAddSerialNumber() {
-        String firstName = "Mike";
-        String lastName = "Johnson";
-        
-        TraineeService traineeService = new TraineeService();
-        traineeService.setTraineeDao(traineeDao);
-        traineeService.setUsernameGenerator(usernameGenerator);
-        traineeService.setPasswordGenerator(passwordGenerator);
-        traineeService.setIdGenerator(idGenerator);
-        traineeService.createTrainee(firstName, lastName, "01 January 1990", "123 Main St");
-        
-        Trainer trainer = trainerService.createTrainer(firstName, lastName, "Yoga");
-        assertEquals(firstName + "." + lastName + "1", trainer.getUsername());
-    }
-
-    @Test
-    void selectTrainer_ExistingId_ShouldReturnTrainer() {
-        Trainer trainer = trainerService.createTrainer("Tom", "Brown", "Pilates");
-        
-        Optional<Trainer> result = trainerService.selectTrainer(trainer.getId());
-        
-        assertTrue(result.isPresent());
-        assertEquals(trainer.getId(), result.get().getId());
-        assertEquals("Tom", result.get().getFirstName());
-        assertEquals("Brown", result.get().getLastName());
-        assertEquals("Pilates", result.get().getSpecialization());
-    }
-
-    @Test
-    void selectTrainer_NonExistingId_ShouldReturnEmpty() {
-        Optional<Trainer> result = trainerService.selectTrainer(999L);
-        
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    void selectAllTrainers_ShouldReturnAllTrainers() {
-        trainerService.createTrainer("Alice", "Smith", "Yoga");
-        trainerService.createTrainer("Bob", "Johnson", "MMA");
-        trainerService.createTrainer("Charlie", "Williams", "Box");
-        
-        var allTrainers = trainerService.selectAllTrainers();
-        
-        assertEquals(3, allTrainers.size());
-    }
-
-    @Test
-    void updateTrainer_ExistingTrainer_ShouldUpdateSuccessfully() {
-        Trainer original = trainerService.createTrainer("David", "Clark", "Yoga");
-        
-        Trainer updated = trainerService.updateTrainer(
-                original.getId(),
-                "David",
-                "Clark",
-                "MMA",
-                false
+        assertThrows(
+                AuthenticationFailedException.class,
+                () -> trainerService.changeTrainerPassword(username, password, "newPass")
         );
-        
-        assertEquals("MMA", updated.getSpecialization());
-        assertFalse(updated.isActive());
-        assertEquals(original.getUsername(), updated.getUsername());
-        assertEquals(original.getPassword(), updated.getPassword());
-    }
-
-    @Test
-    void updateTrainer_NonExistingTrainer_ShouldThrowException() {
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            trainerService.updateTrainer(999L, "John", "Doe", "Yoga", true);
-        });
-        
-        assertTrue(exception.getMessage().contains("not found"));
+        verify(trainerDao, never()).update(org.mockito.ArgumentMatchers.any());
     }
 }

@@ -1,63 +1,87 @@
 package com.epam.gymcrm.dao;
 
+import com.epam.gymcrm.dao.interfaces.Dao;
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.exception.EntityNotFoundException;
-import com.epam.gymcrm.storage.TrainersStorage;
+import com.epam.gymcrm.domain.User;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.TypedQuery;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-@Repository
+@Component
 public class TrainerDaoImp implements Dao<Trainer> {
 
     @Autowired
-    private TrainersStorage trainersStorage;
+    private SessionFactory sessionFactory;
 
     private static final Logger log = LoggerFactory.getLogger(TrainerDaoImp.class);
 
     @Override
-    public Optional<Trainer> get(long id) {
-        Optional<Trainer> trainer = Optional.ofNullable(trainersStorage.getTrainers().get(id));
-        if (trainer.isPresent()) {
-            log.info("Trainer found with id {}", id);
-        } else {
-            log.warn("Trainer NOT found with id {}", id);
+    public Optional<Trainer> get(String username) {
+        Session session = sessionFactory.getCurrentSession();
+
+        TypedQuery<User> userTypedQuery = session.createQuery("SELECT a from User a WHERE  a.username = :username", User.class);
+        Optional<User> user = userTypedQuery
+                .setParameter("username", username)
+                .getResultList()
+                .stream()
+                .findFirst();
+        if (user.isEmpty()) {
+            log.info("User not found with username {}", username);
+            return Optional.empty();
         }
 
+        TypedQuery<Trainer> trainerTypedQuery = session.createQuery("SELECT a from Trainer a WHERE a.user = :user_id", Trainer.class);
+        Optional<Trainer> trainer = trainerTypedQuery
+                .setParameter("user_id", user.get())
+                .getResultList()
+                .stream()
+                .findFirst();
+
+        if (trainer.isPresent()) {
+            log.info("Trainer found with username {}", username);
+        } else {
+            log.info("Trainer not found with username {}", username);
+        }
         return trainer;
     }
 
     @Override
-    public Map<Long, Trainer> getAll() {
-        return Map.copyOf(trainersStorage.getTrainers());
+    public List<Trainer> getAll() {
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("SELECT a FROM Trainer a", Trainer.class).getResultList();
     }
 
     @Override
     public void save(Trainer trainer) {
-        trainersStorage.getTrainers().put(trainer.getId(), trainer);
-        log.debug("Current trainer storage size: {}", trainersStorage.getTrainers().size());
+        Session session = sessionFactory.getCurrentSession();
+        session.persist(trainer);
     }
 
     @Override
     public void update(Trainer trainer) {
-        Map<Long, Trainer> trainers = trainersStorage.getTrainers();
-
-        if (trainers.containsKey(trainer.getId())) {
-            log.info("Updating trainer with id {}", trainer.getId());
-            trainers.put(trainer.getId(), trainer);
-        } else {
-            log.error("Cannot update. Trainer with id {} not found", trainer.getId());
-            throw new EntityNotFoundException("Trainee with id " + trainer.getId() + " not found");
-        }
+        Session session = sessionFactory.getCurrentSession();
+        session.merge(trainer);
     }
 
     @Override
-    public void delete(long id) {
-        trainersStorage.getTrainers().remove(id);
-        log.debug("Current trainer storage size: {}", trainersStorage.getTrainers().size());
+    public void delete(UUID id) {
+        Session session = sessionFactory.getCurrentSession();
+        Trainer trainer = session.get(Trainer.class, id);
+
+        if (trainer == null) {
+            log.error("Cannot delete. trainer with id {} not found", id);
+            throw new EntityNotFoundException("trainer with id " + id + " not found");
+        }
+
+        session.remove(trainer.getUser());
     }
 }

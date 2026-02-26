@@ -1,14 +1,16 @@
 package com.epam.gymcrm.loader;
 
+import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Training;
-import com.epam.gymcrm.storage.TraineeStorage;
-import com.epam.gymcrm.storage.TrainersStorage;
-import com.epam.gymcrm.storage.TrainingStorage;
+import com.epam.gymcrm.service.TraineeService;
+import com.epam.gymcrm.service.TrainerService;
+import com.epam.gymcrm.service.TrainingService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,33 +18,41 @@ import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 @Component
+@Order(3)
 public class TrainingLoader extends AbstractDataLoader {
     private static final Logger logger = LoggerFactory.getLogger(TrainingLoader.class);
 
-    private TrainingStorage trainingStorage;
+    private TrainingService trainingService;
 
-    public TrainersStorage trainersStorage;
+    public TrainerService trainerService;
 
-    public TraineeStorage traineeStorage;
+    public TraineeService traineeService;
 
     @Autowired
-    public void setTrainingStorage(TrainingStorage trainingStorage) {
-        this.trainingStorage = trainingStorage;
+    public void setTrainingService(TrainingService trainingService) {
+        this.trainingService = trainingService;
     }
 
     @Autowired
-    public void setTrainersStorage(TrainersStorage trainersStorage) {
-        this.trainersStorage = trainersStorage;
+    public void setTrainerService(TrainerService trainerService) {
+        this.trainerService = trainerService;
     }
 
     @Autowired
-    public void setTraineeStorage(TraineeStorage traineeStorage) {
-        this.traineeStorage = traineeStorage;
+    public void setTraineeService(TraineeService traineeService) {
+        this.traineeService = traineeService;
     }
 
     public void processTraining(JsonNode node) {
         Training trainingMapper = objectMapper.convertValue(node, Training.class);
-        trainingStorage.getTraining().put(trainingMapper.getId(), trainingMapper);
+        trainingService.createTraining(
+                trainingMapper.getTrainerId().getUser().getUsername(),
+                trainingMapper.getTraineeId().getUser().getUsername(),
+                new Training(
+                        trainingMapper.getName(), trainingMapper.getDate(),
+                        trainingMapper.getDuration()
+                )
+        );
     }
 
     @Override
@@ -57,11 +67,11 @@ public class TrainingLoader extends AbstractDataLoader {
             // Only VALID trainings reach here
             StreamSupport.stream(trainingNode.spliterator(), false)
                     .filter(training -> {
-                        long traineeId = training.get("traineeId").asLong();
-                        long trainerId = training.get("trainerId").asLong();
+                        String traineeUsername = training.get("traineeId").get("user").get("username").asText();
+                        String trainerUsername = training.get("trainerId").get("user").get("username").asText();
 
-                        return traineeStorage.getTrainees().containsKey(traineeId)
-                                && trainersStorage.getTrainers().containsKey(trainerId);
+                        return traineeService.getTrainee(traineeUsername).isPresent()
+                                && trainerService.getTrainer(trainerUsername).isPresent();
                     })
                     .forEach(this::processTraining);
 

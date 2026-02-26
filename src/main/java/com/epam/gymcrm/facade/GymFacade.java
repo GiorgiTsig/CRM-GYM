@@ -1,45 +1,22 @@
 package com.epam.gymcrm.facade;
 
-import com.epam.gymcrm.domain.Trainee;
-import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.Training;
-import com.epam.gymcrm.domain.TrainingType;
-import com.epam.gymcrm.service.TraineeService;
-import com.epam.gymcrm.service.TrainerService;
-import com.epam.gymcrm.service.TrainingService;
+import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
+import org.springframework.validation.annotation.Validated;
 
 @Component
+@Validated
 public class GymFacade {
 
-    private final TrainerService trainerService;
-    private final TraineeService traineeService;
-    private final TrainingService trainingService;
+    private final UserService userService;
 
-    public GymFacade(TrainerService trainerService,
-                     TraineeService traineeService,
-                     TrainingService trainingService
-    ) {
-        this.trainerService = trainerService;
-        this.traineeService = traineeService;
-        this.trainingService = trainingService;
+    public GymFacade(UserService userService) {
+        this.userService = userService;
     }
 
-    public Trainer createTrainer(String firstName, String lastName, String specialization) {
-        return trainerService.createTrainer(firstName, lastName, specialization);
-    }
-
-    public Map<Long, Trainer> getAllTrainers() {
-        return trainerService.selectAllTrainers();
-    }
-
-    public Trainee createTrainee(String firstName, String lastName, String dateOfBirth, String address) {
-        return traineeService.createTrainee(firstName, lastName, dateOfBirth, address);
-    }
-
-    public Training createTraining(Long trainee, Long trainer, String name, TrainingType type, String date, String duration) {
-        return trainingService.createTraining(trainee, trainer, name, type, date, duration);
+    public void createUser(@Valid User user) {
+        userService.saveUser(user);
     }
 }

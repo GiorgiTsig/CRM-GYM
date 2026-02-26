@@ -1,11 +1,34 @@
 package com.epam.gymcrm.domain;
 
-public class Trainee extends User {
-    private String dateOfBirth;
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.util.*;
+
+@Entity
+public class Trainee {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column
+    private LocalDate dateOfBirth;
+
+    @Column
     private String address;
 
-    public Trainee(String dateOfBirth, String address, User user) {
-        super(user.getId(), user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.isActive());
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
+    @ManyToMany(mappedBy = "trainees")
+    private List<Trainer> trainers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "traineeId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Training> trainings = new ArrayList<>();
+
+    public Trainee(LocalDate dateOfBirth, String address) {
         this.dateOfBirth = dateOfBirth;
         this.address = address;
     }
@@ -13,11 +36,19 @@ public class Trainee extends User {
     public Trainee() {
     }
 
-    public String getDateOfBirth() {
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -29,16 +60,27 @@ public class Trainee extends User {
         this.address = address;
     }
 
-    @Override
-    public String toString() {
-        return "Trainee{" +
-                "id=" + getId() +
-                ", firstName='" + getFirstName() + '\'' +
-                ", lastName='" + getLastName() + '\'' +
-                ", username='" + getUsername() + '\'' +
-                ", dateOfBirth='" + dateOfBirth + '\'' +
-                ", address='" + address + '\'' +
-                ", isActive=" + isActive() +
-                '}';
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public List<Trainer> getTrainers() {
+        return trainers;
+    }
+
+    public void setTrainers(List<Trainer> trainers) {
+        this.trainers = trainers;
+    }
+
+    public List<Training> getTrainings() {
+        return trainings;
+    }
+
+    public void setTrainings(List<Training> trainings) {
+        this.trainings = trainings;
     }
 }

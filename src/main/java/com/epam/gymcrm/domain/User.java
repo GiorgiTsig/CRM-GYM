@@ -1,36 +1,62 @@
 package com.epam.gymcrm.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import jakarta.validation.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
+import java.util.UUID;
 
+@Entity
 public class User {
-    private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @NotBlank
+    @Column(nullable = false)
     private String firstName;
+
+    @NotBlank
+    @Column(nullable = false)
     private String lastName;
+
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @Column(nullable = false)
     private String password;
 
-    @JsonProperty("isActive")
+    @NotNull
+    @Column(nullable = false)
     private boolean isActive;
 
-    public User(Long id, String firstName, String lastName, String username, String password, boolean isActive) {
-        this.id = id;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Trainee trainee;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Trainer trainer;
+
+    public User(String firstName, String lastName, boolean isActive) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.isActive = isActive;
+    }
+
+    public User(String username, boolean isActive) {
         this.username = username;
-        this.password = password;
         this.isActive = isActive;
     }
 
     public User() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -72,6 +98,21 @@ public class User {
         isActive = active;
     }
 
+    public Trainee getTrainee() {
+        return trainee;
+    }
+
+    public void setTrainee(Trainee trainee) {
+        this.trainee = trainee;
+    }
+
+    public Trainer getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
+    }
 
     @Override
     public String toString() {

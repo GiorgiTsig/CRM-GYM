@@ -1,36 +1,73 @@
 package com.epam.gymcrm.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
 public class Training {
-    private Long id;
-    private Long traineeId;
-    private Long trainerId;
-    private String name;
-    private final TrainingType type;
-    private String date;
-    private String duration;
 
-    public Training(Long id, Long traineeId, Long trainerId, String name, TrainingType type, String date, String duration) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "trainee_id")
+    private Trainee traineeId;
+
+    @ManyToOne
+    @JoinColumn(name = "trainer_id")
+    private Trainer trainerId;
+
+    @NotBlank
+    @Size(max = 100)
+    @Column(nullable = false)
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "trainingType_id")
+    private TrainingType type;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @NotNull
+    @Min(1)
+    @Column(nullable = false)
+    private Integer duration;
+
+    public Training(UUID id, String name, TrainingType type, LocalDate date, Integer duration) {
         this.id = id;
-        this.traineeId = traineeId;
-        this.trainerId = trainerId;
         this.name = name;
         this.type = type;
         this.date = date;
         this.duration = duration;
     }
 
-
-    public Training(@JsonProperty("type") TrainingType type) {
-        this.type = type;
+    public Training(String name, LocalDate date, Integer duration) {
+        this.name = name;
+        this.date = date;
+        this.duration = duration;
     }
 
-    public Long getId() {
+
+    public Training() {
+
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -40,19 +77,19 @@ public class Training {
         this.name = name;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public String getDuration() {
+    public Integer getDuration() {
         return duration;
     }
 
-    public void setDuration(String duration) {
+    public void setDuration(Integer duration) {
         this.duration = duration;
     }
 
@@ -60,12 +97,24 @@ public class Training {
         return type;
     }
 
-    public Long getTrainerId() {
+    public Trainee getTraineeId() {
+        return traineeId;
+    }
+
+    public void setTraineeId(Trainee traineeId) {
+        this.traineeId = traineeId;
+    }
+
+    public Trainer getTrainerId() {
         return trainerId;
     }
 
-    public Long getTraineeId() {
-        return traineeId;
+    public void setTrainerId(Trainer trainerId) {
+        this.trainerId = trainerId;
+    }
+
+    public void setType(TrainingType type) {
+        this.type = type;
     }
 
     @Override
