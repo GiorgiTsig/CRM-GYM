@@ -24,7 +24,6 @@ public class Main {
         trainerFacade.createTrainerProfile(trainerUser, new Trainer(), "MMA");
         traineeFacade.createTraineeProfile(traineeUser, new Trainee(dateOfBirth, "f"), "Giorgi.Tsignadze");
 
-        //Check the trainer’s username and password, and run it after that.
         trainingFacade.addTraining("Giorgi.Tsignadze", "Giorgi.Tsignadze1", new Training("Martial ART", localDate, 100));
     }
 }
