@@ -1,6 +1,6 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TrainingDaoImp;
+import com.epam.gymcrm.repository.TrainingRepository;
 import com.epam.gymcrm.dao.searchCriteria.TraineeTrainingSearchCriteria;
 import com.epam.gymcrm.dao.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.Training;
@@ -8,22 +8,19 @@ import com.epam.gymcrm.exception.AuthenticationFailedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TrainingServiceTest {
 
     @Mock
-    private TrainingDaoImp trainingDao;
+    private TrainingRepository trainingRepository;
     @Mock
     private TrainerService trainerService;
     @Mock
@@ -34,7 +31,7 @@ class TrainingServiceTest {
     @BeforeEach
     void setUp() {
         trainingService = new TrainingService();
-        trainingService.setTrainingDao(trainingDao);
+        trainingService.setTrainingRepository(trainingRepository);
         trainingService.setTrainerService(trainerService);
         trainingService.setTraineeService(traineeService);
     }
@@ -58,7 +55,7 @@ class TrainingServiceTest {
         List<Training> trainings = List.of(new Training());
 
         when(trainerService.authenticateTrainer(username, password)).thenReturn(true);
-        when(trainingDao.findTrainerTrainings(username, criteria)).thenReturn(trainings);
+        when(trainingService.getTrainerTrainings(username, password, criteria)).thenReturn(trainings);
 
         List<Training> result = trainingService.getTrainerTrainings(username, password, criteria);
 

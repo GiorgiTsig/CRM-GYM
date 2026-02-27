@@ -1,13 +1,13 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TrainingDaoImp;
-import com.epam.gymcrm.dao.searchCriteria.TraineeTrainingSearchCriteria;
 import com.epam.gymcrm.dao.searchCriteria.TrainerTrainingSearchCriteria;
+import com.epam.gymcrm.exception.AuthenticationFailedException;
+import com.epam.gymcrm.repository.TrainingRepository;
+import com.epam.gymcrm.dao.searchCriteria.TraineeTrainingSearchCriteria;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.domain.TrainingType;
-import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -24,14 +24,14 @@ import java.util.List;
 @Validated
 public class TrainingService {
 
-    private TrainingDaoImp trainingDao;
+    private TrainingRepository trainingRepository;
     private TrainerService trainerService;
     private TraineeService traineeService;
     private static final Logger log = LoggerFactory.getLogger(TrainingService.class);
 
     @Autowired
-    public void setTrainingDao(TrainingDaoImp trainingDao) {
-        this.trainingDao = trainingDao;
+    public void setTrainingRepository(TrainingRepository trainingRepository) {
+        this.trainingRepository = trainingRepository;
     }
 
     @Autowired
@@ -50,7 +50,7 @@ public class TrainingService {
             @NotBlank String traineeUsername,
             @Valid Training training
     ) {
-        Trainer trainer = trainerService.findTrainerByUsername(trainerUsername)
+        Trainer trainer = trainerService.getTrainer(trainerUsername)
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
 
         Trainee trainee = traineeService.findTraineeByUsername(traineeUsername)
@@ -59,13 +59,19 @@ public class TrainingService {
         if (trainer.getTrainingType() == null) {
             throw new IllegalArgumentException("Training type is required for training creation");
         }
+
         TrainingType type = trainerService.trainingType(trainer.getTrainingType().getTrainingTypeName());
 
         training.setTrainerId(trainer);
         training.setTraineeId(trainee);
         training.setType(type);
 
-        trainingDao.save(training);
+        trainingRepository.save(training);
+    }
+
+    @Transactional
+    public void delete(String username) {
+        trainingRepository.deleteTrainingByTraineeId_User_Username(username);
     }
 
     @Transactional(readOnly = true)
@@ -78,7 +84,12 @@ public class TrainingService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
         log.info("Selecting trainee trainings with username: {}", traineeUsername);
-        return trainingDao.findTraineeTrainings(traineeUsername, criteria);
+        return trainingRepository.findTrainingByTraineeId_User_UsernameOrDateBetweenAndTrainerId_TrainingType_TrainingTypeName(
+                traineeUsername,
+                criteria.getFromDate(),
+                criteria.getToDate(),
+                criteria.getTrainingType()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +102,11 @@ public class TrainingService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
         log.info("Selecting trainer trainings with username: {}", trainerUsername);
-        return trainingDao.findTrainerTrainings(trainerUsername, criteria);
+        return trainingRepository.findTrainingByTrainerId_User_UsernameOrDateBetweenAndTraineeId_User_FirstName(
+                trainerUsername,
+                criteria.getFromDate(),
+                criteria.getToDate(),
+                criteria.getTraineeName()
+        );
     }
 }

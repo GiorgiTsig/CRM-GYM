@@ -1,6 +1,6 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TraineeDaoImp;
+import com.epam.gymcrm.repository.TraineeRepository;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 class TraineeServiceTest {
 
     @Mock
-    private TraineeDaoImp traineeDao;
+    private TraineeRepository traineeRepository;
     @Mock
     private UserService userService;
     @Mock
@@ -38,7 +38,7 @@ class TraineeServiceTest {
     @BeforeEach
     void setUp() {
         traineeService = new TraineeService();
-        traineeService.setTraineeDao(traineeDao);
+        traineeService.setTrainerRepository(traineeRepository);
         traineeService.setUserService(userService);
         traineeService.setAuthentication(authentication);
         traineeService.setTrainerService(trainerService);
@@ -56,12 +56,12 @@ class TraineeServiceTest {
         trainee.setUser(user);
 
         when(authentication.auth(username, password)).thenReturn(true);
-        when(traineeDao.get(username)).thenReturn(Optional.of(trainee));
+        when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee));
 
         traineeService.changeTraineePassword(username, password, newPassword);
 
         assertEquals(newPassword, trainee.getUser().getPassword());
-        verify(traineeDao).update(trainee);
+        verify(traineeRepository).save(trainee);
     }
 
     @Test
@@ -75,7 +75,7 @@ class TraineeServiceTest {
                 AuthenticationFailedException.class,
                 () -> traineeService.changeTraineePassword(username, password, "newPass")
         );
-        verify(traineeDao, never()).update(org.mockito.ArgumentMatchers.any());
+        verify(traineeRepository, never()).save(org.mockito.ArgumentMatchers.any());
     }
 
     @Test
@@ -94,7 +94,7 @@ class TraineeServiceTest {
         trainee.setTrainers(new java.util.ArrayList<>(List.of(assignedTrainer)));
 
         when(authentication.auth(username, password)).thenReturn(true);
-        when(traineeDao.get(username)).thenReturn(Optional.of(trainee));
+        when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee));
         when(trainerService.getAllTrainers()).thenReturn(List.of(assignedTrainer, unassignedTrainer));
 
         List<Trainer> result = traineeService.getUnassignedTrainersForTrainee(username, password);

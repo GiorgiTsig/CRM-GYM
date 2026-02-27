@@ -11,7 +11,7 @@ public class Trainer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "trainer_trainee",
             joinColumns = @JoinColumn(name = "trainer_id"),

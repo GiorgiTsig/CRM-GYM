@@ -1,6 +1,7 @@
 package com.epam.gymcrm;
 
 import com.epam.gymcrm.config.AppConfig;
+import com.epam.gymcrm.dao.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.*;
 import com.epam.gymcrm.facade.*;
 import org.springframework.context.ApplicationContext;
@@ -15,6 +16,7 @@ public class Main {
         TraineeFacade traineeFacade = applicationContext.getBean(TraineeFacade.class);
         TrainingFacade trainingFacade = applicationContext.getBean(TrainingFacade.class);
 
+
         User trainerUser = new User("Giorgi", "Tsignadze", true);
         User traineeUser = new User("Giorgi", "Tsignadze", true);
 
@@ -25,5 +27,17 @@ public class Main {
         traineeFacade.createTraineeProfile(traineeUser, new Trainee(dateOfBirth, "f"), "Giorgi.Tsignadze");
 
         trainingFacade.addTraining("Giorgi.Tsignadze", "Giorgi.Tsignadze1", new Training("Martial ART", localDate, 100));
+
+        TrainerTrainingSearchCriteria trainerTrainingSearchCriteria = new TrainerTrainingSearchCriteria();
+
+        LocalDate from = LocalDate.of(2024, 1, 1);
+        LocalDate to = LocalDate.of(2026, 3, 16);
+
+        trainerTrainingSearchCriteria.setFromDate(from);
+        trainerTrainingSearchCriteria.setToDate(to);
+        trainerTrainingSearchCriteria.setTraineeName("Jane.Smith");
+
+
+        trainingFacade.getTrainerTrainings("Sarah.Williams", "aLPyO5Z5RA", trainerTrainingSearchCriteria);
     }
 }

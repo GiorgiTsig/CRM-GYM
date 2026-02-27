@@ -6,7 +6,6 @@ import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.service.TrainingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 

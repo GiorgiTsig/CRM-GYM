@@ -1,24 +1,25 @@
 package com.epam.gymcrm.util;
 
-import com.epam.gymcrm.dao.UserDaoImp;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class UsernameGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(UsernameGenerator.class);
 
-    private UserDaoImp userDao;
+    private UserRepository userRepository;
 
     @Autowired
-    public void setUser(UserDaoImp userDao) {
-        this.userDao = userDao;
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     /**
@@ -45,8 +46,7 @@ public class UsernameGenerator {
     }
 
     private boolean usernameExistsInUser(String username) {
-        List<User> allUser = userDao.getAll();
-        return allUser.stream()
-                .anyMatch(user -> username.equals(user.getUsername()));
+        Optional<User> user = userRepository.getUsersByUsername(username);
+        return user.isPresent();
     }
 }

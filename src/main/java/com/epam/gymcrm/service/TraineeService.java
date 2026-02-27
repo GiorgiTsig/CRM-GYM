@@ -1,11 +1,11 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TraineeDaoImp;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
+import com.epam.gymcrm.repository.TraineeRepository;
 import com.epam.gymcrm.util.Authentication;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -24,43 +24,23 @@ import java.util.*;
 @Validated
 public class TraineeService {
 
-    private TraineeDaoImp traineeDao;
+    private TraineeRepository traineeRepository;
     private UserService  userService;
     private Authentication authentication;
     private TrainerService trainerService;
     private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
 
     @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+    public void setUserService(UserService userService) {this.userService = userService;}
 
     @Autowired
-    public void setTraineeDao(TraineeDaoImp traineeDao) {
-        this.traineeDao = traineeDao;
-    }
+    public void setTrainerRepository(TraineeRepository traineeRepository) {this.traineeRepository = traineeRepository;}
 
     @Autowired
     public void setTrainerService(TrainerService trainerService) {this.trainerService = trainerService;}
 
     @Autowired
     public void setAuthentication(Authentication authentication) {this.authentication = authentication;}
-
-    @Transactional
-    public void createTrainee(@Valid Trainee trainee, @NotBlank String username, @NotBlank String trainerUsername) {
-        User user = userService.getUser(username).orElseThrow(() -> new EntityNotFoundException("Username doesn't exists"));
-        Trainer trainer = trainerService.findTrainerByUsername(trainerUsername).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
-
-        log.info("Creating trainee with firstName: {}", user.getFirstName());
-
-        trainee.setUser(user);
-        traineeDao.save(trainee);
-
-        trainee.getTrainers().add(trainer);
-        trainer.getTrainees().add(trainee);
-
-        log.info("Trainee created successfully with id: {}, username: {}", user.getId(), user.getUsername());
-    }
 
     @Transactional
     public void createTraineeProfile(@Valid User user, @Valid Trainee trainee, @NotBlank String trainerUsernames) {
@@ -71,36 +51,24 @@ public class TraineeService {
         user.setTrainee(trainee);
 
         if (trainerUsernames != null && !trainerUsernames.isEmpty()) {
-            Trainer trainer = trainerService.findTrainerByUsername(trainerUsernames).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
+            Trainer trainer = trainerService.getTrainer(trainerUsernames).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
             trainee.getTrainers().add(trainer);
             trainer.getTrainees().add(trainee);
         }
 
-        traineeDao.save(trainee);
+        traineeRepository.save(trainee);
         log.info("Trainee profile created with username: {}", user.getUsername());
     }
 
     @Transactional(readOnly = true)
     public Optional<Trainee> getTrainee(@NotBlank String username) {
-        return traineeDao.get(username);
+        return traineeRepository.getTraineeByUserUsername(username);
     }
 
     @Transactional(readOnly = true)
     public Optional<Trainee> findTraineeByUsername(@NotBlank String username) {
         log.info("Selecting trainee with id: {}", username);
-        return traineeDao.get(username);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<Trainee> findTraineeById(@NotNull UUID id) {
-        log.info("Selecting trainee with UUID: {}", id);
-        return traineeDao.getById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Trainee> getAllTrainees() {
-        log.info("Selecting all trainees");
-        return traineeDao.getAll();
+        return traineeRepository.getTraineeByUserUsername(username);
     }
 
     @Transactional(readOnly = true)
@@ -108,7 +76,7 @@ public class TraineeService {
         if (!authentication.auth(username, password)) {
             return false;
         }
-        return traineeDao.get(username).isPresent();
+        return traineeRepository.getTraineeByUserUsername(username).isPresent();
     }
 
     @Transactional
@@ -122,8 +90,8 @@ public class TraineeService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainee trainee = traineeDao.get(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));;
-        Trainer trainer = trainerService.findTrainerByUsername(trainerUsername).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));;
+        Trainer trainer = trainerService.getTrainer(trainerUsername).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
 
         for (Trainer oldTrainer : new HashSet<>(trainee.getTrainers())) {
             oldTrainer.getTrainees().remove(trainee);
@@ -133,7 +101,7 @@ public class TraineeService {
         trainee.getTrainers().add(trainer);
         trainer.getTrainees().add(trainee);
 
-        traineeDao.update(trainee);
+        traineeRepository.save(trainee);
 
         log.info("Trainee updated successfully with id: {}", trainee.getId());
     }
@@ -153,7 +121,7 @@ public class TraineeService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainee trainee = traineeDao.get(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
         User user = trainee.getUser();
 
         user.setFirstName(firstName);
@@ -161,7 +129,7 @@ public class TraineeService {
         trainee.setDateOfBirth(dateOfBirth);
         trainee.setAddress(address);
 
-        traineeDao.update(trainee);
+        traineeRepository.save(trainee);
         log.info("Trainee profile updated successfully with username: {}", username);
     }
 
@@ -173,9 +141,9 @@ public class TraineeService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainee trainee = traineeDao.get(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
         trainee.getUser().setPassword(newPassword);
-        traineeDao.update(trainee);
+        traineeRepository.save(trainee);
         log.info("Trainee password changed successfully with username: {}", username);
     }
 
@@ -187,7 +155,7 @@ public class TraineeService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainee trainee = traineeDao.get(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
         Set<Trainer> assigned = new HashSet<>(trainee.getTrainers());
 
         return trainerService.getAllTrainers().stream()
@@ -203,7 +171,9 @@ public class TraineeService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        traineeDao.delete(username);
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
+
+        traineeRepository.deleteTraineeById(trainee.getId());
         log.info("Trainee deleted successfully with username: {}", username);
     }
 
@@ -215,13 +185,13 @@ public class TraineeService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainee trainee = traineeDao.get(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
         if (trainee.getUser().isActive()) {
             throw new IllegalStateException("Trainee profile is already active");
         }
 
         trainee.getUser().setActive(true);
-        traineeDao.update(trainee);
+        traineeRepository.save(trainee);
         log.info("Trainee activated successfully with username: {}", username);
     }
 
@@ -233,13 +203,13 @@ public class TraineeService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainee trainee = traineeDao.get(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));
         if (!trainee.getUser().isActive()) {
             throw new IllegalStateException("Trainee profile is already inactive");
         }
 
         trainee.getUser().setActive(false);
-        traineeDao.update(trainee);
+        traineeRepository.save(trainee);
         log.info("Trainee deactivated successfully with username: {}", username);
     }
 }

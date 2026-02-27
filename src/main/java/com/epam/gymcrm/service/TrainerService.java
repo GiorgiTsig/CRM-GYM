@@ -1,7 +1,7 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TrainerDaoImp;
-import com.epam.gymcrm.dao.TrainingTypeDao;
+import com.epam.gymcrm.repository.TrainingTypeRepository;
+import com.epam.gymcrm.repository.TrainerRepository;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -23,19 +24,11 @@ import java.util.*;
 @Validated
 public class TrainerService {
 
-    private TrainerDaoImp trainerDao;
+    private TrainingTypeRepository trainingTypeRepository;
+    private TrainerRepository trainerRepository;
     private UserService  userService;
     private Authentication authentication;
-    private TrainingTypeDao trainingTypeDao;
     private static final Logger log = LoggerFactory.getLogger(TrainerService.class);
-
-    @Autowired
-    public void setTrainingTypeDao(TrainingTypeDao trainingTypeDao) {this.trainingTypeDao = trainingTypeDao;}
-
-    @Autowired
-    public void setTrainerDao(TrainerDaoImp trainerDao) {
-        this.trainerDao = trainerDao;
-    }
 
     @Autowired
     public void setUserService(UserService userService) {
@@ -43,22 +36,16 @@ public class TrainerService {
     }
 
     @Autowired
+    public void setTrainerRepository(TrainerRepository trainerRepository) {
+        this.trainerRepository = trainerRepository;
+    }
+
+    @Autowired
     public void setAuthentication(Authentication authentication) {this.authentication = authentication;}
 
-    @Transactional
-    public void createTrainer(@Valid Trainer trainer, @NotBlank String username, @NotBlank String type) {
-        User user = userService.getUser(username).orElseThrow(() -> new EntityNotFoundException("Username doesn't exists"));
-        log.info("Creating trainer with specialization: {}", type);
-
-        TrainingType trainingType = trainingType(type);
-
-        trainer.setTrainingType(trainingType);
-        trainer.setUser(user);
-        user.setTrainer(trainer);
-
-        trainerDao.save(trainer);
-
-        log.info("Trainee updated successfully with id: {}", trainer.getId());
+    @Autowired
+    public void setTrainingTypeRepository(TrainingTypeRepository trainingTypeRepository) {
+        this.trainingTypeRepository = trainingTypeRepository;
     }
 
     @Transactional
@@ -72,26 +59,14 @@ public class TrainerService {
         trainer.setUser(user);
         user.setTrainer(trainer);
 
-        trainerDao.save(trainer);
+        trainerRepository.save(trainer);
 
         log.info("Trainer profile created with username: {}", user.getUsername());
     }
 
     @Transactional(readOnly = true)
     public Optional<Trainer> getTrainer(@NotBlank String username) {
-        return trainerDao.get(username);
-    }
-
-    @Transactional(readOnly = true)
-    Optional<Trainer> findTrainerByUsername(@NotBlank String username) {
-        log.info("Selecting trainer with id: {}", username);
-        return trainerDao.get(username);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Trainer> getAllTrainers() {
-        log.info("Selecting all trainers");
-        return trainerDao.getAll();
+        return trainerRepository.getTrainerByUser_Username(username);
     }
 
     @Transactional(readOnly = true)
@@ -99,22 +74,7 @@ public class TrainerService {
         if (!authentication.auth(username, password)) {
             return false;
         }
-        return trainerDao.get(username).isPresent();
-    }
-
-    @Transactional
-    public void updateTrainer(@NotBlank String username, @NotBlank String password, @NotBlank String type) {
-        log.info("Checking user with Username/Passowrd");
-        if (!authenticateTrainer(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
-
-        Trainer trainer = trainerDao.get(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exists"));;
-
-        TrainingType trainingType = trainingType(type);
-        trainer.setTrainingType(trainingType);
-        trainerDao.update(trainer);
+        return trainerRepository.getTrainerByUser_Username(username).isPresent();
     }
 
     @Transactional
@@ -131,14 +91,14 @@ public class TrainerService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainer trainer = trainerDao.get(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
+        Trainer trainer = trainerRepository.getTrainerByUser_Username(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
         User user = trainer.getUser();
 
         user.setFirstName(firstName);
         user.setLastName(lastName);
         trainer.setTrainingType(trainingType(specialization));
 
-        trainerDao.update(trainer);
+        trainerRepository.save(trainer);
         log.info("Trainer profile updated successfully for username: {}", username);
     }
 
@@ -151,7 +111,7 @@ public class TrainerService {
         }
 
         log.info("Deleting Trainer with id: {}", id);
-        trainerDao.delete(id);
+        trainerRepository.deleteTrainerById(id);
         log.info("Trainer deleted successfully with id: {}", id);
     }
 
@@ -163,9 +123,9 @@ public class TrainerService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainer trainer = trainerDao.get(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
+        Trainer trainer = trainerRepository.getTrainerByUser_Username(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
         trainer.getUser().setPassword(newPassword);
-        trainerDao.update(trainer);
+        trainerRepository.save(trainer);
         log.info("Trainer password changed successfully with username: {}", username);
     }
 
@@ -177,13 +137,13 @@ public class TrainerService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainer trainer = trainerDao.get(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
+        Trainer trainer = trainerRepository.getTrainerByUser_Username(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
         if (trainer.getUser().isActive()) {
             throw new IllegalStateException("Trainer profile is already active");
         }
 
         trainer.getUser().setActive(true);
-        trainerDao.update(trainer);
+        trainerRepository.save(trainer);
         log.info("Trainer activated successfully with username: {}", username);
     }
 
@@ -195,22 +155,24 @@ public class TrainerService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainer trainer = trainerDao.get(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
+        Trainer trainer = trainerRepository.getTrainerByUser_Username(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exists"));
         if (!trainer.getUser().isActive()) {
             throw new IllegalStateException("Trainer profile is already inactive");
         }
 
         trainer.getUser().setActive(false);
-        trainerDao.update(trainer);
+        trainerRepository.save(trainer);
         log.info("Trainer deactivated successfully with username: {}", username);
     }
 
-    public TrainingType trainingType(String type) {
-        List<TrainingType> getAllTrainingType = trainingTypeDao.getAll();
+    @Transactional(readOnly = true)
+    public List<Trainer> getAllTrainers() {
+        log.info("Selecting all trainers");
+        return trainerRepository.findAll();
+    }
 
-        return getAllTrainingType.stream()
-                .filter(t -> Objects.equals(t.getTrainingTypeName(), type))
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Training type not found"));
+    @Transactional(readOnly = true)
+    public TrainingType trainingType(@NonNull String type) {
+        return trainingTypeRepository.findTrainingTypeByTrainingTypeName(type);
     }
 }

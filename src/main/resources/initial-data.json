@@ -67,12 +67,12 @@
       "duration": "90",
       "traineeId": {
         "user": {
-          "username" : "John.Doe"
+          "username" : "Jane.Smith"
         }
       },
       "trainerId": {
         "user" : {
-          "username": "Mike.Johnson"
+          "username": "Sarah.Williams"
         }
       }
     }

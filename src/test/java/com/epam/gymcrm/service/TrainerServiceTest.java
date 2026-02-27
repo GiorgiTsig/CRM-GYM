@@ -1,7 +1,7 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TrainerDaoImp;
-import com.epam.gymcrm.dao.TrainingTypeDao;
+import com.epam.gymcrm.repository.TrainerRepository;
+import com.epam.gymcrm.repository.TrainingTypeRepository;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.exception.AuthenticationFailedException;
@@ -24,23 +24,23 @@ import static org.mockito.Mockito.when;
 class TrainerServiceTest {
 
     @Mock
-    private TrainerDaoImp trainerDao;
+    private TrainerRepository trainerRepository;
     @Mock
     private UserService userService;
     @Mock
     private Authentication authentication;
     @Mock
-    private TrainingTypeDao trainingTypeDao;
+    private TrainingTypeRepository trainingTypeRepository;
 
     private TrainerService trainerService;
 
     @BeforeEach
     void setUp() {
         trainerService = new TrainerService();
-        trainerService.setTrainerDao(trainerDao);
+        trainerService.setTrainerRepository(trainerRepository);
         trainerService.setUserService(userService);
         trainerService.setAuthentication(authentication);
-        trainerService.setTrainingTypeDao(trainingTypeDao);
+        trainerService.setTrainingTypeRepository(trainingTypeRepository);
     }
 
     @Test
@@ -55,12 +55,12 @@ class TrainerServiceTest {
         trainer.setUser(user);
 
         when(authentication.auth(username, password)).thenReturn(true);
-        when(trainerDao.get(username)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.getTrainerByUser_Username(username)).thenReturn(Optional.of(trainer));
 
         trainerService.changeTrainerPassword(username, password, newPassword);
 
         assertEquals(newPassword, trainer.getUser().getPassword());
-        verify(trainerDao).update(trainer);
+        verify(trainerRepository).save(trainer);
     }
 
     @Test
@@ -74,6 +74,6 @@ class TrainerServiceTest {
                 AuthenticationFailedException.class,
                 () -> trainerService.changeTrainerPassword(username, password, "newPass")
         );
-        verify(trainerDao, never()).update(org.mockito.ArgumentMatchers.any());
+        verify(trainerRepository, never()).save(org.mockito.ArgumentMatchers.any());
     }
 }
