@@ -42,7 +42,7 @@ public class UserService {
 
     @Transactional
     public void saveUser(@Valid User user) {
-        log.info("Creating user with firstName: {}, lastName: {}", user.getUsername(), user.getLastName());
+        log.info("Creating user with firstName: {}, lastName: {}", user.getFirstName(), user.getLastName());
 
         String password = passwordGenerator.generatePassword();
         user.setPassword(password);
@@ -62,13 +62,13 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(String username, String firsName, String lastname, String password, Boolean isActive) {
+    public void updateUser(String username, String firstName, String lastname, String password, Boolean isActive) {
         log.info("Updating User with id: {}", username);
 
         User existingUser = userRepository.getUsersByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        existingUser.setFirstName(firsName);
+        existingUser.setFirstName(firstName);
         existingUser.setLastName(lastname);
         existingUser.setPassword(password);
         existingUser.setActive(isActive);

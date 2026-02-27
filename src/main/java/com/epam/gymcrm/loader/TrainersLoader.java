@@ -21,7 +21,7 @@ public class TrainersLoader extends AbstractDataLoader {
     private TrainerService trainerService;
 
     @Autowired
-    public void setTraineeService(TrainerService trainerService) {
+    public void setTrainerService(TrainerService trainerService) {
         this.trainerService = trainerService;
     }
 

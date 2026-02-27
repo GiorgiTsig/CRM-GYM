@@ -43,8 +43,7 @@ public class TraineeLoader extends AbstractDataLoader {
             trainees.forEach(trainee ->
                     traineeService.createTraineeProfile(
                             new User(trainee.getUser().getFirstName(), trainee.getUser().getLastName(), trainee.getUser().isActive()),
-                            new Trainee(null, trainee.getAddress()),
-                            "Mike.Johnson"
+                            new Trainee(null, trainee.getAddress())
                     )
             );
 

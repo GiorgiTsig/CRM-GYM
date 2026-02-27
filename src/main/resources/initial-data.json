@@ -64,7 +64,7 @@
       "name": "MMA Training",
       "type": "MMA",
       "date": "2026-02-16",
-      "duration": "90",
+      "duration": 90,
       "traineeId": {
         "user": {
           "username" : "Jane.Smith"

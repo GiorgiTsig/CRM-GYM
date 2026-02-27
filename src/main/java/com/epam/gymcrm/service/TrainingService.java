@@ -56,9 +56,13 @@ public class TrainingService {
         Trainee trainee = traineeService.findTraineeByUsername(traineeUsername)
                 .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
 
+
         if (trainer.getTrainingType() == null) {
             throw new IllegalArgumentException("Training type is required for training creation");
         }
+
+        trainee.getTrainers().add(trainer);
+        trainer.getTrainees().add(trainee);
 
         TrainingType type = trainerService.trainingType(trainer.getTrainingType().getTrainingTypeName());
 

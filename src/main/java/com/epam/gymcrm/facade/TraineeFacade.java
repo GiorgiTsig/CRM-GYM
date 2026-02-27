@@ -24,8 +24,8 @@ public class TraineeFacade {
         this.traineeService = traineeService;
     }
 
-    public void createTraineeProfile(@Valid User user, @Valid Trainee trainee, @NotBlank String trainerUsernames) {
-        traineeService.createTraineeProfile(user, trainee, trainerUsernames);
+    public void createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
+        traineeService.createTraineeProfile(user, trainee);
     }
 
     public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {

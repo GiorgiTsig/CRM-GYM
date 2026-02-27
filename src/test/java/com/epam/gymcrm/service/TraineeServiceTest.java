@@ -38,7 +38,7 @@ class TraineeServiceTest {
     @BeforeEach
     void setUp() {
         traineeService = new TraineeService();
-        traineeService.setTrainerRepository(traineeRepository);
+        traineeService.setTraineeRepository(traineeRepository);
         traineeService.setUserService(userService);
         traineeService.setAuthentication(authentication);
         traineeService.setTrainerService(trainerService);

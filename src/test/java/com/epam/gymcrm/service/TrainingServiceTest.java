@@ -55,7 +55,11 @@ class TrainingServiceTest {
         List<Training> trainings = List.of(new Training());
 
         when(trainerService.authenticateTrainer(username, password)).thenReturn(true);
-        when(trainingService.getTrainerTrainings(username, password, criteria)).thenReturn(trainings);
+        when(trainingRepository.findTrainingByTrainerId_User_UsernameOrDateBetweenAndTraineeId_User_FirstName(
+                username, criteria.getFromDate(), criteria.getToDate(),
+                criteria.getTraineeName())).thenReturn(trainings
+        );
+
 
         List<Training> result = trainingService.getTrainerTrainings(username, password, criteria);
 
