@@ -1,7 +1,7 @@
 package com.epam.gymcrm.facade;
 
-import com.epam.gymcrm.dao.searchCriteria.TraineeTrainingSearchCriteria;
-import com.epam.gymcrm.dao.searchCriteria.TrainerTrainingSearchCriteria;
+import com.epam.gymcrm.searchCriteria.TraineeTrainingSearchCriteria;
+import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.service.TrainingService;
 import jakarta.validation.Valid;

@@ -1,7 +1,7 @@
 package com.epam.gymcrm;
 
 import com.epam.gymcrm.config.AppConfig;
-import com.epam.gymcrm.dao.searchCriteria.TrainerTrainingSearchCriteria;
+import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.*;
 import com.epam.gymcrm.facade.*;
 import org.springframework.context.ApplicationContext;

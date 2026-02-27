@@ -1,4 +1,4 @@
-package com.epam.gymcrm.dao.searchCriteria;
+package com.epam.gymcrm.searchCriteria;
 
 import java.time.LocalDate;
 

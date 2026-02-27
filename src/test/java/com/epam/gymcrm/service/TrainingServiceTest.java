@@ -1,8 +1,8 @@
 package com.epam.gymcrm.service;
 
 import com.epam.gymcrm.repository.TrainingRepository;
-import com.epam.gymcrm.dao.searchCriteria.TraineeTrainingSearchCriteria;
-import com.epam.gymcrm.dao.searchCriteria.TrainerTrainingSearchCriteria;
+import com.epam.gymcrm.searchCriteria.TraineeTrainingSearchCriteria;
+import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.exception.AuthenticationFailedException;
 import org.junit.jupiter.api.BeforeEach;
