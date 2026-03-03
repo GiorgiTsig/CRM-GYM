@@ -24,14 +24,14 @@ public class TrainingFacade {
         this.trainerService = trainerService;
     }
 
-    public void addTraining(
+    public Training addTraining(
             @NotBlank String trainerUsername,
             @NotBlank String password,
             @NotBlank String traineeUsername,
             @Valid Training training
     ) {
         trainerService.authenticateTrainer(traineeUsername, password);
-        trainingService.createTraining(trainerUsername, traineeUsername, training);
+       return trainingService.createTraining(trainerUsername, traineeUsername, training);
     }
 
     public List<Training> getTraineeTrainings(

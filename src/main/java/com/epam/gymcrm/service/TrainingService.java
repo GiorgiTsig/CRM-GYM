@@ -45,7 +45,7 @@ public class TrainingService {
     }
 
     @Transactional
-    public void createTraining(
+    public Training createTraining(
             @NotBlank String trainerUsername,
             @NotBlank String traineeUsername,
             @Valid Training training
@@ -71,6 +71,8 @@ public class TrainingService {
         training.setType(type);
 
         trainingRepository.save(training);
+
+        return training;
     }
 
     @Transactional
@@ -106,7 +108,7 @@ public class TrainingService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
         log.info("Selecting trainer trainings with username: {}", trainerUsername);
-        return trainingRepository.findTrainingByTrainerUserUsernameOrDateBetweenAndTraineeUserFirstName(
+        return trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
                 trainerUsername,
                 criteria.getFromDate(),
                 criteria.getToDate(),

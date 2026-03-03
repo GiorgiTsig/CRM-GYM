@@ -25,8 +25,8 @@ public interface TrainingRepository extends JpaRepository<Training, UUID> {
             String trainingType
     );
 
-    List<Training> findTrainingByTrainerUserUsernameOrDateBetweenAndTraineeUserFirstName(
-            String traineeUsername,
+    List<Training> findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
+            String username,
             LocalDate dateAfter,
             LocalDate dateBefore,
             String traineeUserFirstName

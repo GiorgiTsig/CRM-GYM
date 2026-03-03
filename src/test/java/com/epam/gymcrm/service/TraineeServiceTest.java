@@ -11,6 +11,7 @@ import com.epam.gymcrm.util.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -37,17 +38,8 @@ class TraineeServiceTest {
     @Mock
     private TrainerService trainerService;
 
+    @InjectMocks
     private TraineeService traineeService;
-
-    @BeforeEach
-    void setUp() {
-        traineeService = new TraineeService();
-        traineeService.setTraineeRepository(traineeRepository);
-        traineeService.setUsernameGenerator(usernameGenerator);
-        traineeService.setPasswordGenerator(passwordGenerator);
-        traineeService.setAuthentication(authentication);
-        traineeService.setTrainerService(trainerService);
-    }
 
     @Test
     void changeTraineePassword_updatesPasswordWhenCredentialsAreValid() {
@@ -86,23 +78,13 @@ class TraineeServiceTest {
     @Test
     void getUnassignedTrainersForTrainee_returnsOnlyUnassignedTrainers() {
         String username = "trainee.user";
-        String password = "pass";
 
-        User user = new User();
-        user.setPassword(password);
-
-        Trainer assignedTrainer = new Trainer();
         Trainer unassignedTrainer = new Trainer();
 
-        Trainee trainee = new Trainee();
-        trainee.setUser(user);
-        trainee.setTrainers(new java.util.ArrayList<>(List.of(assignedTrainer)));
+        when(traineeRepository.findUnassignedTrainersByTraineeUsername(username))
+                .thenReturn(List.of(unassignedTrainer));
 
-        when(authentication.auth(username, password)).thenReturn(true);
-        when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee));
-        when(trainerService.getAllTrainers()).thenReturn(List.of(assignedTrainer, unassignedTrainer));
-
-        List<Trainer> result = traineeService.getUnassignedTrainersForTrainee(username, password);
+        List<Trainer> result = traineeService.getUnassignedTrainersForTrainee(username);
 
         assertEquals(1, result.size());
         assertEquals(unassignedTrainer, result.get(0));

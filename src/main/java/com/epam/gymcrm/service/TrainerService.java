@@ -59,7 +59,7 @@ public class TrainerService {
     }
 
     @Transactional
-    public void createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String type) {
+    public Trainer createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String type) {
         log.info("Creating trainer profile for {} {}", user.getFirstName(), user.getLastName());
 
         String password = passwordGenerator.generatePassword();
@@ -76,6 +76,7 @@ public class TrainerService {
         trainerRepository.save(trainer);
 
         log.info("Trainer profile created with username: {}", user.getUsername());
+        return trainer;
     }
 
     @Transactional(readOnly = true)

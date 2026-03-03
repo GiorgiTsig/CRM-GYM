@@ -20,8 +20,8 @@ public class TrainerFacade {
         this.trainerService = trainerService;
     }
 
-    public void createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String trainingType) {
-        trainerService.createTrainerProfile(user, trainer, trainingType);
+    public Trainer createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String trainingType) {
+       return trainerService.createTrainerProfile(user, trainer, trainingType);
     }
 
     public boolean authenticateTrainer(@NotBlank String username, @NotBlank String password) {

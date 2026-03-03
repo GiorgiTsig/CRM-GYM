@@ -6,6 +6,7 @@ import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.service.TraineeService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -24,8 +25,8 @@ public class TraineeFacade {
         this.traineeService = traineeService;
     }
 
-    public void createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
-        traineeService.createTraineeProfile(user, trainee);
+    public Trainee createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
+       return traineeService.createTraineeProfile(user, trainee);
     }
 
     public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {
@@ -67,12 +68,14 @@ public class TraineeFacade {
     public void updateTraineeTrainers(
             @NotBlank String username,
             @NotBlank String password,
-            @NotNull  String trainerUsernames
+            @NotEmpty List<String> trainerUsernames,
+            List<String> oldTrainerUsernames
     ) {
-        traineeService.updateTraineeTrainers(username, password, trainerUsernames);
+        traineeService.updateTraineeTrainers(username, password, trainerUsernames, oldTrainerUsernames);
     }
 
     public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {
-        return traineeService.getUnassignedTrainersForTrainee(username, password);
+        traineeService.authenticateTrainee(username, password);
+        return traineeService.getUnassignedTrainersForTrainee(username);
     }
 }

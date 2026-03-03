@@ -55,7 +55,7 @@ class TrainingServiceTest {
         List<Training> trainings = List.of(new Training());
 
         when(trainerService.authenticateTrainer(username, password)).thenReturn(true);
-        when(trainingRepository.findTrainingByTrainerUserUsernameOrDateBetweenAndTraineeUserFirstName(
+        when(trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
                 username, criteria.getFromDate(), criteria.getToDate(),
                 criteria.getTraineeName())).thenReturn(trainings
         );

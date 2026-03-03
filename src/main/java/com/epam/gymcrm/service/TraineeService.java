@@ -11,6 +11,7 @@ import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +60,7 @@ public class TraineeService {
     }
 
     @Transactional
-    public void createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
+    public Trainee createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
         log.info("Creating trainee profile for {} {}", user.getFirstName(), user.getLastName());
 
         String password = passwordGenerator.generatePassword();
@@ -73,6 +74,8 @@ public class TraineeService {
 
         traineeRepository.save(trainee);
         log.info("Trainee profile created with username: {}", user.getUsername());
+
+        return trainee;
     }
 
     @Transactional(readOnly = true)
@@ -97,23 +100,29 @@ public class TraineeService {
     @Transactional
     public void updateTraineeTrainers(
             @NotBlank String username, @NotBlank String password,
-            @NotBlank String trainerUsername
+            @NotEmpty List<String> trainerUsernames,
+            List<String> oldTrainerUsernames
     ) {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
             log.error("Username and Password are not correct: {}", username);
         }
 
-        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));;
-        Trainer trainer = trainerService.getTrainer(trainerUsername).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
 
-        for (Trainer oldTrainer : new HashSet<>(trainee.getTrainers())) {
-            oldTrainer.getTrainees().remove(trainee);
-            trainee.getTrainers().remove(oldTrainer);
+        // If you want to replace a trainer instance with another trainer, it will delete it and then add the new one.
+        if (!oldTrainerUsernames.isEmpty()) {
+            oldTrainerUsernames.forEach(oldTrainerUsername -> {
+                Trainer trainer = trainerService.getTrainer(oldTrainerUsername).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
+                trainer.getTrainees().remove(trainee);
+
+            });
         }
 
-        trainee.getTrainers().add(trainer);
-        trainer.getTrainees().add(trainee);
+        trainerUsernames.forEach(trainerUsername -> {
+                    Trainer trainer = trainerService.getTrainer(trainerUsername).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
+                    trainer.getTrainees().add(trainee);
+                });
 
         traineeRepository.save(trainee);
 
@@ -160,18 +169,8 @@ public class TraineeService {
     }
 
     @Transactional(readOnly = true)
-    public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {
-        log.info("Checking user with Username/Password");
-        if (!authenticateTrainee(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-        }
-
-        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
-        Set<Trainer> assigned = new HashSet<>(trainee.getTrainers());
-
-        return trainerService.getAllTrainers().stream()
-                .filter(trainer -> !assigned.contains(trainer))
-                .toList();
+    public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username) {
+        return traineeRepository.findUnassignedTrainersByTraineeUsername(username);
     }
 
     @Transactional
