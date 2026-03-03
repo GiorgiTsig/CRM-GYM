@@ -20,11 +20,11 @@ public class Training {
 
     @ManyToOne
     @JoinColumn(name = "trainee_id")
-    private Trainee traineeId;
+    private Trainee trainee;
 
     @ManyToOne
     @JoinColumn(name = "trainer_id")
-    private Trainer trainerId;
+    private Trainer trainer;
 
     @NotBlank
     @Size(max = 100)
@@ -98,19 +98,19 @@ public class Training {
     }
 
     public Trainee getTraineeId() {
-        return traineeId;
+        return trainee;
     }
 
     public void setTraineeId(Trainee traineeId) {
-        this.traineeId = traineeId;
+        this.trainee = traineeId;
     }
 
     public Trainer getTrainerId() {
-        return trainerId;
+        return trainer;
     }
 
     public void setTrainerId(Trainer trainerId) {
-        this.trainerId = trainerId;
+        this.trainer = trainerId;
     }
 
     public void setType(TrainingType type) {
@@ -121,8 +121,8 @@ public class Training {
     public String toString() {
         return "Training{" +
                 "id=" + id +
-                ", traineeId=" + traineeId +
-                ", trainerId=" + trainerId +
+                ", traineeId=" + trainee +
+                ", trainerId=" + trainer +
                 ", name=" + name +
                 ", type=" + type +
                 ", date=" + date +

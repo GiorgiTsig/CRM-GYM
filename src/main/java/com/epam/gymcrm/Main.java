@@ -26,7 +26,7 @@ public class Main {
         trainerFacade.createTrainerProfile(trainerUser, new Trainer(), "MMA");
         traineeFacade.createTraineeProfile(traineeUser, new Trainee(dateOfBirth, "f"));
 
-        trainingFacade.addTraining("Giorgi.Tsignadze", "Giorgi.Tsignadze1", new Training("Martial ART", localDate, 100));
+//        trainingFacade.addTraining("Giorgi.Tsignadze", "Giorgi.Tsignadze1", new Training("Martial ART", localDate, 100));
 
         TrainerTrainingSearchCriteria trainerTrainingSearchCriteria = new TrainerTrainingSearchCriteria();
 

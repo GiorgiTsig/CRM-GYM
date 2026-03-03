@@ -6,6 +6,8 @@ import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.util.Authentication;
+import com.epam.gymcrm.util.PasswordGenerator;
+import com.epam.gymcrm.util.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +29,9 @@ class TraineeServiceTest {
     @Mock
     private TraineeRepository traineeRepository;
     @Mock
-    private UserService userService;
+    private UsernameGenerator usernameGenerator;
+    @Mock
+    private PasswordGenerator passwordGenerator;
     @Mock
     private Authentication authentication;
     @Mock
@@ -39,7 +43,8 @@ class TraineeServiceTest {
     void setUp() {
         traineeService = new TraineeService();
         traineeService.setTraineeRepository(traineeRepository);
-        traineeService.setUserService(userService);
+        traineeService.setUsernameGenerator(usernameGenerator);
+        traineeService.setPasswordGenerator(passwordGenerator);
         traineeService.setAuthentication(authentication);
         traineeService.setTrainerService(trainerService);
     }

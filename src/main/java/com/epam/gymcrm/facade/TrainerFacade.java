@@ -28,7 +28,8 @@ public class TrainerFacade {
         return trainerService.authenticateTrainer(username, password);
     }
 
-    public Optional<Trainer> getTrainerProfile(@NotBlank String username) {
+    public Optional<Trainer> getTrainerProfile(@NotBlank String username, @NotBlank String password) {
+        trainerService.authenticateTrainer(username, password);
         return trainerService.getTrainer(username);
     }
 

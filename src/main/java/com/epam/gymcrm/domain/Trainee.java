@@ -18,15 +18,15 @@ public class Trainee {
     @Column
     private String address;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
     @ManyToMany(mappedBy = "trainees")
-    private List<Trainer> trainers = new ArrayList<>();
+    private List<Trainer> trainers;
 
-    @OneToMany(mappedBy = "traineeId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Training> trainings = new ArrayList<>();
+    @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Training> trainings;
 
     public Trainee(LocalDate dateOfBirth, String address) {
         this.dateOfBirth = dateOfBirth;

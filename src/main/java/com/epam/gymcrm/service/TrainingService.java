@@ -75,7 +75,7 @@ public class TrainingService {
 
     @Transactional
     public void delete(String username) {
-        trainingRepository.deleteTrainingByTraineeId_User_Username(username);
+        trainingRepository.deleteTrainingByTraineeUserUsername(username);
     }
 
     @Transactional(readOnly = true)
@@ -88,7 +88,7 @@ public class TrainingService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
         log.info("Selecting trainee trainings with username: {}", traineeUsername);
-        return trainingRepository.findTrainingByTraineeId_User_UsernameOrDateBetweenAndTrainerId_TrainingType_TrainingTypeName(
+        return trainingRepository.findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
                 traineeUsername,
                 criteria.getFromDate(),
                 criteria.getToDate(),
@@ -106,7 +106,7 @@ public class TrainingService {
             throw new AuthenticationFailedException("Invalid credentials");
         }
         log.info("Selecting trainer trainings with username: {}", trainerUsername);
-        return trainingRepository.findTrainingByTrainerId_User_UsernameOrDateBetweenAndTraineeId_User_FirstName(
+        return trainingRepository.findTrainingByTrainerUserUsernameOrDateBetweenAndTraineeUserFirstName(
                 trainerUsername,
                 criteria.getFromDate(),
                 criteria.getToDate(),

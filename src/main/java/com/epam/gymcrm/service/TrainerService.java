@@ -8,6 +8,8 @@ import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.util.Authentication;
+import com.epam.gymcrm.util.PasswordGenerator;
+import com.epam.gymcrm.util.UsernameGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
@@ -26,14 +28,10 @@ public class TrainerService {
 
     private TrainingTypeRepository trainingTypeRepository;
     private TrainerRepository trainerRepository;
-    private UserService  userService;
+    private UsernameGenerator usernameGenerator;
+    private PasswordGenerator passwordGenerator;
     private Authentication authentication;
     private static final Logger log = LoggerFactory.getLogger(TrainerService.class);
-
-    @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
 
     @Autowired
     public void setTrainerRepository(TrainerRepository trainerRepository) {
@@ -50,15 +48,29 @@ public class TrainerService {
         this.trainingTypeRepository = trainingTypeRepository;
     }
 
+    @Autowired
+    public void setUsernameGenerator(UsernameGenerator usernameGenerator) {
+        this.usernameGenerator = usernameGenerator;
+    }
+
+    @Autowired
+    public void setPasswordGenerator(PasswordGenerator passwordGenerator) {
+        this.passwordGenerator = passwordGenerator;
+    }
+
     @Transactional
     public void createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String type) {
         log.info("Creating trainer profile for {} {}", user.getFirstName(), user.getLastName());
 
-        userService.saveUser(user);
+        String password = passwordGenerator.generatePassword();
+        user.setPassword(password);
 
+        String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName());
+        user.setUsername(username);
+
+        trainer.setUser(user);
         TrainingType trainingType = trainingType(type);
         trainer.setTrainingType(trainingType);
-        trainer.setUser(user);
         user.setTrainer(trainer);
 
         trainerRepository.save(trainer);
@@ -68,15 +80,15 @@ public class TrainerService {
 
     @Transactional(readOnly = true)
     public Optional<Trainer> getTrainer(@NotBlank String username) {
-        return trainerRepository.getTrainerByUser_Username(username);
+        return trainerRepository.getTrainerByUserUsername(username);
     }
 
     @Transactional(readOnly = true)
     public boolean authenticateTrainer(@NotBlank String username, @NotBlank String password) {
         if (!authentication.auth(username, password)) {
-            return false;
+            throw new AuthenticationFailedException("Invalid credentials");
         }
-        return trainerRepository.getTrainerByUser_Username(username).isPresent();
+        return trainerRepository.getTrainerByUserUsername(username).isPresent();
     }
 
     @Transactional
@@ -90,10 +102,9 @@ public class TrainerService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainer(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainer trainer = trainerRepository.getTrainerByUser_Username(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
+        Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         User user = trainer.getUser();
 
         user.setFirstName(firstName);
@@ -109,7 +120,6 @@ public class TrainerService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainer(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
         log.info("Deleting Trainer with id: {}", id);
@@ -122,10 +132,9 @@ public class TrainerService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainer(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainer trainer = trainerRepository.getTrainerByUser_Username(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
+        Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         trainer.getUser().setPassword(newPassword);
         trainerRepository.save(trainer);
         log.info("Trainer password changed successfully with username: {}", username);
@@ -136,10 +145,9 @@ public class TrainerService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainer(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainer trainer = trainerRepository.getTrainerByUser_Username(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
+        Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         if (trainer.getUser().isActive()) {
             throw new IllegalStateException("Trainer profile is already active");
         }
@@ -154,10 +162,9 @@ public class TrainerService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainer(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
-        Trainer trainer = trainerRepository.getTrainerByUser_Username(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
+        Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         if (!trainer.getUser().isActive()) {
             throw new IllegalStateException("Trainer profile is already inactive");
         }

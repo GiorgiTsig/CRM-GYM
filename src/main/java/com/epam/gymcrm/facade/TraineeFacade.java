@@ -32,7 +32,8 @@ public class TraineeFacade {
         return traineeService.authenticateTrainee(username, password);
     }
 
-    public Optional<Trainee> getTraineeProfile(@NotBlank String username) {
+    public Optional<Trainee> getTraineeProfile(@NotBlank String username, @NotBlank String password) {
+        traineeService.authenticateTrainee(username, password);
         return traineeService.getTrainee(username);
     }
 

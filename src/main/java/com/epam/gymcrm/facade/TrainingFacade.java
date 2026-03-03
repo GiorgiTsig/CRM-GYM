@@ -3,6 +3,7 @@ package com.epam.gymcrm.facade;
 import com.epam.gymcrm.searchCriteria.TraineeTrainingSearchCriteria;
 import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.Training;
+import com.epam.gymcrm.service.TrainerService;
 import com.epam.gymcrm.service.TrainingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -16,16 +17,20 @@ import java.util.List;
 public class TrainingFacade {
 
     private final TrainingService trainingService;
+    public TrainerService trainerService;
 
-    public TrainingFacade(TrainingService trainingService) {
+    public TrainingFacade(TrainingService trainingService, TrainerService trainerService) {
         this.trainingService = trainingService;
+        this.trainerService = trainerService;
     }
 
     public void addTraining(
             @NotBlank String trainerUsername,
+            @NotBlank String password,
             @NotBlank String traineeUsername,
             @Valid Training training
     ) {
+        trainerService.authenticateTrainer(traineeUsername, password);
         trainingService.createTraining(trainerUsername, traineeUsername, training);
     }
 

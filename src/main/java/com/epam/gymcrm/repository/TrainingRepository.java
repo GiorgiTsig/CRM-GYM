@@ -16,19 +16,19 @@ public interface TrainingRepository extends JpaRepository<Training, UUID> {
     @Override
     <S extends Training> S save(@NonNull S entity);
 
-    void deleteTrainingByTraineeId_User_Username(String traineeIdUserUsername);
+    void deleteTrainingByTraineeUserUsername(String traineeUserUsername);
 
-    List<Training> findTrainingByTraineeId_User_UsernameOrDateBetweenAndTrainerId_TrainingType_TrainingTypeName(
-            String traineeIdUserUsername,
+    List<Training> findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
+            String username,
             LocalDate dateAfter,
             LocalDate dateBefore,
-            String trainerIdTrainingTypeTrainingTypeName
+            String trainingType
     );
 
-    List<Training> findTrainingByTrainerId_User_UsernameOrDateBetweenAndTraineeId_User_FirstName(
-            String trainerIdUserUsername,
+    List<Training> findTrainingByTrainerUserUsernameOrDateBetweenAndTraineeUserFirstName(
+            String traineeUsername,
             LocalDate dateAfter,
             LocalDate dateBefore,
-            String traineeIdUserFirstName
+            String traineeUserFirstName
     );
 }

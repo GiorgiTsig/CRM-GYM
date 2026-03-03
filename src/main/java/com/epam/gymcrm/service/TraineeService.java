@@ -7,6 +7,8 @@ import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.repository.TraineeRepository;
 import com.epam.gymcrm.util.Authentication;
+import com.epam.gymcrm.util.PasswordGenerator;
+import com.epam.gymcrm.util.UsernameGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,15 +27,11 @@ import java.util.*;
 public class TraineeService {
 
     private TraineeRepository traineeRepository;
-    private UserService  userService;
+    private UsernameGenerator usernameGenerator;
+    private PasswordGenerator passwordGenerator;
     private Authentication authentication;
     private TrainerService trainerService;
     private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
-
-    @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
 
     @Autowired
     public void setTraineeRepository(TraineeRepository traineeRepository) {
@@ -50,11 +48,26 @@ public class TraineeService {
         this.authentication = authentication;
     }
 
+    @Autowired
+    public void setUsernameGenerator(UsernameGenerator usernameGenerator) {
+        this.usernameGenerator = usernameGenerator;
+    }
+
+    @Autowired
+    public void setPasswordGenerator(PasswordGenerator passwordGenerator) {
+        this.passwordGenerator = passwordGenerator;
+    }
+
     @Transactional
     public void createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
         log.info("Creating trainee profile for {} {}", user.getFirstName(), user.getLastName());
 
-        userService.saveUser(user);
+        String password = passwordGenerator.generatePassword();
+        user.setPassword(password);
+
+        String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName());
+        user.setUsername(username);
+
         trainee.setUser(user);
         user.setTrainee(trainee);
 
@@ -76,7 +89,7 @@ public class TraineeService {
     @Transactional(readOnly = true)
     public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {
         if (!authentication.auth(username, password)) {
-            return false;
+            throw new AuthenticationFailedException("Invalid credentials");
         }
         return traineeRepository.getTraineeByUserUsername(username).isPresent();
     }
@@ -89,7 +102,6 @@ public class TraineeService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));;
@@ -120,7 +132,6 @@ public class TraineeService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
@@ -140,7 +151,6 @@ public class TraineeService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
@@ -154,7 +164,6 @@ public class TraineeService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
@@ -170,7 +179,6 @@ public class TraineeService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
@@ -184,7 +192,6 @@ public class TraineeService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
@@ -202,7 +209,6 @@ public class TraineeService {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
             log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
         }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));

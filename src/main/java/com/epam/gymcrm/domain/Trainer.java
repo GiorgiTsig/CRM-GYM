@@ -17,13 +17,13 @@ public class Trainer {
             joinColumns = @JoinColumn(name = "trainer_id"),
             inverseJoinColumns = @JoinColumn(name = "trainee_id")
     )
-    private Set<Trainee> trainees = new HashSet<>();
+    private Set<Trainee> trainees;
 
     @ManyToOne
     @JoinColumn(name = "specialization_id", nullable = false)
     private TrainingType trainingType;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
