@@ -39,13 +39,13 @@ public class TrainingLoader extends AbstractDataLoader {
     }
 
     public void processTraining(JsonNode node) {
-        Training trainingMapper = objectMapper.convertValue(node, Training.class);
+        Training training = objectMapper.convertValue(node, Training.class);
         trainingService.createTraining(
-                trainingMapper.getTrainerId().getUser().getUsername(),
-                trainingMapper.getTraineeId().getUser().getUsername(),
+                training.getTrainerId().getUser().getUsername(),
+                training.getTraineeId().getUser().getUsername(),
                 new Training(
-                        trainingMapper.getName(), trainingMapper.getDate(),
-                        trainingMapper.getDuration()
+                        training.getName(), training.getDate(),
+                        training.getDuration()
                 )
         );
     }
