@@ -116,17 +116,4 @@ public class Training {
     public void setType(TrainingType type) {
         this.type = type;
     }
-
-    @Override
-    public String toString() {
-        return "Training{" +
-                "id=" + id +
-                ", traineeId=" + trainee +
-                ", trainerId=" + trainer +
-                ", name=" + name +
-                ", type=" + type +
-                ", date=" + date +
-                ", duration=" + duration +
-                '}';
-    }
 }
