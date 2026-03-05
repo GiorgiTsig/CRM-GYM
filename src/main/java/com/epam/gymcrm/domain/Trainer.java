@@ -56,4 +56,21 @@ public class Trainer {
     public void setTrainees(Set<Trainee> trainees) {
         this.trainees = trainees;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Trainer trainer = (Trainer) o;
+        return user != null
+                && trainer.user != null
+                && user.getUsername() != null
+                && user.getUsername().equals(trainer.user.getUsername());
+    }
+
+    @Override
+    public int hashCode() {
+        return user != null && user.getUsername() != null
+                ? user.getUsername().hashCode()
+                : org.hibernate.Hibernate.getClass(this).hashCode();
+    }
 }

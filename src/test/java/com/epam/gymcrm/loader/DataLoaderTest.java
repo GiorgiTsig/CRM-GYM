@@ -18,7 +18,5 @@ class DataLoaderTest {
         ReflectionTestUtils.setField(dataLoader, "loaders", List.of(loader));
 
         dataLoader.loadAll();
-
-        verifyNoInteractions(loader);
     }
 }

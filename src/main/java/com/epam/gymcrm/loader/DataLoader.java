@@ -26,7 +26,7 @@ public class DataLoader {
     @PostConstruct
     public void loadAll() {
         try {
-//            loaders.forEach(GymDataLoader::load);
+            loaders.forEach(GymDataLoader::load);
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize", e);
         }

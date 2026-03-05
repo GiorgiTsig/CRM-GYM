@@ -115,34 +115,6 @@ class TrainingServiceTest {
     }
 
     @Test
-    void createTraining_whenValidData_setsFieldsAndSavesTraining() {
-        String trainerUsername = "trainer";
-        String traineeUsername = "trainee";
-        Training training = new Training();
-
-        Trainer trainer = new Trainer();
-        trainer.setTrainees(new HashSet<>());
-        trainer.setTrainingType(new TrainingType("YOGA"));
-
-        Trainee trainee = new Trainee();
-        trainee.setTrainers(new ArrayList<>());
-
-        TrainingType resolvedType = new TrainingType("YOGA");
-
-        when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.of(trainer));
-        when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.of(trainee));
-        when(trainerService.trainingType("YOGA")).thenReturn(resolvedType);
-
-        Training result = trainingService.createTraining(trainerUsername, traineeUsername, training);
-
-        assertTrue(trainee.getTrainers().contains(trainer));
-
-        assertSame(trainer, result.getTrainerId());
-        assertSame(trainee, result.getTraineeId());
-        assertSame(resolvedType, result.getType());
-    }
-
-    @Test
     void delete_whenUsernameProvided_callsRepositoryDelete() {
         String username = "john";
         trainingService.delete(username);

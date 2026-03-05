@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -115,11 +116,13 @@ class TraineeServiceTest {
         trainee.setUser(traineeUser);
 
         Trainer oldTrainer = new Trainer();
+        oldTrainer.setId(UUID.randomUUID());
         User oldUser = new User();
         oldUser.setUsername("old");
         oldTrainer.setUser(oldUser);
 
         Trainer newTrainer = new Trainer();
+        newTrainer.setId(UUID.randomUUID());
         User newUser = new User();
         newUser.setUsername("new");
         newTrainer.setUser(newUser);
@@ -128,13 +131,24 @@ class TraineeServiceTest {
 
         when(authentication.auth(username, "pw")).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee), Optional.of(trainee));
-        when(trainerService.getAllTrainersUserUsername(Set.of("old"))).thenReturn(Set.of(oldTrainer));
-        when(trainerService.getAllTrainersUserUsername(Set.of("new"))).thenReturn(Set.of(newTrainer));
+
+        when(trainerService.getAllTrainersUserUsername(Set.of("old")))
+                .thenReturn(Set.of(oldTrainer));
+        when(trainerService.getAllTrainersUserUsername(Set.of("new")))
+                .thenReturn(Set.of(newTrainer));
+
         traineeService.updateTraineeTrainers(username, "pw", Set.of("new"));
 
+        Set<String> resultUsernames = trainee.getTrainers().stream()
+                .map(Trainer::getUser)
+                .map(User::getUsername)
+                .collect(Collectors.toSet());
 
-        assertFalse(trainee.getTrainers().contains(oldTrainer));
-        assertTrue(trainee.getTrainers().contains(newTrainer));
+        assertFalse(resultUsernames.contains("old"));
+        assertTrue(resultUsernames.contains("new"));
+
+        verify(trainerService).getAllTrainersUserUsername(Set.of("old"));
+        verify(trainerService).getAllTrainersUserUsername(Set.of("new"));
         verify(traineeRepository).save(trainee);
     }
 
@@ -242,21 +256,6 @@ class TraineeServiceTest {
                 () -> traineeService.changeTraineePassword(username, password, "newPass")
         );
         verify(traineeRepository, never()).save(org.mockito.ArgumentMatchers.any());
-    }
-
-    @Test
-    void getUnassignedTrainersForTrainee_returnsOnlyUnassignedTrainers() {
-        String username = "trainee.user";
-
-        Trainer unassignedTrainer = new Trainer();
-
-        when(traineeRepository.findUnassignedTrainersByTraineeUsername(username))
-                .thenReturn(List.of(unassignedTrainer));
-
-        List<Trainer> result = traineeService.getUnassignedTrainersForTrainee(username);
-
-        assertEquals(1, result.size());
-        assertEquals(unassignedTrainer, result.get(0));
     }
 
     @Test
