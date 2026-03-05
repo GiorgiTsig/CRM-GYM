@@ -14,10 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -113,30 +110,31 @@ class TraineeServiceTest {
     void updateTraineeTrainers_replacesOldAndAddsNew() {
         String username = "trainee.user";
         Trainee trainee = new Trainee();
-        User user = new User();
-        user.setActive(true);
-        trainee.setUser(user);
+        User traineeUser = new User();
+        traineeUser.setActive(true);
+        trainee.setUser(traineeUser);
 
         Trainer oldTrainer = new Trainer();
-        oldTrainer.setTrainees(new java.util.HashSet<>(Set.of(trainee)));
+        User oldUser = new User();
+        oldUser.setUsername("old");
+        oldTrainer.setUser(oldUser);
+
         Trainer newTrainer = new Trainer();
-        newTrainer.setTrainees(new java.util.HashSet<>());
+        User newUser = new User();
+        newUser.setUsername("new");
+        newTrainer.setUser(newUser);
+
+        trainee.setTrainers(new ArrayList<>(List.of(oldTrainer)));
 
         when(authentication.auth(username, "pw")).thenReturn(true);
-        when(traineeRepository.getTraineeByUserUsername(username))
-                .thenReturn(Optional.of(trainee), Optional.of(trainee));
-        when(trainerService.getTrainer("old")).thenReturn(Optional.of(oldTrainer));
-        when(trainerService.getTrainer("new")).thenReturn(Optional.of(newTrainer));
+        when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee), Optional.of(trainee));
+        when(trainerService.getAllTrainersUserUsername(Set.of("old"))).thenReturn(Set.of(oldTrainer));
+        when(trainerService.getAllTrainersUserUsername(Set.of("new"))).thenReturn(Set.of(newTrainer));
+        traineeService.updateTraineeTrainers(username, "pw", Set.of("new"));
 
-        traineeService.updateTraineeTrainers(
-                username,
-                "pw",
-                List.of("new"),
-                List.of("old")
-        );
 
-        assertFalse(oldTrainer.getTrainees().contains(trainee));
-        assertTrue(newTrainer.getTrainees().contains(trainee));
+        assertFalse(trainee.getTrainers().contains(oldTrainer));
+        assertTrue(trainee.getTrainers().contains(newTrainer));
         verify(traineeRepository).save(trainee);
     }
 

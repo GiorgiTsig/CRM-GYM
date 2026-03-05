@@ -135,7 +135,7 @@ class TrainingServiceTest {
 
         Training result = trainingService.createTraining(trainerUsername, traineeUsername, training);
 
-        assertTrue(trainer.getTrainees().contains(trainee));
+        assertTrue(trainee.getTrainers().contains(trainer));
 
         assertSame(trainer, result.getTrainerId());
         assertSame(trainee, result.getTraineeId());

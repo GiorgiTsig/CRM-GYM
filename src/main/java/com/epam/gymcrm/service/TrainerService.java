@@ -187,6 +187,11 @@ public class TrainerService {
     }
 
     @Transactional(readOnly = true)
+    public Set<Trainer> getAllTrainersUserUsername(Set<String> users) {
+        return trainerRepository.findAllByUserUsernameIn(users);
+    }
+
+    @Transactional(readOnly = true)
     public TrainingType trainingType(@NonNull String type) {
         return trainingTypeRepository.findTrainingTypeByTrainingTypeName(type);
     }

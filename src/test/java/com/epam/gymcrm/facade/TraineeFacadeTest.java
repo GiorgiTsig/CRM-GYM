@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,12 +60,11 @@ class TraineeFacadeTest {
 
     @Test
     void updateTraineeTrainersDelegatesAllArguments() {
-        List<String> newTrainers = List.of("t1", "t2");
-        List<String> oldTrainers = List.of("old");
+        Set<String> newTrainers = Set.of("t1", "t2");
 
-        traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, newTrainers, oldTrainers);
+        traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, newTrainers);
 
-        verify(traineeService).updateTraineeTrainers(USERNAME, PASSWORD, newTrainers, oldTrainers);
+        verify(traineeService).updateTraineeTrainers(USERNAME, PASSWORD, newTrainers);
     }
 
     @Test

@@ -11,12 +11,7 @@ public class Trainer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToMany
-    @JoinTable(
-            name = "trainer_trainee",
-            joinColumns = @JoinColumn(name = "trainer_id"),
-            inverseJoinColumns = @JoinColumn(name = "trainee_id")
-    )
+    @ManyToMany(mappedBy = "trainers")
     private Set<Trainee> trainees;
 
     @ManyToOne

@@ -22,7 +22,12 @@ public class Trainee {
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
-    @ManyToMany(mappedBy = "trainees")
+    @ManyToMany
+    @JoinTable(
+            name = "trainer_trainee",
+            joinColumns = @JoinColumn(name = "trainee_id"),
+            inverseJoinColumns = @JoinColumn(name = "trainer_id")
+    )
     private List<Trainer> trainers;
 
     @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true)

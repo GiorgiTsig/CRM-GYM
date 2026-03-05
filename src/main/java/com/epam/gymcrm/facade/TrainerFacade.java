@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -53,5 +54,10 @@ public class TrainerFacade {
 
     public void deactivateTrainer(@NotBlank String username, @NotBlank String password) {
         trainerService.deactivateTrainer(username, password);
+    }
+
+    public List<Trainer> getAllTrainers(@NotBlank String username, @NotBlank String password) {
+        trainerService.authenticateTrainer(username, password);
+        return trainerService.getAllTrainers();
     }
 }

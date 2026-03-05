@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 @Validated
@@ -68,10 +69,9 @@ public class TraineeFacade {
     public void updateTraineeTrainers(
             @NotBlank String username,
             @NotBlank String password,
-            @NotEmpty List<String> trainerUsernames,
-            List<String> oldTrainerUsernames
+            Set<@NotNull String> trainerUsernames
     ) {
-        traineeService.updateTraineeTrainers(username, password, trainerUsernames, oldTrainerUsernames);
+        traineeService.updateTraineeTrainers(username, password, trainerUsernames);
     }
 
     public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {

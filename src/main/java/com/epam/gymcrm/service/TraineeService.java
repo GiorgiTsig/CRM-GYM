@@ -11,7 +11,6 @@ import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -100,8 +100,7 @@ public class TraineeService {
     @Transactional
     public void updateTraineeTrainers(
             @NotBlank String username, @NotBlank String password,
-            @NotEmpty List<String> trainerUsernames,
-            List<String> oldTrainerUsernames
+            Set<@NotNull String> trainerUsernames
     ) {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
@@ -110,22 +109,19 @@ public class TraineeService {
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
 
-        // If you want to replace a trainer instance with another trainer, it will delete it and then add the new one.
-        if (!oldTrainerUsernames.isEmpty()) {
-            oldTrainerUsernames.forEach(oldTrainerUsername -> {
-                Trainer trainer = trainerService.getTrainer(oldTrainerUsername).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
-                trainer.getTrainees().remove(trainee);
+        //Current trainers are those stored in the DB. The new trainer is provided by the user, and the unmatched old trainer will be deleted.
+        var assignedTrainerUsernames = trainee.getTrainers().stream().map(Trainer::getUser).map(User::getUsername).collect(Collectors.toSet());
+        var trainerUsernamesToAdd = trainerUsernames.stream().filter(trainer -> !assignedTrainerUsernames.contains(trainer)).collect(Collectors.toSet());
+        var trainerUsernamesToRemove = assignedTrainerUsernames.stream().filter(trainer -> !trainerUsernames.contains(trainer)).collect(Collectors.toSet());
 
-            });
-        }
+        Set<Trainer> trainersToRemove = trainerService.getAllTrainersUserUsername(trainerUsernamesToRemove);
+        Set<Trainer> trainersToAdd = trainerService.getAllTrainersUserUsername(trainerUsernamesToAdd);
 
-        trainerUsernames.forEach(trainerUsername -> {
-                    Trainer trainer = trainerService.getTrainer(trainerUsername).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
-                    trainer.getTrainees().add(trainee);
-                });
+        //If it is empty, it will automatically be cleaned
+        trainee.getTrainers().removeAll(trainersToRemove);
+        trainee.getTrainers().addAll(trainersToAdd);
 
         traineeRepository.save(trainee);
-
         log.info("Trainee updated successfully with id: {}", trainee.getId());
     }
 

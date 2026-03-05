@@ -62,7 +62,6 @@ public class TrainingService {
         }
 
         trainee.getTrainers().add(trainer);
-        trainer.getTrainees().add(trainee);
 
         TrainingType type = trainerService.trainingType(trainer.getTrainingType().getTrainingTypeName());
 
