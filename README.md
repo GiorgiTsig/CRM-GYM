@@ -1,5 +1,3 @@
-![Grid Preview](docs/images%20/1.png)
-
 b) on the codebase created during the previous module implement follow functionality:
 1. Create Trainer profile.
 2. Create Trainee profile.
