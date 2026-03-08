@@ -1,32 +1,25 @@
 package com.epam.gymcrm.util;
 
-import com.epam.gymcrm.dao.TraineeDaoImp;
-import com.epam.gymcrm.dao.TrainerDaoImp;
-import com.epam.gymcrm.domain.Trainee;
-import com.epam.gymcrm.domain.Trainer;
+import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class UsernameGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(UsernameGenerator.class);
 
-    private TraineeDaoImp traineeDao;
-    private TrainerDaoImp trainerDao;
+    private UserRepository userRepository;
 
     @Autowired
-    public void setTraineeDao(TraineeDaoImp traineeDao) {
-        this.traineeDao = traineeDao;
-    }
-
-    @Autowired
-    public void setTrainerDao(TrainerDaoImp trainerDao) {
-        this.trainerDao = trainerDao;
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     /**
@@ -43,7 +36,7 @@ public class UsernameGenerator {
         String username = baseUsername;
         int serialNumber = 1;
 
-        while (usernameExistsInTrainees(username) || usernameExistsInTrainers(username)) {
+        while (usernameExistsInUser(username)) {
             username = baseUsername + serialNumber;
             serialNumber++;
         }
@@ -52,15 +45,8 @@ public class UsernameGenerator {
         return username;
     }
 
-    private boolean usernameExistsInTrainees(String username) {
-        Map<Long, Trainee> allTrainees = traineeDao.getAll();
-        return allTrainees.values().stream()
-                .anyMatch(trainee -> username.equals(trainee.getUsername()));
-    }
-
-    private boolean usernameExistsInTrainers(String username) {
-        Map<Long, Trainer> allTrainers = trainerDao.getAll();
-        return allTrainers.values().stream()
-                .anyMatch(trainer -> username.equals(trainer.getUsername()));
+    private boolean usernameExistsInUser(String username) {
+        Optional<User> user = userRepository.getUsersByUsername(username);
+        return user.isPresent();
     }
 }

@@ -1,33 +1,76 @@
 package com.epam.gymcrm.domain;
 
-public class Trainer extends User {
-    private String specialization;
+import jakarta.persistence.*;
 
-    public Trainer(User user, String specialization) {
-        super(user.getId(), user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.isActive());
-        this.specialization = specialization;
-    }
+import java.util.*;
+
+@Entity
+public class Trainer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToMany(mappedBy = "trainers")
+    private Set<Trainee> trainees;
+
+    @ManyToOne
+    @JoinColumn(name = "specialization_id", nullable = false)
+    private TrainingType trainingType;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public Trainer() {
     }
 
-    public String getSpecialization() {
-        return specialization;
+    public UUID getId() {
+        return id;
     }
 
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public TrainingType getTrainingType() {
+        return trainingType;
+    }
+
+    public void setTrainingType(TrainingType trainingType) {
+        this.trainingType = trainingType;
+    }
+
+    public Set<Trainee> getTrainees() {
+        return trainees;
+    }
+
+    public void setTrainees(Set<Trainee> trainees) {
+        this.trainees = trainees;
     }
 
     @Override
-    public String toString() {
-        return "Trainer{" +
-                "id=" + getId() +
-                ", firstName='" + getFirstName() + '\'' +
-                ", lastName='" + getLastName() + '\'' +
-                ", username='" + getUsername() + '\'' +
-                ", specialization='" + specialization + '\'' +
-                ", isActive=" + isActive() +
-                '}';
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Trainer trainer = (Trainer) o;
+        return user != null
+                && trainer.user != null
+                && user.getUsername() != null
+                && user.getUsername().equals(trainer.user.getUsername());
+    }
+
+    @Override
+    public int hashCode() {
+        return user != null && user.getUsername() != null
+                ? user.getUsername().hashCode()
+                : org.hibernate.Hibernate.getClass(this).hashCode();
     }
 }

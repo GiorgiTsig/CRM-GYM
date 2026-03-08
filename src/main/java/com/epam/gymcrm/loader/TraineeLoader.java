@@ -1,26 +1,29 @@
 package com.epam.gymcrm.loader;
 
 import com.epam.gymcrm.domain.Trainee;
-import com.epam.gymcrm.storage.TraineeStorage;
+import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.service.TraineeService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@Order(2)
 public class TraineeLoader extends AbstractDataLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(TraineeLoader.class);
 
-    private TraineeStorage traineeStorage;
+    private TraineeService traineeService;
 
     @Autowired
-    public void setTraineeStorage(TraineeStorage traineeStorage) {
-        this.traineeStorage = traineeStorage;
+    public void setTraineeService(TraineeService traineeService) {
+        this.traineeService = traineeService;
     }
 
     @Override
@@ -38,7 +41,10 @@ public class TraineeLoader extends AbstractDataLoader {
             );
 
             trainees.forEach(trainee ->
-                    traineeStorage.getTrainees().put(trainee.getId(), trainee)
+                    traineeService.createTraineeProfile(
+                            new User(trainee.getUser().getFirstName(), trainee.getUser().getLastName(), trainee.getUser().isActive()),
+                            new Trainee(null, trainee.getAddress())
+                    )
             );
 
         } catch (Exception e) {

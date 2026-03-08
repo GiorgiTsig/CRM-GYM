@@ -1,33 +1,52 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TraineeDaoImp;
 import com.epam.gymcrm.domain.Trainee;
+import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
-import com.epam.gymcrm.exception.ValidationException;
-import com.epam.gymcrm.util.IdGenerator;
+import com.epam.gymcrm.repository.TraineeRepository;
+import com.epam.gymcrm.util.Authentication;
 import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@Validated
 public class TraineeService {
 
-    private TraineeDaoImp traineeDao;
+    private TraineeRepository traineeRepository;
     private UsernameGenerator usernameGenerator;
     private PasswordGenerator passwordGenerator;
-    private IdGenerator idGenerator;
+    private Authentication authentication;
+    private TrainerService trainerService;
     private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
 
     @Autowired
-    public void setTraineeDao(TraineeDaoImp traineeDao) {
-        this.traineeDao = traineeDao;
+    public void setTraineeRepository(TraineeRepository traineeRepository) {
+        this.traineeRepository = traineeRepository;
+    }
+
+    @Autowired
+    public void setTrainerService(TrainerService trainerService) {
+        this.trainerService = trainerService;
+    }
+
+    @Autowired
+    public void setAuthentication(Authentication authentication) {
+        this.authentication = authentication;
     }
 
     @Autowired
@@ -40,74 +59,160 @@ public class TraineeService {
         this.passwordGenerator = passwordGenerator;
     }
 
-    @Autowired
-    public void setIdGenerator(IdGenerator idGenerator) {
-        this.idGenerator = idGenerator;
-    }
+    @Transactional
+    public Trainee createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
+        log.info("Creating trainee profile for {} {}", user.getFirstName(), user.getLastName());
 
-    public Trainee createTrainee(String firstName, String lastName, String dateOfBirth, String address) {
-        log.info("Creating trainee with firstName: {}, lastName: {}", firstName, lastName);
-        
-        validateInput(firstName, "First name");
-        validateInput(lastName, "Last name");
-
-        String username = usernameGenerator.generateUsername(firstName, lastName);
         String password = passwordGenerator.generatePassword();
-        Long id = idGenerator.generateNextId(traineeDao.getAll());
+        user.setPassword(password);
 
-        User user = new User(id, firstName, lastName, username, password, true);
-        Trainee trainee = new Trainee(dateOfBirth, address, user);
+        String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName());
+        user.setUsername(username);
 
-        traineeDao.save(trainee);
+        trainee.setUser(user);
+        user.setTrainee(trainee);
 
-        log.info("Trainee created successfully with id: {}, username: {}", id, username);
+        traineeRepository.save(trainee);
+        log.info("Trainee profile created with username: {}", user.getUsername());
+
         return trainee;
     }
 
-    public Optional<Trainee> selectTrainee(long id) {
-        log.info("Selecting trainee with id: {}", id);
-        return traineeDao.get(id);
+    @Transactional(readOnly = true)
+    public Optional<Trainee> getTrainee(@NotBlank String username) {
+        return traineeRepository.getTraineeByUserUsername(username);
     }
 
-    public Map<Long, Trainee> selectAllTrainees() {
-        log.info("Selecting all trainees");
-        return traineeDao.getAll();
+    @Transactional(readOnly = true)
+    public Optional<Trainee> findTraineeByUsername(@NotBlank String username) {
+        log.info("Selecting trainee with id: {}", username);
+        return traineeRepository.getTraineeByUserUsername(username);
     }
 
-    public Trainee updateTrainee(long id, String firstName, String lastName, String dateOfBirth, String address, boolean isActive) {
-        log.info("Updating trainee with id: {}", id);
-        
-        validateInput(firstName, "First name");
-        validateInput(lastName, "Last name");
+    @Transactional(readOnly = true)
+    public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {
+        if (!authentication.auth(username, password)) {
+            throw new AuthenticationFailedException("Invalid credentials");
+        }
+        return traineeRepository.getTraineeByUserUsername(username).isPresent();
+    }
 
-        Optional<Trainee> existingTraineeOpt = traineeDao.get(id);
-        if (existingTraineeOpt.isEmpty()) {
-            log.error("Cannot update. Trainee with id {} not found", id);
-            throw new EntityNotFoundException("Trainee with id " + id + " not found");
+    @Transactional
+    public void updateTraineeTrainers(
+            @NotBlank String username, @NotBlank String password,
+            Set<@NotNull String> trainerUsernames
+    ) {
+        log.info("Checking user with Username/Password");
+        if (!authenticateTrainee(username, password)) {
+            log.error("Username and Password are not correct: {}", username);
         }
 
-        Trainee existingTrainee = existingTraineeOpt.get();
-        
-        User updatedUser = new User(id, firstName, lastName, existingTrainee.getUsername(), existingTrainee.getPassword(), isActive);
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
 
-        Trainee updatedTrainee = new Trainee(dateOfBirth, address, updatedUser);
+        //Current trainers are those stored in the DB. The new trainer is provided by the user, and the unmatched old trainer will be deleted.
+        var assignedTrainerUsernames = trainee.getTrainers().stream().map(Trainer::getUser).map(User::getUsername).collect(Collectors.toSet());
+        var trainerUsernamesToAdd = trainerUsernames.stream().filter(trainer -> !assignedTrainerUsernames.contains(trainer)).collect(Collectors.toSet());
+        var trainerUsernamesToRemove = assignedTrainerUsernames.stream().filter(trainer -> !trainerUsernames.contains(trainer)).collect(Collectors.toSet());
 
-        traineeDao.update(updatedTrainee);
+        Set<Trainer> trainersToRemove = trainerService.getAllTrainersUserUsername(trainerUsernamesToRemove);
+        Set<Trainer> trainersToAdd = trainerService.getAllTrainersUserUsername(trainerUsernamesToAdd);
 
-        log.info("Trainee updated successfully with id: {}", id);
-        return updatedTrainee;
+        //If it is empty, it will automatically be cleaned
+        trainee.getTrainers().removeAll(trainersToRemove);
+        trainee.getTrainers().addAll(trainersToAdd);
+
+        traineeRepository.save(trainee);
+        log.info("Trainee updated successfully with id: {}", trainee.getId());
     }
 
-    public void deleteTrainee(long id) {
-        log.info("Deleting trainee with id: {}", id);
-        traineeDao.delete(id);
-        log.info("Trainee deleted successfully with id: {}", id);
-    }
-    
-    private void validateInput(String value, String fieldName) {
-        if (value == null || value.trim().isEmpty()) {
-            log.error("Validation failed: {} cannot be null or empty", fieldName);
-            throw new ValidationException(fieldName + " cannot be null or empty");
+    @Transactional
+    public void updateTraineeProfile(
+            @NotBlank String username,
+            @NotBlank String password,
+            @NotBlank String firstName,
+            @NotBlank String lastName,
+            @NotNull  LocalDate dateOfBirth,
+            @NotBlank String address
+    ) {
+        log.info("Checking user with Username/Password");
+        if (!authenticateTrainee(username, password)) {
+            log.error("Username and Password are not correct: {}", username);
         }
+
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
+        User user = trainee.getUser();
+
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        trainee.setDateOfBirth(dateOfBirth);
+        trainee.setAddress(address);
+
+        traineeRepository.save(trainee);
+        log.info("Trainee profile updated successfully with username: {}", username);
+    }
+
+    @Transactional
+    public void changeTraineePassword(@NotBlank String username, @NotBlank String password, @NotBlank String newPassword) {
+        log.info("Checking user with Username/Password");
+        if (!authenticateTrainee(username, password)) {
+            log.error("Username and Password are not correct: {}", username);
+        }
+
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
+        trainee.getUser().setPassword(newPassword);
+        traineeRepository.save(trainee);
+        log.info("Trainee password changed successfully with username: {}", username);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username) {
+        return traineeRepository.findUnassignedTrainersByTraineeUsername(username);
+    }
+
+    @Transactional
+    public void deleteTrainee(@NotBlank String username, @NotBlank String password) {
+        log.info("Checking user with Username/Password");
+        if (!authenticateTrainee(username, password)) {
+            log.error("Username and Password are not correct: {}", username);
+        }
+
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
+
+        traineeRepository.deleteTraineeById(trainee.getId());
+        log.info("Trainee deleted successfully with username: {}", username);
+    }
+
+    @Transactional
+    public void activateTrainee(@NotBlank String username, @NotBlank String password) {
+        log.info("Checking user with Username/Password");
+        if (!authenticateTrainee(username, password)) {
+            log.error("Username and Password are not correct: {}", username);
+        }
+
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
+        if (trainee.getUser().isActive()) {
+            throw new IllegalStateException("Trainee profile is already active");
+        }
+
+        trainee.getUser().setActive(true);
+        traineeRepository.save(trainee);
+        log.info("Trainee activated successfully with username: {}", username);
+    }
+
+    @Transactional
+    public void deactivateTrainee(@NotBlank String username, @NotBlank String password) {
+        log.info("Checking user with Username/Password");
+        if (!authenticateTrainee(username, password)) {
+            log.error("Username and Password are not correct: {}", username);
+        }
+
+        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
+        if (!trainee.getUser().isActive()) {
+            throw new IllegalStateException("Trainee profile is already inactive");
+        }
+
+        trainee.getUser().setActive(false);
+        traineeRepository.save(trainee);
+        log.info("Trainee deactivated successfully with username: {}", username);
     }
 }

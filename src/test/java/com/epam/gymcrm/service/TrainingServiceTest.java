@@ -1,149 +1,238 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.dao.TrainingDaoImp;
-import com.epam.gymcrm.domain.Training;
+import com.epam.gymcrm.domain.Trainee;
+import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
-import com.epam.gymcrm.storage.TrainingStorage;
-import com.epam.gymcrm.util.IdGenerator;
-import org.junit.jupiter.api.BeforeEach;
+import com.epam.gymcrm.exception.EntityNotFoundException;
+import com.epam.gymcrm.repository.TrainingRepository;
+import com.epam.gymcrm.searchCriteria.TraineeTrainingSearchCriteria;
+import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
+import com.epam.gymcrm.domain.Training;
+import com.epam.gymcrm.exception.AuthenticationFailedException;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class TrainingServiceTest {
 
+    @Mock
+    private TrainingRepository trainingRepository;
+    @Mock
+    private TrainerService trainerService;
+    @Mock
+    private TraineeService traineeService;
+
+    @InjectMocks
     private TrainingService trainingService;
-    private TrainingDaoImp trainingDao;
-    private TrainingStorage trainingStorage;
-    private IdGenerator idGenerator;
 
-    @BeforeEach
-    void setUp() {
-        trainingStorage = new TrainingStorage();
-        
-        trainingDao = new TrainingDaoImp();
-        ReflectionTestUtils.setField(trainingDao, "trainingStorage", trainingStorage);
-        
-        idGenerator = new IdGenerator();
-        
-        trainingService = new TrainingService();
-        trainingService.setTrainingDao(trainingDao);
-        trainingService.setIdGenerator(idGenerator);
-    }
+    @Test
+    void getTraineeTrainings_throwsWhenTraineeCredentialsAreInvalid() {
+        when(traineeService.authenticateTrainee("trainee.user", "bad")).thenReturn(false);
 
-    private Long createTrainee() {
-        return new Random().nextLong();
-    }
-
-    private Long createTrainer() {
-        return new Random().nextLong();
+        assertThrows(
+                AuthenticationFailedException.class,
+                () -> trainingService.getTraineeTrainings("trainee.user", "bad", new TraineeTrainingSearchCriteria())
+        );
     }
 
     @Test
-    void createTraining() {
-        Long trainee = createTrainee();
-        Long trainer = createTrainee();
-        String name = "Morning Yoga Session";
-        TrainingType type = TrainingType.Yoga;
-        String date = "2024-01-15";
-        String duration = "60 minutes";
+    void getTrainerTrainings_returnsDataWhenCredentialsAreValid() {
+        String username = "trainer.user";
+        String password = "pass";
+        TrainerTrainingSearchCriteria criteria = new TrainerTrainingSearchCriteria();
+        List<Training> trainings = List.of(new Training());
 
-        Training createdTraining = trainingService.createTraining(trainee, trainer, name, type, date, duration);
+        when(trainerService.authenticateTrainer(username, password)).thenReturn(true);
+        when(trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
+                username, criteria.getFromDate(), criteria.getToDate(),
+                criteria.getTraineeName())).thenReturn(trainings
+        );
 
-        assertNotNull(createdTraining);
-        assertEquals(trainee, createdTraining.getTraineeId());
-        assertEquals(trainer, createdTraining.getTrainerId());
-        assertEquals(name, createdTraining.getName());
-        assertEquals(type, createdTraining.getType());
-        assertEquals(date, createdTraining.getDate());
-        assertEquals(duration, createdTraining.getDuration());
-        assertNotNull(createdTraining.getId());
-        
-        assertTrue(trainingStorage.getTraining().containsKey(createdTraining.getId()));
-        assertEquals(createdTraining, trainingStorage.getTraining().get(createdTraining.getId()));
+
+        List<Training> result = trainingService.getTrainerTrainings(username, password, criteria);
+
+        assertEquals(trainings, result);
     }
 
     @Test
-    void createTraining_ShouldGenerateUniqueId() {
-        Long trainee1 = createTrainee();
-        Long trainer1 = createTrainer();
+    void createTraining_whenTraineeNotFound_throwsException() {
+        String traineeUsername = "john";
+        String password = "bad";
+        Training training = new Training();
 
-        Long trainee2 = createTrainee();
-        Long trainer2 = createTrainer();
-
-        Training training1 = trainingService.createTraining(trainee1, trainer1, "Session 1", TrainingType.Yoga, "2024-01-15", "60");
-        Training training2 = trainingService.createTraining(trainee2, trainer2, "Session 2", TrainingType.MMA, "2024-01-16", "90");
-
-        assertNotEquals(training1.getId(), training2.getId());
-        assertTrue(training1.getId() < training2.getId());
+        when(trainerService.getTrainer(traineeUsername)).thenThrow(EntityNotFoundException.class);
+        assertThrows(EntityNotFoundException.class,  () -> trainingService.createTraining(traineeUsername, password, training));
+        verify(trainerService).getTrainer(traineeUsername);
     }
 
     @Test
-    void createTraining_WithDifferentTypes() {
-        Long trainee = createTrainee();
-        Long trainer = createTrainer();
+    void createTraining_whenTraineeNotFound_throwsEntityNotFoundException() {
+        String trainerUsername = "trainer";
+        String traineeUsername = "trainee";
+        Training training = new Training();
 
-        Training yogaTraining = trainingService.createTraining(trainee, trainer, "Yoga Class", TrainingType.Yoga, "2024-01-15", "60");
-        Training mmaTraining = trainingService.createTraining(trainee, trainer, "MMA Class", TrainingType.MMA, "2024-01-16", "90");
-        Training boxTraining = trainingService.createTraining(trainee, trainer, "Box Class", TrainingType.Box, "2024-01-17", "45");
-        Training pilatesTraining = trainingService.createTraining(trainee, trainer, "Pilates Class", TrainingType.Pilates, "2024-01-18", "30");
+        Trainer trainer = new Trainer();
+        trainer.setTrainingType(new TrainingType("YOGA"));
 
-        assertEquals(TrainingType.Yoga, yogaTraining.getType());
-        assertEquals(TrainingType.MMA, mmaTraining.getType());
-        assertEquals(TrainingType.Box, boxTraining.getType());
-        assertEquals(TrainingType.Pilates, pilatesTraining.getType());
+        when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.of(trainer));
+        when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> trainingService.createTraining(trainerUsername, traineeUsername, training));
+
+        verify(trainerService).getTrainer(trainerUsername);
+        verify(traineeService).findTraineeByUsername(traineeUsername);
     }
 
     @Test
-    void selectTraining_ExistingId_ShouldReturnTraining() {
-        Long trainee = createTrainee();
-        Long trainer = createTrainer();
-        Training training = trainingService.createTraining(trainee, trainer, "Test Session", TrainingType.Yoga, "2024-01-15", "60");
+    void createTraining_whenTrainerTrainingTypeIsNull_throwsIllegalArgumentException() {
+        String trainerUsername = "trainer";
+        String traineeUsername = "trainee";
+        Training training = new Training();
 
-        Optional<Training> result = trainingService.selectTraining(training.getId());
+        Trainer trainer = new Trainer();
+        Trainee trainee = new Trainee();
+        trainee.setTrainers(new ArrayList<>());
 
-        assertTrue(result.isPresent());
-        assertEquals(training.getId(), result.get().getId());
-        assertEquals("Test Session", result.get().getName());
+        when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.of(trainer));
+        when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.of(trainee));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> trainingService.createTraining(trainerUsername, traineeUsername, training));
+
     }
 
     @Test
-    void selectTraining_NonExistingId_ShouldReturnEmpty() {
-        Optional<Training> result = trainingService.selectTraining(999L);
+    void delete_whenUsernameProvided_callsRepositoryDelete() {
+        String username = "john";
+        trainingService.delete(username);
+        verify(trainingRepository).deleteTrainingByTraineeUserUsername(username);
+    }
 
-        assertFalse(result.isPresent());
+
+    @Test
+    void getTraineeTrainings_whenAuthenticationFails_throwsAuthenticationFailedException() {
+        String traineeUsername = "john";
+        String password = "bad";
+        TraineeTrainingSearchCriteria criteria = new TraineeTrainingSearchCriteria();
+        criteria.setFromDate(LocalDate.of(2026, 1, 1));
+        criteria.setToDate(LocalDate.of(2026, 2, 1));
+        criteria.setTrainingType("YOGA");
+
+        when(traineeService.authenticateTrainee(traineeUsername, password)).thenReturn(false);
+
+        assertThrows(AuthenticationFailedException.class,
+                () -> trainingService.getTraineeTrainings(traineeUsername, password, criteria));
+
+        verify(traineeService).authenticateTrainee(traineeUsername, password);
+        verifyNoInteractions(trainingRepository);
     }
 
     @Test
-    void selectAllTrainings_ShouldReturnAllTrainings() {
-        Long trainee1 = createTrainee();
-        Long trainer1 = createTrainer();
-        Long trainee2 = createTrainee();
-        Long trainer2 = createTrainer();
+    void getTraineeTrainings_whenAuthenticated_returnsTrainings() {
+        String traineeUsername = "john";
+        String password = "good";
+        TraineeTrainingSearchCriteria criteria = new TraineeTrainingSearchCriteria();
+        criteria.setFromDate(LocalDate.of(2026, 1, 1));
+        criteria.setToDate(LocalDate.of(2026, 2, 1));
+        criteria.setTrainingType("YOGA");
 
-        trainingService.createTraining(trainee1, trainer1, "Session 1", TrainingType.Yoga, "2024-01-15", "60");
-        trainingService.createTraining(trainee2, trainer2, "Session 2", TrainingType.MMA, "2024-01-16", "90");
-        trainingService.createTraining(trainee1, trainer2, "Session 3", TrainingType.Box, "2024-01-17", "45");
+        List<Training> trainings = List.of(new Training(), new Training());
 
-        var allTrainings = trainingService.selectAllTrainings();
+        when(traineeService.authenticateTrainee(traineeUsername, password)).thenReturn(true);
+        when(trainingRepository
+                .findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
+                        traineeUsername,
+                        criteria.getFromDate(),
+                        criteria.getToDate(),
+                        criteria.getTrainingType()
+                )).thenReturn(trainings);
 
-        assertEquals(3, allTrainings.size());
+        List<Training> result = trainingService.getTraineeTrainings(traineeUsername, password, criteria);
+
+        assertEquals(trainings, result);
+
+        verify(traineeService).authenticateTrainee(traineeUsername, password);
+        verify(trainingRepository)
+                .findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
+                        traineeUsername,
+                        criteria.getFromDate(),
+                        criteria.getToDate(),
+                        criteria.getTrainingType()
+                );
     }
 
     @Test
-    void createTraining_WithDifferentDurations() {
-        Long trainee = createTrainee();
-        Long trainer = createTrainer();
+    void getTrainerTrainings_whenAuthenticationFails_throwsAuthenticationFailedException() {
+        String trainerUsername = "mike";
+        String password = "bad";
+        TrainerTrainingSearchCriteria criteria = new TrainerTrainingSearchCriteria();
+        criteria.setFromDate(LocalDate.of(2026, 1, 1));
+        criteria.setToDate(LocalDate.of(2026, 2, 1));
+        criteria.setTraineeName("John");
 
-        Training shortSession = trainingService.createTraining(trainee, trainer, "Short Session", TrainingType.Yoga, "2024-01-15", "30 minutes");
-        Training mediumSession = trainingService.createTraining(trainee, trainer, "Medium Session", TrainingType.MMA, "2024-01-16", "60 minutes");
-        Training longSession = trainingService.createTraining(trainee, trainer, "Long Session", TrainingType.Pilates, "2024-01-17", "120 minutes");
+        when(trainerService.authenticateTrainer(trainerUsername, password)).thenReturn(false);
 
-        assertEquals("30 minutes", shortSession.getDuration());
-        assertEquals("60 minutes", mediumSession.getDuration());
-        assertEquals("120 minutes", longSession.getDuration());
-    }}
+        assertThrows(AuthenticationFailedException.class,
+                () -> trainingService.getTrainerTrainings(trainerUsername, password, criteria));
+
+        verify(trainerService).authenticateTrainer(trainerUsername, password);
+        verifyNoInteractions(trainingRepository);
+    }
+
+    @Test
+    void getTrainerTrainings_whenAuthenticated_returnsTrainings() {
+        String trainerUsername = "mike";
+        String password = "good";
+        TrainerTrainingSearchCriteria criteria = new TrainerTrainingSearchCriteria();
+        criteria.setFromDate(LocalDate.of(2026, 1, 1));
+        criteria.setToDate(LocalDate.of(2026, 2, 1));
+        criteria.setTraineeName("John");
+
+        List<Training> trainings = List.of(new Training());
+
+        when(trainerService.authenticateTrainer(trainerUsername, password)).thenReturn(true);
+        when(trainingRepository
+                .findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
+                        trainerUsername,
+                        criteria.getFromDate(),
+                        criteria.getToDate(),
+                        criteria.getTraineeName()
+                )).thenReturn(trainings);
+
+        List<Training> result = trainingService.getTrainerTrainings(trainerUsername, password, criteria);
+
+        assertEquals(trainings, result);
+
+        verify(trainerService).authenticateTrainer(trainerUsername, password);
+        verify(trainingRepository)
+                .findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
+                        trainerUsername,
+                        criteria.getFromDate(),
+                        criteria.getToDate(),
+                        criteria.getTraineeName()
+                );
+    }
+
+    @Test
+    void createTraining_whenTrainerNotFound_throwsEntityNotFoundException() {
+        String username = "trainer";
+        String password = "bad";
+        Training training = new Training();
+
+        when(trainerService.getTrainer(username)).thenReturn(Optional.empty());
+        assertThrows(EntityNotFoundException.class, () -> trainingService.createTraining(username, password, training));
+    }
+}
