@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.*;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
-@Import({DatabaseConfig.class, WebConfig.class})
+@Import({DatabaseConfig.class})
 @ComponentScan(basePackages = "com.epam.gymcrm")
 @PropertySource("classpath:application.properties")
 public class AppConfig {
