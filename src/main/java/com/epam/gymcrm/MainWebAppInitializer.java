@@ -1,30 +1,35 @@
 package com.epam.gymcrm;
 
+import com.epam.gymcrm.config.AppConfig;
 import com.epam.gymcrm.config.WebConfig;
-import jakarta.servlet.FilterRegistration;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRegistration;
-import org.springframework.web.WebApplicationInitializer;
-import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.lang.NonNull;
 import org.springframework.web.filter.CharacterEncodingFilter;
-import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+import jakarta.servlet.Filter;
 
-public class MainWebAppInitializer implements WebApplicationInitializer {
+public class MainWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
     @Override
-    public void onStartup(ServletContext servletContext) throws ServletException {
-        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-        rootContext.register(WebConfig.class);
-        rootContext.setConfigLocation("com.epam.gymcrm.config");
-        servletContext.addListener(new ContextLoaderListener(rootContext));
-        ServletRegistration.Dynamic dispatcher = servletContext.addServlet("dispatcher",  new DispatcherServlet(rootContext));
-        dispatcher.setLoadOnStartup(1);
-        dispatcher.addMapping("/");
-        FilterRegistration.Dynamic encodingFilter = servletContext.addFilter("encoding-filter", new CharacterEncodingFilter());
-        encodingFilter.setInitParameter("encoding", "UTF-8");
-        encodingFilter.setInitParameter("forceEncoding", "true");
-        encodingFilter.addMappingForUrlPatterns(null, true, "/*");
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class<?>[]{AppConfig.class};
+    }
 
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+        return new Class<?>[]{WebConfig.class};
+    }
+
+    @NonNull
+    @Override
+    protected String[] getServletMappings() {
+        return new String[]{"/"};
+    }
+
+    @Override
+    protected Filter[] getServletFilters() {
+        CharacterEncodingFilter filter = new CharacterEncodingFilter();
+        filter.setEncoding("UTF-8");
+        filter.setForceEncoding(true);
+        return new Filter[]{filter};
     }
 }

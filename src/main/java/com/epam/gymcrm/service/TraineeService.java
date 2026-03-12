@@ -164,10 +164,6 @@ public class TraineeService {
         log.info("Trainee password changed successfully with username: {}", username);
     }
 
-    @Transactional(readOnly = true)
-    public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username) {
-        return traineeRepository.findUnassignedTrainersByTraineeUsername(username);
-    }
 
     @Transactional
     public void deleteTrainee(@NotBlank String username, @NotBlank String password) {

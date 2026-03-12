@@ -4,6 +4,7 @@ import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.service.TraineeService;
+import com.epam.gymcrm.service.TrainerService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -21,9 +22,11 @@ import java.util.Set;
 public class TraineeFacade {
 
     private final TraineeService traineeService;
+    private final TrainerService trainerService;
 
-    public TraineeFacade(TraineeService traineeService) {
+    public TraineeFacade(TraineeService traineeService, TrainerService trainerService) {
         this.traineeService = traineeService;
+        this.trainerService = trainerService;
     }
 
     public Trainee createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
@@ -76,6 +79,6 @@ public class TraineeFacade {
 
     public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {
         traineeService.authenticateTrainee(username, password);
-        return traineeService.getUnassignedTrainersForTrainee(username);
+        return trainerService.getUnassignedTrainersForTrainee(username);
     }
 }

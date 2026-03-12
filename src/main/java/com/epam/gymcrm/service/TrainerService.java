@@ -180,6 +180,12 @@ public class TrainerService {
         log.info("Trainer deactivated successfully with username: {}", username);
     }
 
+
+    @Transactional(readOnly = true)
+    public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username) {
+        return trainerRepository.findUnassignedTrainersByTraineeUsername(username);
+    }
+
     @Transactional(readOnly = true)
     public List<Trainer> getAllTrainers() {
         log.info("Selecting all trainers");
