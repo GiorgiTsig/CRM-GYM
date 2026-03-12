@@ -4,6 +4,7 @@ import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.service.TraineeService;
+import com.epam.gymcrm.service.TrainerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -27,6 +28,9 @@ class TraineeFacadeTest {
 
     @Mock
     private TraineeService traineeService;
+
+    @Mock
+    private TrainerService trainerService;
 
     @InjectMocks
     private TraineeFacade traineeFacade;
@@ -71,14 +75,15 @@ class TraineeFacadeTest {
     void getUnassignedTrainersAuthenticatesAndReturnsList() {
         List<Trainer> trainers = List.of(new Trainer());
         when(traineeService.authenticateTrainee(USERNAME, PASSWORD)).thenReturn(true);
-        when(traineeService.getUnassignedTrainersForTrainee(USERNAME)).thenReturn(trainers);
+        when(trainerService.getUnassignedTrainersForTrainee(USERNAME)).thenReturn(trainers);
 
         List<Trainer> result = traineeFacade.getUnassignedTrainersForTrainee(USERNAME, PASSWORD);
 
         assertEquals(trainers, result);
         InOrder inOrder = inOrder(traineeService);
+        InOrder inOrderTrainer = inOrder(trainerService);
         inOrder.verify(traineeService).authenticateTrainee(USERNAME, PASSWORD);
-        inOrder.verify(traineeService).getUnassignedTrainersForTrainee(USERNAME);
+        inOrderTrainer.verify(trainerService).getUnassignedTrainersForTrainee(USERNAME);
     }
 
     @Test

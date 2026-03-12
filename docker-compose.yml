@@ -10,3 +10,19 @@ services:
     ports:
       - "3306:3306"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  tomcat:
+    image: tomcat:10.1-jdk17-temurin
+    container_name: gymcrm-tomcat
+    ports:
+      - "8080:8080"
+    depends_on:
+      crm-mysql:
+        condition: service_healthy
+    volumes:
+      - ./target/CRM-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/ROOT.war
