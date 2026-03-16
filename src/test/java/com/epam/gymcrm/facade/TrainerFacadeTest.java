@@ -57,9 +57,9 @@ class TrainerFacadeTest {
 
     @Test
     void updateTrainerProfileDelegatesAllArguments() {
-        trainerFacade.updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", "Strength");
+        trainerFacade.updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", true,"Strength");
 
-        verify(trainerService).updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", "Strength");
+        verify(trainerService).updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", true,"Strength");
     }
 
     @Test

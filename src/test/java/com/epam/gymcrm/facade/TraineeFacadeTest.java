@@ -91,13 +91,13 @@ class TraineeFacadeTest {
         LocalDate dob = LocalDate.of(1990, 1, 1);
         String address = "123 Main St";
 
-        traineeFacade.updateTraineeProfile(USERNAME, PASSWORD, "John", "Doe", dob, address);
+        traineeFacade.updateTraineeProfile(USERNAME, PASSWORD, "John", "Doe", dob, address, true);
         traineeFacade.changeTraineePassword(USERNAME, PASSWORD, "newPass");
         traineeFacade.activateTrainee(USERNAME, PASSWORD);
         traineeFacade.deactivateTrainee(USERNAME, PASSWORD);
         traineeFacade.deleteTrainee(USERNAME, PASSWORD);
 
-        verify(traineeService).updateTraineeProfile(USERNAME, PASSWORD, "John", "Doe", dob, address);
+        verify(traineeService).updateTraineeProfile(USERNAME, PASSWORD, "John", "Doe", dob, address, true);
         verify(traineeService).changeTraineePassword(USERNAME, PASSWORD, "newPass");
         verify(traineeService).activateTrainee(USERNAME, PASSWORD);
         verify(traineeService).deactivateTrainee(USERNAME, PASSWORD);

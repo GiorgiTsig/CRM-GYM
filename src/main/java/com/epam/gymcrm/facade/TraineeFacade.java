@@ -46,15 +46,16 @@ public class TraineeFacade {
         traineeService.changeTraineePassword(username, password, newPassword);
     }
 
-    public void updateTraineeProfile(
+    public Trainee updateTraineeProfile(
             @NotBlank String username,
             @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
             @NotNull LocalDate dateOfBirth,
-            @NotBlank String address
+            @NotBlank String address,
+            @NotNull boolean isActive
     ) {
-        traineeService.updateTraineeProfile(username, password, firstName, lastName, dateOfBirth, address);
+       return traineeService.updateTraineeProfile(username, password, firstName, lastName, dateOfBirth, address, isActive);
     }
 
     public void activateTrainee(@NotBlank String username, @NotBlank String password) {
@@ -69,12 +70,12 @@ public class TraineeFacade {
         traineeService.deleteTrainee(username, password);
     }
 
-    public void updateTraineeTrainers(
+    public List<Trainer> updateTraineeTrainers(
             @NotBlank String username,
             @NotBlank String password,
             Set<@NotNull String> trainerUsernames
     ) {
-        traineeService.updateTraineeTrainers(username, password, trainerUsernames);
+       return traineeService.updateTraineeTrainers(username, password, trainerUsernames);
     }
 
     public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {

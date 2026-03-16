@@ -2,6 +2,7 @@ package com.epam.gymcrm.repository;
 
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,7 @@ import java.util.*;
 @Repository
 public interface TrainerRepository extends JpaRepository<Trainer, UUID> {
 
+    @EntityGraph(attributePaths = {"trainees", "user", "trainees.user"})
     Optional<Trainer> getTrainerByUserUsername(String userUsername);
 
     @NonNull

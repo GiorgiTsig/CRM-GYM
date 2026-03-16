@@ -41,8 +41,8 @@ public class TrainingLoader extends AbstractDataLoader {
     public void processTraining(JsonNode node) {
         Training training = objectMapper.convertValue(node, Training.class);
         trainingService.createTraining(
-                training.getTrainerId().getUser().getUsername(),
-                training.getTraineeId().getUser().getUsername(),
+                training.getTrainer().getUser().getUsername(),
+                training.getTrainee().getUser().getUsername(),
                 new Training(
                         training.getName(), training.getDate(),
                         training.getDuration()
@@ -62,8 +62,8 @@ public class TrainingLoader extends AbstractDataLoader {
             // Only VALID trainings reach here
             StreamSupport.stream(trainingNode.spliterator(), false)
                     .filter(training -> {
-                        String traineeUsername = training.get("traineeId").get("user").get("username").asText();
-                        String trainerUsername = training.get("trainerId").get("user").get("username").asText();
+                        String traineeUsername = training.get("trainee").get("user").get("username").asText();
+                        String trainerUsername = training.get("trainer").get("user").get("username").asText();
 
                         return traineeService.getTrainee(traineeUsername).isPresent()
                                 && trainerService.getTrainer(trainerUsername).isPresent();

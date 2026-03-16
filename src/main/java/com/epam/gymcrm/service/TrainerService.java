@@ -12,6 +12,7 @@ import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,7 @@ public class TrainerService {
 
         String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName());
         user.setUsername(username);
+        user.setActive(true);
 
         trainer.setUser(user);
         TrainingType trainingType = trainingType(type);
@@ -93,11 +95,12 @@ public class TrainerService {
     }
 
     @Transactional
-    public void updateTrainerProfile(
+    public Trainer updateTrainerProfile(
             @NotBlank String username,
             @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
+            @NotNull boolean isActive,
             @NotBlank String specialization
     ) {
         log.info("Checking user with Username/Password");
@@ -109,12 +112,14 @@ public class TrainerService {
         Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         User user = trainer.getUser();
 
+        user.setActive(isActive);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-        trainer.setTrainingType(trainingType(specialization));
+        trainingType(specialization);
 
         trainerRepository.save(trainer);
         log.info("Trainer profile updated successfully for username: {}", username);
+        return trainer;
     }
 
     @Transactional

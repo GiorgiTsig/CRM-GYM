@@ -54,8 +54,8 @@ class TrainingLoaderTest {
                       "name": "Session",
                       "date": "2024-01-01",
                       "duration": 45,
-                      "trainerId": { "user": { "username": "trainer" } },
-                      "traineeId": { "user": { "username": "trainee" } }
+                      "trainer": { "user": { "username": "trainer" } },
+                      "trainee": { "user": { "username": "trainee" } }
                     }
                 ] }
                 """;
@@ -88,8 +88,8 @@ class TrainingLoaderTest {
                       "name": "Session",
                       "date": "2024-01-01",
                       "duration": 45,
-                      "trainerId": { "user": { "username": "trainer" } },
-                      "traineeId": { "user": { "username": "trainee" } }
+                      "trainer": { "user": { "username": "trainer" } },
+                      "trainee": { "user": { "username": "trainee" } }
                     }
                 ] }
                 """;

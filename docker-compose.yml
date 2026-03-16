@@ -21,8 +21,13 @@ services:
     container_name: gymcrm-tomcat
     ports:
       - "8080:8080"
+      - "5005:5005"
     depends_on:
       crm-mysql:
         condition: service_healthy
     volumes:
       - ./target/CRM-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/ROOT.war
+    environment:
+      JPDA_ADDRESS: "*:5005"
+      JPDA_TRANSPORT: "dt_socket"
+    command: ["catalina.sh", "jpda", "run"]

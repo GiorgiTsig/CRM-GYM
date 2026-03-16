@@ -5,8 +5,6 @@ import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.repository.TrainingRepository;
-import com.epam.gymcrm.searchCriteria.TraineeTrainingSearchCriteria;
-import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.exception.AuthenticationFailedException;
 import org.junit.jupiter.api.Test;
@@ -26,6 +24,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TrainingServiceTest {
+    private static final String PASSWORD = "password";
+    private static final LocalDate FROM = LocalDate.of(2024, 1, 1);
+    private static final LocalDate TO = LocalDate.of(2026, 3, 16);
 
     @Mock
     private TrainingRepository trainingRepository;
@@ -43,7 +44,7 @@ class TrainingServiceTest {
 
         assertThrows(
                 AuthenticationFailedException.class,
-                () -> trainingService.getTraineeTrainings("trainee.user", "bad", new TraineeTrainingSearchCriteria())
+                () -> trainingService.getTraineeTrainings("trainee.user", "bad", FROM, TO, "YOGA")
         );
     }
 
@@ -51,17 +52,16 @@ class TrainingServiceTest {
     void getTrainerTrainings_returnsDataWhenCredentialsAreValid() {
         String username = "trainer.user";
         String password = "pass";
-        TrainerTrainingSearchCriteria criteria = new TrainerTrainingSearchCriteria();
+
         List<Training> trainings = List.of(new Training());
 
         when(trainerService.authenticateTrainer(username, password)).thenReturn(true);
-        when(trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
-                username, criteria.getFromDate(), criteria.getToDate(),
-                criteria.getTraineeName())).thenReturn(trainings
+        when(trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(
+                username, FROM, TO, "toby")).thenReturn(trainings
         );
 
 
-        List<Training> result = trainingService.getTrainerTrainings(username, password, criteria);
+        List<Training> result = trainingService.getTrainerTrainings(username, password, FROM, TO, "toby");
 
         assertEquals(trainings, result);
     }
@@ -126,15 +126,11 @@ class TrainingServiceTest {
     void getTraineeTrainings_whenAuthenticationFails_throwsAuthenticationFailedException() {
         String traineeUsername = "john";
         String password = "bad";
-        TraineeTrainingSearchCriteria criteria = new TraineeTrainingSearchCriteria();
-        criteria.setFromDate(LocalDate.of(2026, 1, 1));
-        criteria.setToDate(LocalDate.of(2026, 2, 1));
-        criteria.setTrainingType("YOGA");
 
         when(traineeService.authenticateTrainee(traineeUsername, password)).thenReturn(false);
 
         assertThrows(AuthenticationFailedException.class,
-                () -> trainingService.getTraineeTrainings(traineeUsername, password, criteria));
+                () -> trainingService.getTraineeTrainings(traineeUsername, password, FROM, TO, "YOGA"));
 
         verify(traineeService).authenticateTrainee(traineeUsername, password);
         verifyNoInteractions(trainingRepository);
@@ -144,10 +140,6 @@ class TrainingServiceTest {
     void getTraineeTrainings_whenAuthenticated_returnsTrainings() {
         String traineeUsername = "john";
         String password = "good";
-        TraineeTrainingSearchCriteria criteria = new TraineeTrainingSearchCriteria();
-        criteria.setFromDate(LocalDate.of(2026, 1, 1));
-        criteria.setToDate(LocalDate.of(2026, 2, 1));
-        criteria.setTrainingType("YOGA");
 
         List<Training> trainings = List.of(new Training(), new Training());
 
@@ -155,12 +147,12 @@ class TrainingServiceTest {
         when(trainingRepository
                 .findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
                         traineeUsername,
-                        criteria.getFromDate(),
-                        criteria.getToDate(),
-                        criteria.getTrainingType()
+                        FROM,
+                        TO,
+                        "YOGA"
                 )).thenReturn(trainings);
 
-        List<Training> result = trainingService.getTraineeTrainings(traineeUsername, password, criteria);
+        List<Training> result = trainingService.getTraineeTrainings(traineeUsername, password, FROM, TO, "YOGA");
 
         assertEquals(trainings, result);
 
@@ -168,9 +160,9 @@ class TrainingServiceTest {
         verify(trainingRepository)
                 .findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
                         traineeUsername,
-                        criteria.getFromDate(),
-                        criteria.getToDate(),
-                        criteria.getTrainingType()
+                        FROM,
+                        TO,
+                        "YOGA"
                 );
     }
 
@@ -178,15 +170,11 @@ class TrainingServiceTest {
     void getTrainerTrainings_whenAuthenticationFails_throwsAuthenticationFailedException() {
         String trainerUsername = "mike";
         String password = "bad";
-        TrainerTrainingSearchCriteria criteria = new TrainerTrainingSearchCriteria();
-        criteria.setFromDate(LocalDate.of(2026, 1, 1));
-        criteria.setToDate(LocalDate.of(2026, 2, 1));
-        criteria.setTraineeName("John");
 
         when(trainerService.authenticateTrainer(trainerUsername, password)).thenReturn(false);
 
         assertThrows(AuthenticationFailedException.class,
-                () -> trainingService.getTrainerTrainings(trainerUsername, password, criteria));
+                () -> trainingService.getTrainerTrainings(trainerUsername, password, FROM, TO, "toby"));
 
         verify(trainerService).authenticateTrainer(trainerUsername, password);
         verifyNoInteractions(trainingRepository);
@@ -196,33 +184,29 @@ class TrainingServiceTest {
     void getTrainerTrainings_whenAuthenticated_returnsTrainings() {
         String trainerUsername = "mike";
         String password = "good";
-        TrainerTrainingSearchCriteria criteria = new TrainerTrainingSearchCriteria();
-        criteria.setFromDate(LocalDate.of(2026, 1, 1));
-        criteria.setToDate(LocalDate.of(2026, 2, 1));
-        criteria.setTraineeName("John");
 
         List<Training> trainings = List.of(new Training());
 
         when(trainerService.authenticateTrainer(trainerUsername, password)).thenReturn(true);
         when(trainingRepository
-                .findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
+                .findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(
                         trainerUsername,
-                        criteria.getFromDate(),
-                        criteria.getToDate(),
-                        criteria.getTraineeName()
+                        FROM,
+                        TO,
+                        "toby"
                 )).thenReturn(trainings);
 
-        List<Training> result = trainingService.getTrainerTrainings(trainerUsername, password, criteria);
+        List<Training> result = trainingService.getTrainerTrainings(trainerUsername, password, FROM, TO, "toby");
 
         assertEquals(trainings, result);
 
         verify(trainerService).authenticateTrainer(trainerUsername, password);
         verify(trainingRepository)
-                .findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
+                .findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(
                         trainerUsername,
-                        criteria.getFromDate(),
-                        criteria.getToDate(),
-                        criteria.getTraineeName()
+                        FROM,
+                        TO,
+                        "toby"
                 );
     }
 

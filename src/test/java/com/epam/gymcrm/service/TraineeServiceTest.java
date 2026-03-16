@@ -97,7 +97,8 @@ class TraineeServiceTest {
                 "New",
                 "Surname",
                 java.time.LocalDate.of(1990, 1, 1),
-                "New address"
+                "New address",
+                true
         );
 
         assertEquals("New", user.getFirstName());

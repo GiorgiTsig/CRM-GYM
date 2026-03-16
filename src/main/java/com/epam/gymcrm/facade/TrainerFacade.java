@@ -5,6 +5,7 @@ import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.service.TrainerService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -38,14 +39,15 @@ public class TrainerFacade {
         trainerService.changeTrainerPassword(username, password, newPassword);
     }
 
-    public void updateTrainerProfile(
+    public Trainer updateTrainerProfile(
             @NotBlank String username,
             @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
+            @NotNull boolean isActive,
             @NotBlank String specialization
     ) {
-        trainerService.updateTrainerProfile(username, password, firstName, lastName, specialization);
+       return trainerService.updateTrainerProfile(username, password, firstName, lastName, isActive, specialization);
     }
 
     public void activateTrainer(@NotBlank String username, @NotBlank String password) {

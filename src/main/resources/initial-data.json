@@ -49,12 +49,12 @@
       "type": "YOGA",
       "date": "2026-02-15",
       "duration": 60,
-      "traineeId": {
+      "trainee": {
         "user": {
           "username" : "John.Doe"
         }
       },
-      "trainerId": {
+      "trainer": {
         "user" : {
           "username": "Mike.Johnson"
         }
@@ -65,12 +65,12 @@
       "type": "MMA",
       "date": "2026-02-16",
       "duration": 90,
-      "traineeId": {
+      "trainee": {
         "user": {
           "username" : "Jane.Smith"
         }
       },
-      "trainerId": {
+      "trainer": {
         "user" : {
           "username": "Sarah.Williams"
         }

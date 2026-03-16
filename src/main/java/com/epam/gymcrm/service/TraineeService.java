@@ -68,6 +68,7 @@ public class TraineeService {
 
         String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName());
         user.setUsername(username);
+        user.setActive(true);
 
         trainee.setUser(user);
         user.setTrainee(trainee);
@@ -98,7 +99,7 @@ public class TraineeService {
     }
 
     @Transactional
-    public void updateTraineeTrainers(
+    public List<Trainer> updateTraineeTrainers(
             @NotBlank String username, @NotBlank String password,
             Set<@NotNull String> trainerUsernames
     ) {
@@ -122,17 +123,19 @@ public class TraineeService {
         trainee.getTrainers().addAll(trainersToAdd);
 
         traineeRepository.save(trainee);
-        log.info("Trainee updated successfully with id: {}", trainee.getId());
+        log.info("TrainerDto updated successfully with id: {}", trainee.getId());
+        return trainee.getTrainers();
     }
 
     @Transactional
-    public void updateTraineeProfile(
+    public Trainee updateTraineeProfile(
             @NotBlank String username,
             @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
             @NotNull  LocalDate dateOfBirth,
-            @NotBlank String address
+            @NotBlank String address,
+            @NotNull boolean isActive
     ) {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
@@ -144,11 +147,13 @@ public class TraineeService {
 
         user.setFirstName(firstName);
         user.setLastName(lastName);
+        user.setActive(isActive);
         trainee.setDateOfBirth(dateOfBirth);
         trainee.setAddress(address);
 
         traineeRepository.save(trainee);
         log.info("Trainee profile updated successfully with username: {}", username);
+        return trainee;
     }
 
     @Transactional

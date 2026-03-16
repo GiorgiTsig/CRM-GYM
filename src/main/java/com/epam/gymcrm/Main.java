@@ -1,7 +1,6 @@
 package com.epam.gymcrm;
 
 import com.epam.gymcrm.config.AppConfig;
-import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.*;
 import com.epam.gymcrm.facade.*;
 import org.springframework.context.ApplicationContext;
@@ -29,14 +28,9 @@ public class Main {
 
         //trainingFacade.addTraining("Giorgi.Tsignadze", "Giorgi.Tsignadze1", new Training("Martial ART", localDate, 100));
 
-        TrainerTrainingSearchCriteria trainerTrainingSearchCriteria = new TrainerTrainingSearchCriteria();
 
         LocalDate from = LocalDate.of(2024, 1, 1);
         LocalDate to = LocalDate.of(2026, 3, 16);
-
-        trainerTrainingSearchCriteria.setFromDate(from);
-        trainerTrainingSearchCriteria.setToDate(to);
-        trainerTrainingSearchCriteria.setTraineeName("Jane.Smith");
 
         //Check the password in the database and set it; otherwise, it won’t work.
         //trainingFacade.getTrainerTrainings("Sarah.Williams", "aLPyO5Z5RA", trainerTrainingSearchCriteria);
