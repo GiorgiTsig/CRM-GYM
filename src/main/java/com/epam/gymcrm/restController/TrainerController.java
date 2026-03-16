@@ -2,6 +2,7 @@ package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.Training;
+import com.epam.gymcrm.dto.trainer.TrainerTrainingsDto;
 import com.epam.gymcrm.dto.trainer.TrainingDto;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.TrainerDto;
@@ -46,18 +47,12 @@ public class TrainerController {
     ResponseEntity<String> create(
             @RequestBody CreateTrainerDto userTrainerDto
     ) {
-        try {
-            Trainer trainer = trainerMapper.toTrainer(userTrainerDto);
-            Trainer createdTrainer = trainerFacade.createTrainerProfile(trainer.getUser(), trainer, trainer.getTrainingType().getTrainingTypeName());
+        Trainer trainer = trainerMapper.toTrainer(userTrainerDto);
+        Trainer createdTrainer = trainerFacade.createTrainerProfile(trainer.getUser(), trainer, trainer.getTrainingType().getTrainingTypeName());
 
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("Registration successful " + createdTrainer.getUser().getUsername() + " " + createdTrainer.getUser().getPassword());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Registration successful " + createdTrainer.getUser().getUsername() + " " + createdTrainer.getUser().getPassword());
 
-        } catch (ConstraintViolationException e) {
-            return ResponseEntity
-                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(e.getMessage());
-        }
     }
 
 
@@ -96,13 +91,19 @@ public class TrainerController {
     ResponseEntity<List<TrainingDto>> getTrainerTrainingsList(
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestHeader("fromDate") LocalDate fromDate,
-            @RequestHeader("toDate") LocalDate toDate,
-            @RequestHeader("traineeName") String traineeName,
+            @RequestBody(required = false) TrainerTrainingsDto trainerTrainingsDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
-        List<Training> trainings = trainingFacade.getTrainerTrainings(username, password, fromDate, toDate, traineeName);
+
+        List<Training> trainings = trainingFacade.getTrainerTrainings(
+                username,
+                password,
+                trainerTrainingsDto.getFromDate(),
+                trainerTrainingsDto.getToDate(),
+                trainerTrainingsDto.getTraineeName()
+        );
+
         List<TrainingDto> trainingDtoList = trainings.stream().map(training -> trainerMapper.toTrainingDto(training)).toList();
         return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);
     }

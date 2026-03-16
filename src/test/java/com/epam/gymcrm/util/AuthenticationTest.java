@@ -1,6 +1,7 @@
 package com.epam.gymcrm.util;
 
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -41,13 +42,13 @@ class AuthenticationTest {
         user.setPassword("other");
         when(userService.getUser(USERNAME)).thenReturn(Optional.of(user));
 
-        assertFalse(authentication.auth(USERNAME, PASSWORD));
+        assertThrows(AuthenticationFailedException.class, () -> authentication.auth(USERNAME, PASSWORD));
     }
 
     @Test
     void throwsWhenUserNotFound() {
         when(userService.getUser(USERNAME)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> authentication.auth(USERNAME, PASSWORD));
+        assertThrows(AuthenticationFailedException.class, () -> authentication.auth(USERNAME, PASSWORD));
     }
 }

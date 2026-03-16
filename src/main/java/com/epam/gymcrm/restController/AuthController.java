@@ -1,6 +1,5 @@
 package com.epam.gymcrm.restController;
 
-import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.service.UserService;
 import com.epam.gymcrm.util.Authentication;
 import org.slf4j.Logger;
@@ -49,14 +48,10 @@ public class AuthController {
             @RequestHeader("newpassword") String newPassword,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
-        try {
-            log.info("TransactionId: {}", transactionId);
-            authentication.auth(username, password);
-            userService.updatePassword(username, newPassword);
+        log.info("TransactionId: {}", transactionId);
+        authentication.auth(username, password);
+        userService.updatePassword(username, newPassword);
 
-            return ResponseEntity.status(HttpStatus.OK).body("Successful authentication");
-        } catch (AuthenticationFailedException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid credentials");
-        }
+        return ResponseEntity.status(HttpStatus.OK).body("Password changed successfully");
     }
 }

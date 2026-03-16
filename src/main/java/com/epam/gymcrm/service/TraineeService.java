@@ -133,8 +133,8 @@ public class TraineeService {
             @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
-            @NotNull  LocalDate dateOfBirth,
-            @NotBlank String address,
+            LocalDate dateOfBirth,
+            String address,
             @NotNull boolean isActive
     ) {
         log.info("Checking user with Username/Password");

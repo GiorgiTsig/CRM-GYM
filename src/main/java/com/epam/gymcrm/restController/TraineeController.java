@@ -48,18 +48,11 @@ public class TraineeController {
     ResponseEntity<String> create(
             @RequestBody CreateTraineeDto traineeDto
     ) {
-        try {
-            Trainee trainee = traineeMapper.toTrainee(traineeDto);
-            Trainee createdTrainee = traineeFacade.createTraineeProfile(trainee.getUser(), trainee);
+        Trainee trainee = traineeMapper.toTrainee(traineeDto);
+        Trainee createdTrainee = traineeFacade.createTraineeProfile(trainee.getUser(), trainee);
 
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("Registration successful " + createdTrainee.getUser().getUsername() + " " + createdTrainee.getUser().getPassword());
-
-        } catch (ConstraintViolationException e) {
-            return ResponseEntity
-                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("Registration successful " + createdTrainee.getUser().getUsername() + " " + createdTrainee.getUser().getPassword());
     }
 
     @GetMapping("/get")
@@ -83,8 +76,8 @@ public class TraineeController {
             @RequestHeader("password") String password,
             @RequestHeader("firstName") String firstName,
             @RequestHeader("lastName") String lastName,
-            @RequestHeader("dateOfBirth") LocalDate dateOfBirth,
-            @RequestHeader("address") String address,
+            @RequestParam(required = false) LocalDate dateOfBirth,
+            @RequestParam(required = false) String address,
             @RequestHeader("isActive") boolean isActive,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
@@ -136,13 +129,11 @@ public class TraineeController {
     ResponseEntity<List<TrainingDto>> getTraineeTrainingsList(
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestHeader("fromDate") LocalDate fromDate,
-            @RequestHeader("toDate") LocalDate toDate,
-            @RequestHeader("type") String trainingType,
+            @RequestBody(required = false) TraineeTrainingsDto traineeTrainingsDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
-        List<Training> trainings = trainingFacade.getTraineeTrainings(username, password, fromDate, toDate, trainingType);
+        List<Training> trainings = trainingFacade.getTraineeTrainings(username, password, traineeTrainingsDto.getFromDate(), traineeTrainingsDto.getToDate(), traineeTrainingsDto.getTrainingType());
         List<TrainingDto> trainingDtoList = trainings.stream().map(training -> traineeMapper.toTrainingDto(training)).toList();
         return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);
     }
