@@ -6,13 +6,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.*;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @Import({DatabaseConfig.class})
 @ComponentScan(
         basePackages = "com.epam.gymcrm",
         excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = RestController.class)
+                @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = RestController.class),
+                @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = EnableWebMvc.class)
         }
 )
 @PropertySource("classpath:application.properties")
