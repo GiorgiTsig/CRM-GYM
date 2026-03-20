@@ -3,6 +3,8 @@ package com.epam.gymcrm.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.epam.gymcrm.dto.exceptions.ErrorResponse ;
@@ -11,6 +13,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler({AuthenticationFailedException.class, EntityNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleAuthenticationException(
@@ -22,6 +27,8 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 request.getRequestURI()
         );
+
+        log.debug("Entity not found exception occurred: ", ex);
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
