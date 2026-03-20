@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,12 +68,12 @@ class TrainingServiceTest {
     @Test
     void createTraining_whenTraineeNotFound_throwsException() {
         String traineeUsername = "john";
-        String password = "bad";
+        String trainerUsername = "dsa";
         Training training = new Training();
 
-        when(trainerService.getTrainer(traineeUsername)).thenThrow(EntityNotFoundException.class);
-        assertThrows(EntityNotFoundException.class,  () -> trainingService.createTraining(traineeUsername, password, training));
-        verify(trainerService).getTrainer(traineeUsername);
+        when(trainerService.getTrainer(trainerUsername)).thenThrow(EntityNotFoundException.class);
+        assertThrows(EntityNotFoundException.class,  () -> trainingService.createTraining(traineeUsername, trainerUsername, training));
+        verify(trainerService).getTrainer(trainerUsername);
     }
 
     @Test
@@ -90,7 +89,7 @@ class TrainingServiceTest {
         when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
-                () -> trainingService.createTraining(trainerUsername, traineeUsername, training));
+                () -> trainingService.createTraining(traineeUsername, trainerUsername, training));
 
         verify(trainerService).getTrainer(trainerUsername);
         verify(traineeService).findTraineeByUsername(traineeUsername);
@@ -98,8 +97,8 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_whenTrainerTrainingTypeIsNull_throwsIllegalArgumentException() {
-        String trainerUsername = "trainer";
         String traineeUsername = "trainee";
+        String trainerUsername = "trainer";
         Training training = new Training();
 
         Trainer trainer = new Trainer();
@@ -110,7 +109,7 @@ class TrainingServiceTest {
         when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.of(trainee));
 
         assertThrows(IllegalArgumentException.class,
-                () -> trainingService.createTraining(trainerUsername, traineeUsername, training));
+                () -> trainingService.createTraining(traineeUsername, trainerUsername, training));
 
     }
 
@@ -212,11 +211,11 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_whenTrainerNotFound_throwsEntityNotFoundException() {
-        String username = "trainer";
-        String password = "bad";
+        String traineeUsername = "trainer";
+        String trainerUsername = "bad";
         Training training = new Training();
 
-        when(trainerService.getTrainer(username)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> trainingService.createTraining(username, password, training));
+        when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.empty());
+        assertThrows(EntityNotFoundException.class, () -> trainingService.createTraining(traineeUsername, trainerUsername, training));
     }
 }

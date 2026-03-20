@@ -1,16 +1,11 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.Trainee;
-import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.dto.CreateUserDto;
 import com.epam.gymcrm.dto.UserDto;
 import com.epam.gymcrm.dto.trainee.*;
-import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.facade.TraineeFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.mappper.TraineeMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,9 +25,6 @@ import static org.mockito.Mockito.*;
 class TraineeControllerTest {
     @Mock
     private TraineeFacade traineeFacade;
-
-    @Mock
-    private TraineeMapper traineeMapper;
 
     @Mock
     private TrainingFacade trainingFacade;
@@ -47,48 +38,32 @@ class TraineeControllerTest {
     @Test
     void create_shouldReturnCreatedResponse() {
         CreateTraineeDto traineeDto = new CreateTraineeDto();
-        CreateUserDto userDto = new CreateUserDto();
-        traineeDto.setUser(userDto);
-        traineeDto.getUser().setFirstName("John");
-        traineeDto.getUser().setLastName("Doe");
+        traineeDto.setFirstName("John");
+        traineeDto.setLastName("Doe");
 
         User user = new User();
         user.setUsername("John.Doe");
         user.setPassword("12345");
 
-        Trainee trainee = new Trainee();
-        trainee.setUser(user);
-
         Trainee createdTrainee = new Trainee();
         createdTrainee.setUser(user);
 
-        when(traineeMapper.toTrainee(traineeDto)).thenReturn(trainee);
-        when(traineeFacade.createTraineeProfile(user, trainee)).thenReturn(createdTrainee);
+        when(traineeFacade.createTraineeProfile(traineeDto)).thenReturn(createdTrainee);
 
         ResponseEntity<String> response = traineeController.create(traineeDto);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Registration successful John.Doe 12345", response.getBody());
 
-        verify(traineeMapper).toTrainee(traineeDto);
-        verify(traineeFacade).createTraineeProfile(user, trainee);
+        verify(traineeFacade).createTraineeProfile(traineeDto);
     }
 
     @Test
     void traineeProfile_shouldReturnTraineeDto_whenCredentialsValid(){
-        Trainee trainee = new Trainee();
-        User user = new User();
-        user.setUsername(USERNAME);
-        user.setPassword(PASSWORD);
-        trainee.setUser(user);
-
-        UserDto userDto = new UserDto();
         TraineeDto traineeDto = new TraineeDto();
-        userDto.setUsername(USERNAME);
-        traineeDto.setUser(userDto);
+        traineeDto.setFirstName(USERNAME);
 
-        when(traineeFacade.getTraineeProfile(USERNAME, PASSWORD)).thenReturn(Optional.of(trainee));
-        when(traineeMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
+        when(traineeFacade.getTraineeProfile(USERNAME, PASSWORD)).thenReturn(traineeDto);
 
         ResponseEntity<TraineeDto> response =
                 traineeController.traineeProfile(USERNAME, PASSWORD, null);
@@ -97,7 +72,6 @@ class TraineeControllerTest {
         assertEquals(traineeDto, response.getBody());
 
         verify(traineeFacade).getTraineeProfile(USERNAME, PASSWORD);
-        verify(traineeMapper).toTraineeDto(trainee);
     }
 
 
@@ -120,23 +94,22 @@ class TraineeControllerTest {
         trainee.setAddress(address);
 
         TraineeDto traineeDto = new TraineeDto();
-        UserDto userDto = new UserDto();
 
-        userDto.setUsername(USERNAME);
-        traineeDto.setUser(userDto);
+        traineeDto.setFirstName(USERNAME);
+        traineeDto.setFirstName(firstName);
+        traineeDto.setLastName(lastName);
         traineeDto.setAddress(address);
         traineeDto.setDateOfBirth(dateOfBirth);
+        traineeDto.setActive(true);
 
 
-        when(traineeFacade.updateTraineeProfile(USERNAME, PASSWORD, firstName, lastName, LocalDate.of(2026, 2, 2), address, true)).thenReturn(trainee);
-        when(traineeMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
+        when(traineeFacade.updateTraineeProfile(USERNAME, PASSWORD, firstName, lastName, LocalDate.of(2026, 2, 2), address, true)).thenReturn(traineeDto);
 
-        ResponseEntity<TraineeDto> response = traineeController.updateTraineeProfile(USERNAME, PASSWORD, firstName, lastName, dateOfBirth, address, true, null);
+        ResponseEntity<TraineeDto> response = traineeController.updateTraineeProfile(USERNAME, PASSWORD, null, traineeDto);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(traineeDto, response.getBody());
 
         verify(traineeFacade).updateTraineeProfile(USERNAME, PASSWORD, firstName, lastName, LocalDate.of(2026, 2, 2), address, true);
-        verify(traineeMapper).toTraineeDto(trainee);
     }
 
     @Test
@@ -153,18 +126,6 @@ class TraineeControllerTest {
 
     @Test
     void getActiveTrainersNotAssignedToTrainee_shouldReturnTrainerDtoList_whenCredentialsValid() {
-        Trainer trainer1 = new Trainer();
-        User user1 = new User();
-        user1.setUsername("trainer.one");
-        trainer1.setUser(user1);
-
-        Trainer trainer2 = new Trainer();
-        User user2 = new User();
-        user2.setUsername("trainer.two");
-        trainer2.setUser(user2);
-
-        List<Trainer> trainers = List.of(trainer1, trainer2);
-
         TrainerDto trainerDto1 = new TrainerDto();
         UserDto userDto = new UserDto();
         trainerDto1.setUser(userDto);
@@ -175,10 +136,9 @@ class TraineeControllerTest {
         trainerDto2.setUser(userDto1);
         trainerDto2.getUser().setUsername("trainer.two");
 
-        when(traineeFacade.getUnassignedTrainersForTrainee(USERNAME, PASSWORD))
-                .thenReturn(trainers);
-        when(traineeMapper.toTrainerDto(trainer1)).thenReturn(trainerDto1);
-        when(traineeMapper.toTrainerDto(trainer2)).thenReturn(trainerDto2);
+        List<TrainerDto> trainers = List.of(trainerDto1, trainerDto2);
+
+        when(traineeFacade.getUnassignedTrainersForTrainee(USERNAME, PASSWORD)).thenReturn(trainers);
 
         ResponseEntity<List<TrainerDto>> response =
                 traineeController.getActiveTrainersNotAssignedToTrainee(USERNAME, PASSWORD, null);
@@ -187,27 +147,11 @@ class TraineeControllerTest {
         assertEquals(List.of(trainerDto1, trainerDto2), response.getBody());
 
         verify(traineeFacade).getUnassignedTrainersForTrainee(USERNAME, PASSWORD);
-        verify(traineeMapper).toTrainerDto(trainer1);
-        verify(traineeMapper).toTrainerDto(trainer2);
     }
 
     @Test
     void updateTraineeTrainers_shouldReturnTrainerDtoList_whenUpdateSuccessful() {
-
         Set<String> trainerUsernames = Set.of("trainer.one", "trainer.two");
-
-        Trainer trainer1 = new Trainer();
-        User user1 = new User();
-        user1.setUsername("trainer.one");
-        trainer1.setUser(user1);
-
-        Trainer trainer2 = new Trainer();
-        User user2 = new User();
-        user2.setUsername("trainer.two");
-        trainer2.setUser(user2);
-
-        List<Trainer> trainers = List.of(trainer1, trainer2);
-
         TrainerDto dto1 = new TrainerDto();
         UserDto userDto = new UserDto();
         dto1.setUser(userDto);
@@ -215,14 +159,13 @@ class TraineeControllerTest {
 
         TrainerDto dto2 = new TrainerDto();
         UserDto userDto1 = new UserDto();
-        dto2.setUser(userDto);
+        dto2.setUser(userDto1);
         dto2.getUser().setUsername("trainer.two");
+
+        List<TrainerDto> trainers = List.of(dto1, dto2);
 
         when(traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, trainerUsernames))
                 .thenReturn(trainers);
-
-        when(traineeMapper.toTrainerDto(trainer1)).thenReturn(dto1);
-        when(traineeMapper.toTrainerDto(trainer2)).thenReturn(dto2);
 
         ResponseEntity<List<TrainerDto>> response =
                 traineeController.updateTraineeTrainers(USERNAME, PASSWORD, trainerUsernames, null);
@@ -231,8 +174,6 @@ class TraineeControllerTest {
         assertEquals(List.of(dto1, dto2), response.getBody());
 
         verify(traineeFacade).updateTraineeTrainers(USERNAME, PASSWORD, trainerUsernames);
-        verify(traineeMapper).toTrainerDto(trainer1);
-        verify(traineeMapper).toTrainerDto(trainer2);
     }
 
     @Test
@@ -242,12 +183,9 @@ class TraineeControllerTest {
         requestDto.setToDate(LocalDate.of(2026, 2, 1));
         requestDto.setTrainingType("MMA");
 
-        Training training1 = new Training();
-        Training training2 = new Training();
-        List<Training> trainings = List.of(training1, training2);
-
         TrainingDto trainingDto1 = new TrainingDto();
         TrainingDto trainingDto2 = new TrainingDto();
+        List<TrainingDto> trainings = List.of(trainingDto1, trainingDto2);
 
         when(trainingFacade.getTraineeTrainings(
                 USERNAME,
@@ -257,8 +195,6 @@ class TraineeControllerTest {
                 requestDto.getTrainingType()
         )).thenReturn(trainings);
 
-        when(traineeMapper.toTrainingDto(training1)).thenReturn(trainingDto1);
-        when(traineeMapper.toTrainingDto(training2)).thenReturn(trainingDto2);
 
         ResponseEntity<List<TrainingDto>> response =
                 traineeController.getTraineeTrainingsList(USERNAME, PASSWORD, requestDto, null);
@@ -273,8 +209,6 @@ class TraineeControllerTest {
                 requestDto.getToDate(),
                 requestDto.getTrainingType()
         );
-        verify(traineeMapper).toTrainingDto(training1);
-        verify(traineeMapper).toTrainingDto(training2);
     }
 
     @Test

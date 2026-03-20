@@ -48,12 +48,14 @@ class TraineeServiceTest {
         user.setFirstName("John");
         user.setLastName("Doe");
         Trainee trainee = new Trainee();
+        trainee.setUser(user);
+        user.setTrainee(trainee);
 
         when(passwordGenerator.generatePassword()).thenReturn("generatedPass");
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(traineeRepository.save(trainee)).thenReturn(trainee);
 
-        Trainee result = traineeService.createTraineeProfile(user, trainee);
+        Trainee result = traineeService.createTraineeProfile(trainee);
 
         assertEquals("generatedPass", user.getPassword());
         assertEquals("john.doe", user.getUsername());

@@ -1,7 +1,6 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
@@ -10,7 +9,6 @@ import com.epam.gymcrm.dto.trainer.TrainerTrainingsDto;
 import com.epam.gymcrm.dto.trainer.TrainingDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.mappper.TrainerMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -37,9 +34,6 @@ class TrainerControllerTest {
 
     @Mock
     private TrainerFacade trainerFacade;
-
-    @Mock
-    private TrainerMapper trainerMapper;
 
     @Mock
     private TrainingFacade trainingFacade;
@@ -58,39 +52,25 @@ class TrainerControllerTest {
         TrainingType trainingType = new TrainingType();
         trainingType.setTrainingTypeName(SPECIALIZATION);
 
-        Trainer trainer = new Trainer();
-        trainer.setUser(user);
-        trainer.setTrainingType(trainingType);
-
         Trainer createdTrainer = new Trainer();
         createdTrainer.setUser(user);
         createdTrainer.setTrainingType(trainingType);
 
-        when(trainerMapper.toTrainer(createTrainerDto)).thenReturn(trainer);
-        when(trainerFacade.createTrainerProfile(user, trainer, SPECIALIZATION)).thenReturn(createdTrainer);
+        when(trainerFacade.createTrainerProfile(createTrainerDto)).thenReturn(createdTrainer);
 
         ResponseEntity<String> response = trainerController.create(createTrainerDto);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Registration successful " + USERNAME + " " + PASSWORD, response.getBody());
 
-        verify(trainerMapper).toTrainer(createTrainerDto);
-        verify(trainerFacade).createTrainerProfile(user, trainer, SPECIALIZATION);
+        verify(trainerFacade).createTrainerProfile(createTrainerDto);
     }
 
     @Test
     void getTrainerProfile_shouldReturnTrainerDto_whenCredentialsValid() {
-        User user = new User();
-        user.setUsername(USERNAME);
-        user.setPassword(PASSWORD);
-
-        Trainer trainer = new Trainer();
-        trainer.setUser(user);
-
         TrainerDto trainerDto = new TrainerDto();
 
-        when(trainerFacade.getTrainerProfile(USERNAME, PASSWORD)).thenReturn(Optional.of(trainer));
-        when(trainerMapper.toTrainerDto(trainer)).thenReturn(trainerDto);
+        when(trainerFacade.getTrainerProfile(USERNAME, PASSWORD)).thenReturn(trainerDto);
 
         ResponseEntity<TrainerDto> response =
                 trainerController.getTrainerProfile(USERNAME, PASSWORD, null);
@@ -99,7 +79,6 @@ class TrainerControllerTest {
         assertEquals(trainerDto, response.getBody());
 
         verify(trainerFacade).getTrainerProfile(USERNAME, PASSWORD);
-        verify(trainerMapper).toTrainerDto(trainer);
     }
 
     @Test
@@ -107,10 +86,11 @@ class TrainerControllerTest {
         User user = new User();
         user.setUsername(USERNAME);
 
-        Trainer trainer = new Trainer();
-        trainer.setUser(user);
-
         TrainerDto trainerDto = new TrainerDto();
+        trainerDto.setFirstName(FIRST_NAME);
+        trainerDto.setLastName(LAST_NAME);
+        trainerDto.setSpecialization(SPECIALIZATION);
+        trainerDto.setActive(true);
 
         when(trainerFacade.updateTrainerProfile(
                 USERNAME,
@@ -119,18 +99,13 @@ class TrainerControllerTest {
                 LAST_NAME,
                 true,
                 SPECIALIZATION
-        )).thenReturn(trainer);
-
-        when(trainerMapper.toTrainerDto(trainer)).thenReturn(trainerDto);
+        )).thenReturn(trainerDto);
 
         ResponseEntity<TrainerDto> response =
                 trainerController.updateTraineeProfile(
                         USERNAME,
                         PASSWORD,
-                        FIRST_NAME,
-                        LAST_NAME,
-                        SPECIALIZATION,
-                        true,
+                        trainerDto,
                         null
                 );
 
@@ -145,7 +120,6 @@ class TrainerControllerTest {
                 true,
                 SPECIALIZATION
         );
-        verify(trainerMapper).toTrainerDto(trainer);
     }
 
     @Test
@@ -155,12 +129,9 @@ class TrainerControllerTest {
         requestDto.setToDate(LocalDate.of(2026, 2, 1));
         requestDto.setTraineeName("Jane");
 
-        Training training1 = new Training();
-        Training training2 = new Training();
-        List<Training> trainings = List.of(training1, training2);
-
         TrainingDto trainingDto1 = new TrainingDto();
         TrainingDto trainingDto2 = new TrainingDto();
+        List<com.epam.gymcrm.dto.trainer.TrainingDto> trainings = List.of(trainingDto1, trainingDto2);
 
         when(trainingFacade.getTrainerTrainings(
                 USERNAME,
@@ -170,8 +141,6 @@ class TrainerControllerTest {
                 requestDto.getTraineeName()
         )).thenReturn(trainings);
 
-        when(trainerMapper.toTrainingDto(training1)).thenReturn(trainingDto1);
-        when(trainerMapper.toTrainingDto(training2)).thenReturn(trainingDto2);
 
         ResponseEntity<List<TrainingDto>> response =
                 trainerController.getTrainerTrainingsList(USERNAME, PASSWORD, requestDto, null);
@@ -186,8 +155,6 @@ class TrainerControllerTest {
                 requestDto.getToDate(),
                 requestDto.getTraineeName()
         );
-        verify(trainerMapper).toTrainingDto(training1);
-        verify(trainerMapper).toTrainingDto(training2);
     }
 
     @Test

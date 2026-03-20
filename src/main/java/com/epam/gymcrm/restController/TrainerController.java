@@ -7,7 +7,6 @@ import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.TrainerDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.mappper.TrainerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,7 +21,6 @@ import java.util.List;
 public class TrainerController {
     private static final Logger log = LoggerFactory.getLogger(TrainerController.class);
     private TrainerFacade trainerFacade;
-    private TrainerMapper trainerMapper;
     private TrainingFacade trainingFacade;
 
     @Autowired
@@ -34,11 +31,6 @@ public class TrainerController {
     @Autowired
     public void setTrainerFacade(TrainerFacade trainerFacade) {
         this.trainerFacade = trainerFacade;
-    }
-
-    @Autowired
-    public void setTrainerMapper(TrainerMapper trainerMapper) {
-        this.trainerMapper = trainerMapper;
     }
 
     @PostMapping("/create")

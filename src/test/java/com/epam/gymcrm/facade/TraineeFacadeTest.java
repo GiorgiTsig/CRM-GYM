@@ -3,6 +3,10 @@ package com.epam.gymcrm.facade;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.trainee.CreateTraineeDto;
+import com.epam.gymcrm.dto.trainee.TraineeDto;
+import com.epam.gymcrm.dto.trainee.TrainerDto;
+import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
 import com.epam.gymcrm.service.TrainerService;
 import org.junit.jupiter.api.Test;
@@ -32,6 +36,9 @@ class TraineeFacadeTest {
     @Mock
     private TrainerService trainerService;
 
+    @Mock
+    private TraineeMapper traineeMapper;
+
     @InjectMocks
     private TraineeFacade traineeFacade;
 
@@ -39,24 +46,28 @@ class TraineeFacadeTest {
     void createTraineeProfileDelegatesToService() {
         User user = new User();
         Trainee trainee = new Trainee();
-        when(traineeService.createTraineeProfile(user, trainee)).thenReturn(trainee);
+        CreateTraineeDto createTraineeDto = new CreateTraineeDto();
+        trainee.setUser(user);
+        when(traineeMapper.toTrainee(createTraineeDto)).thenReturn(trainee);
+        when(traineeService.createTraineeProfile(trainee)).thenReturn(trainee);
 
-        Trainee result = traineeFacade.createTraineeProfile(user, trainee);
+        Trainee result = traineeFacade.createTraineeProfile(createTraineeDto);
 
         assertSame(trainee, result);
-        verify(traineeService).createTraineeProfile(user, trainee);
+        verify(traineeService).createTraineeProfile(trainee);
     }
 
     @Test
     void getTraineeProfileAuthenticatesBeforeFetching() {
         Trainee trainee = new Trainee();
+        TraineeDto traineeDto = new TraineeDto();
         when(traineeService.authenticateTrainee(USERNAME, PASSWORD)).thenReturn(true);
         when(traineeService.getTrainee(USERNAME)).thenReturn(Optional.of(trainee));
+        when(traineeMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
 
-        Optional<Trainee> result = traineeFacade.getTraineeProfile(USERNAME, PASSWORD);
+        TraineeDto result = traineeFacade.getTraineeProfile(USERNAME, PASSWORD);
 
-        assertTrue(result.isPresent());
-        assertSame(trainee, result.get());
+        assertSame(traineeDto, result);
         InOrder inOrder = inOrder(traineeService);
         inOrder.verify(traineeService).authenticateTrainee(USERNAME, PASSWORD);
         inOrder.verify(traineeService).getTrainee(USERNAME);
@@ -73,17 +84,22 @@ class TraineeFacadeTest {
 
     @Test
     void getUnassignedTrainersAuthenticatesAndReturnsList() {
-        List<Trainer> trainers = List.of(new Trainer());
+        Trainer trainer = new Trainer();
+        List<Trainer> trainers = List.of(trainer);
+
+        TrainerDto trainerDto = new TrainerDto();
+        List<TrainerDto> expectedDtoList = List.of(trainerDto);
+
         when(traineeService.authenticateTrainee(USERNAME, PASSWORD)).thenReturn(true);
         when(trainerService.getUnassignedTrainersForTrainee(USERNAME)).thenReturn(trainers);
+        when(traineeMapper.toTrainerDto(trainer)).thenReturn(trainerDto);
 
-        List<Trainer> result = traineeFacade.getUnassignedTrainersForTrainee(USERNAME, PASSWORD);
+        List<TrainerDto> result = traineeFacade.getUnassignedTrainersForTrainee(USERNAME, PASSWORD);
+        assertEquals(expectedDtoList, result);
 
-        assertEquals(trainers, result);
-        InOrder inOrder = inOrder(traineeService);
-        InOrder inOrderTrainer = inOrder(trainerService);
+        InOrder inOrder = inOrder(traineeService, trainerService);
         inOrder.verify(traineeService).authenticateTrainee(USERNAME, PASSWORD);
-        inOrderTrainer.verify(trainerService).getUnassignedTrainersForTrainee(USERNAME);
+        inOrder.verify(trainerService).getUnassignedTrainersForTrainee(USERNAME);
     }
 
     @Test

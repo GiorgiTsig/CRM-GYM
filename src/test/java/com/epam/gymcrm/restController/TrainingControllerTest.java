@@ -1,6 +1,9 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.Training;
+import com.epam.gymcrm.domain.TrainingType;
+import com.epam.gymcrm.dto.TrainingTypeDto;
+import com.epam.gymcrm.dto.trainee.TrainingDto;
 import com.epam.gymcrm.facade.TrainingFacade;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,38 +37,38 @@ class TrainingControllerTest {
 
     @Test
     void addTraining_shouldReturnOk_whenTrainingCreated() {
-        Training training = new Training(TRAINING_NAME, TRAINING_DATE, TRAINING_DURATION);
+        TrainingTypeDto trainingType = new TrainingTypeDto();
+        trainingType.setTrainingTypeName("MMA");
+        TrainingDto trainingDto = new TrainingDto();
+        trainingDto.setTrainerUsername(TRAINER_USERNAME);
+        trainingDto.setDate(TRAINING_DATE);
+        trainingDto.setDuration(TRAINING_DURATION);
+        trainingDto.setName(TRAINING_NAME);
+        trainingDto.setType(trainingType);
 
-        when(trainingFacade.addTraining(
-                eq(TRAINER_USERNAME),
-                eq(PASSWORD),
+        doNothing().when(trainingFacade).addTraining(
                 eq(TRAINEE_USERNAME),
-                any(Training.class)
-        )).thenReturn(training);
+                eq(PASSWORD),
+                eq(trainingDto)
+        );
 
         ResponseEntity<Void> response = trainingController.addTraining(
                 TRAINEE_USERNAME,
                 PASSWORD,
-                TRAINER_USERNAME,
-                TRAINING_NAME,
-                TRAINING_DATE,
-                TRAINING_DURATION
+                trainingDto
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        ArgumentCaptor<Training> trainingCaptor = ArgumentCaptor.forClass(Training.class);
 
         verify(trainingFacade).addTraining(
-                eq(TRAINER_USERNAME),
-                eq(PASSWORD),
                 eq(TRAINEE_USERNAME),
-                trainingCaptor.capture()
+                eq(PASSWORD),
+                eq(trainingDto)
         );
 
-        Training capturedTraining = trainingCaptor.getValue();
-        assertEquals(TRAINING_NAME, capturedTraining.getName());
-        assertEquals(TRAINING_DATE, capturedTraining.getDate());
-        assertEquals(TRAINING_DURATION, capturedTraining.getDuration());
+        assertEquals(TRAINING_NAME, trainingDto.getName());
+        assertEquals(TRAINING_DATE, trainingDto.getDate());
+        assertEquals(TRAINING_DURATION, trainingDto.getDuration());
     }
 }
