@@ -1,25 +1,32 @@
 package com.epam.gymcrm.dto.trainer;
 
-import com.epam.gymcrm.dto.CreateUserDto;
-import com.epam.gymcrm.dto.TrainingTypeDto;
 
 public class CreateTrainerDto {
-    private TrainingTypeDto trainingType;
-    private CreateUserDto user;
+    private String firstName;
+    private String lastName;
+    private String trainingTypeName;
 
-    public TrainingTypeDto getTrainingType() {
-        return trainingType;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setTrainingType(TrainingTypeDto trainingType) {
-        this.trainingType = trainingType;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public CreateUserDto getUser() {
-        return user;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setUser(CreateUserDto user) {
-        this.user = user;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getTrainingTypeName() {
+        return trainingTypeName;
+    }
+
+    public void setTrainingTypeName(String trainingTypeName) {
+        this.trainingTypeName = trainingTypeName;
     }
 }

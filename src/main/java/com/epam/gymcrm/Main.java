@@ -23,9 +23,6 @@ public class Main {
         LocalDate dateOfBirth = LocalDate.of(2000, 1, 1);
         LocalDate localDate = LocalDate.of(2025, 1, 1);
 
-        Trainer trainer = trainerFacade.createTrainerProfile(trainerUser, new Trainer(), "MMA");
-        Trainee trainee = traineeFacade.createTraineeProfile(traineeUser, new Trainee(dateOfBirth, "f"));
-
         //trainingFacade.addTraining("Giorgi.Tsignadze", "Giorgi.Tsignadze1", new Training("Martial ART", localDate, 100));
 
 
@@ -35,6 +32,5 @@ public class Main {
         //Check the password in the database and set it; otherwise, it won’t work.
         //trainingFacade.getTrainerTrainings("Sarah.Williams", "aLPyO5Z5RA", trainerTrainingSearchCriteria);
         //traineeFacade.updateTraineeTrainers("Jane.Smith", "shlVbr6yWY", trainers);
-        System.out.println(trainerFacade.getAllTrainers(trainer.getUser().getUsername(), trainer.getUser().getPassword()));
     }
 }

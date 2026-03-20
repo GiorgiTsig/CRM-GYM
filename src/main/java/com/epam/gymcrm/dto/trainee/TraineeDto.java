@@ -1,22 +1,33 @@
 package com.epam.gymcrm.dto.trainee;
 
-import com.epam.gymcrm.dto.UserDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public class TraineeDto {
-    private UserDto user;
+    private String firstName;
+    private String lastName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
     private String address;
+    private boolean isActive;
     private List<TrainerDto> trainers;
 
-    public UserDto getUser() {
-        return user;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setUser(UserDto user) {
-        this.user = user;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public LocalDate getDateOfBirth() {
@@ -33,6 +44,14 @@ public class TraineeDto {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public List<TrainerDto> getTrainers() {

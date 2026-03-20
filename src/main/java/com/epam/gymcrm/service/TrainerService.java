@@ -115,7 +115,7 @@ public class TrainerService {
         user.setActive(isActive);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-        trainingType(specialization);
+        trainer.setTrainingType(trainingType(specialization));
 
         trainerRepository.save(trainer);
         log.info("Trainer profile updated successfully for username: {}", username);

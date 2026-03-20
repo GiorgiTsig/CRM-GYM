@@ -1,13 +1,12 @@
 package com.epam.gymcrm.dto.trainee;
 
-import com.epam.gymcrm.dto.CreateUserDto;
-
 import java.time.LocalDate;
 
 public class CreateTraineeDto {
+    private String firstName;
+    private String lastName;
     private LocalDate dateOfBirth;
     private String address;
-    private CreateUserDto user;
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
@@ -25,11 +24,19 @@ public class CreateTraineeDto {
         this.address = address;
     }
 
-    public CreateUserDto getUser() {
-        return user;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setUser(CreateUserDto user) {
-        this.user = user;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

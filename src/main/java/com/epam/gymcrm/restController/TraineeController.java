@@ -1,14 +1,10 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.Trainee;
-import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.Training;
-import com.epam.gymcrm.dto.trainee.TrainingDto;
 import com.epam.gymcrm.dto.trainee.*;
 import com.epam.gymcrm.facade.TraineeFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.mappper.TraineeMapper;
-import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -26,17 +21,11 @@ public class TraineeController {
 
     private static final Logger log = LoggerFactory.getLogger(TraineeController.class);
     private TraineeFacade traineeFacade;
-    private TraineeMapper traineeMapper;
     private TrainingFacade trainingFacade;
 
     @Autowired
     public void setTraineeFacade(TraineeFacade traineeFacade) {
         this.traineeFacade = traineeFacade;
-    }
-
-    @Autowired
-    public void setTraineeMapper(TraineeMapper traineeMapper) {
-        this.traineeMapper = traineeMapper;
     }
 
     @Autowired
@@ -48,11 +37,10 @@ public class TraineeController {
     ResponseEntity<String> create(
             @RequestBody CreateTraineeDto traineeDto
     ) {
-        Trainee trainee = traineeMapper.toTrainee(traineeDto);
-        Trainee createdTrainee = traineeFacade.createTraineeProfile(trainee.getUser(), trainee);
+        Trainee trainee = traineeFacade.createTraineeProfile(traineeDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Registration successful " + createdTrainee.getUser().getUsername() + " " + createdTrainee.getUser().getPassword());
+                .body("Registration successful " + trainee.getUser().getUsername() + " " + trainee.getUser().getPassword());
     }
 
     @GetMapping("/get")
@@ -63,8 +51,7 @@ public class TraineeController {
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        Trainee trainee = traineeFacade.getTraineeProfile(username, password).orElseThrow();
-        TraineeDto profileDTO = traineeMapper.toTraineeDto(trainee);
+        TraineeDto profileDTO = traineeFacade.getTraineeProfile(username, password);
 
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
     }
@@ -74,16 +61,19 @@ public class TraineeController {
     ResponseEntity<TraineeDto> updateTraineeProfile(
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestHeader("firstName") String firstName,
-            @RequestHeader("lastName") String lastName,
-            @RequestParam(required = false) LocalDate dateOfBirth,
-            @RequestParam(required = false) String address,
-            @RequestHeader("isActive") boolean isActive,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "transactionId", required = false) String transactionId,
+            @RequestBody TraineeDto traineeDto
     ) {
         log.info("TransactionId: {}", transactionId);
-        Trainee trainee = traineeFacade.updateTraineeProfile(username, password, firstName, lastName, dateOfBirth, address, isActive);
-        TraineeDto profileDTO = traineeMapper.toTraineeDto(trainee);
+        TraineeDto profileDTO = traineeFacade.updateTraineeProfile(
+                username,
+                password,
+                traineeDto.getFirstName(),
+                traineeDto.getLastName(),
+                traineeDto.getDateOfBirth(),
+                traineeDto.getAddress(),
+                traineeDto.isActive()
+        );
 
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
     }
@@ -106,8 +96,7 @@ public class TraineeController {
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        List<Trainer> trainers = traineeFacade.getUnassignedTrainersForTrainee(username, password);
-        List<TrainerDto> trainerDtoList = trainers.stream().map(trainer -> traineeMapper.toTrainerDto(trainer)).toList();
+        List<TrainerDto> trainerDtoList = traineeFacade.getUnassignedTrainersForTrainee(username, password);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDtoList);
     }
 
@@ -115,12 +104,11 @@ public class TraineeController {
     ResponseEntity<List<TrainerDto>> updateTraineeTrainers(
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestHeader("trainees") Set<String> trainerList,
+            @RequestBody Set<@NotNull String> trainerList,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        List<Trainer> trainers = traineeFacade.updateTraineeTrainers(username, password, trainerList);
-        List<TrainerDto> trainerDtoList = trainers.stream().map(trainer -> traineeMapper.toTrainerDto(trainer)).toList();
+        List<TrainerDto> trainerDtoList = traineeFacade.updateTraineeTrainers(username, password, trainerList);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDtoList);
     }
 
@@ -133,8 +121,14 @@ public class TraineeController {
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
-        List<Training> trainings = trainingFacade.getTraineeTrainings(username, password, traineeTrainingsDto.getFromDate(), traineeTrainingsDto.getToDate(), traineeTrainingsDto.getTrainingType());
-        List<TrainingDto> trainingDtoList = trainings.stream().map(training -> traineeMapper.toTrainingDto(training)).toList();
+        List<TrainingDto> trainingDtoList = trainingFacade.getTraineeTrainings(
+                username,
+                password,
+                traineeTrainingsDto.getFromDate(),
+                traineeTrainingsDto.getToDate(),
+                traineeTrainingsDto.getTrainingType()
+        );
+
         return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);
     }
 
@@ -142,7 +136,7 @@ public class TraineeController {
     ResponseEntity<Void> updateTraineeStatus (
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestHeader("isActive") boolean isActive
+            @RequestParam boolean isActive
     ) {
         if (isActive) {
             traineeFacade.activateTrainee(username, password);

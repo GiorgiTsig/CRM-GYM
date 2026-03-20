@@ -60,21 +60,18 @@ public class TraineeService {
     }
 
     @Transactional
-    public Trainee createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
-        log.info("Creating trainee profile for {} {}", user.getFirstName(), user.getLastName());
+    public Trainee createTraineeProfile(@Valid Trainee trainee) {
+        log.info("Creating trainee profile for {} {}", trainee.getUser().getFirstName(), trainee.getUser().getLastName());
 
         String password = passwordGenerator.generatePassword();
-        user.setPassword(password);
+        trainee.getUser().setPassword(password);
 
-        String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName());
-        user.setUsername(username);
-        user.setActive(true);
-
-        trainee.setUser(user);
-        user.setTrainee(trainee);
+        String username = usernameGenerator.generateUsername(trainee.getUser().getFirstName(), trainee.getUser().getLastName());
+        trainee.getUser().setUsername(username);
+        trainee.getUser().setActive(true);
 
         traineeRepository.save(trainee);
-        log.info("Trainee profile created with username: {}", user.getUsername());
+        log.info("Trainee profile created with username: {}", trainee.getUser().getUsername());
 
         return trainee;
     }

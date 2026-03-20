@@ -1,8 +1,6 @@
 package com.epam.gymcrm.mappper;
 
 import com.epam.gymcrm.domain.*;
-import com.epam.gymcrm.dto.CreateUserDto;
-import com.epam.gymcrm.dto.TrainingTypeDto;
 import com.epam.gymcrm.dto.UserDto;
 import com.epam.gymcrm.dto.trainer.TrainingDto;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
@@ -13,13 +11,18 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface TrainerMapper {
+    @Mapping(target = "user.firstName", source = "firstName")
+    @Mapping(target = "user.lastName", source = "lastName")
+    @Mapping(target = "trainingType.trainingTypeName", source = "trainingTypeName")
     Trainer toTrainer(CreateTrainerDto createTrainerDto);
-    User toUser(CreateUserDto createUserDto);
 
+    @Mapping(target = "firstName", source = "user.firstName")
+    @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "specialization", source = "trainingType.trainingTypeName")
+    @Mapping(target = "active", source = "user.active")
     TrainerDto toTrainerDto(Trainer trainer);
     UserDto toUserDto(User user);
     TraineeDto toTraineeDto(Trainee trainee);
-    TrainingTypeDto toTrainingTypeDto(TrainingTypeMapper trainingType);
 
     @Mapping(target = "traineeUsername", source = "trainee.user.username")
     TrainingDto toTrainingDto(Training training);

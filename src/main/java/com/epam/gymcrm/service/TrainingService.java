@@ -45,16 +45,16 @@ public class TrainingService {
     }
 
     @Transactional
-    public Training createTraining(
-            @NotBlank String trainerUsername,
+    public void createTraining(
             @NotBlank String traineeUsername,
+            @NotBlank String trainerUsername,
             @Valid Training training
     ) {
         Trainer trainer = trainerService.getTrainer(trainerUsername)
                 .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
 
         Trainee trainee = traineeService.findTraineeByUsername(traineeUsername)
-                .orElseThrow(() -> new EntityNotFoundException("TrainerDto not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
 
 
         if (trainer.getTrainingType() == null) {
@@ -70,8 +70,6 @@ public class TrainingService {
         training.setType(type);
 
         trainingRepository.save(training);
-
-        return training;
     }
 
     @Transactional

@@ -1,7 +1,6 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.dto.trainer.TrainerTrainingsDto;
 import com.epam.gymcrm.dto.trainer.TrainingDto;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
@@ -9,7 +8,6 @@ import com.epam.gymcrm.dto.trainer.TrainerDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.mappper.TrainerMapper;
-import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +45,7 @@ public class TrainerController {
     ResponseEntity<String> create(
             @RequestBody CreateTrainerDto userTrainerDto
     ) {
-        Trainer trainer = trainerMapper.toTrainer(userTrainerDto);
-        Trainer createdTrainer = trainerFacade.createTrainerProfile(trainer.getUser(), trainer, trainer.getTrainingType().getTrainingTypeName());
+        Trainer createdTrainer = trainerFacade.createTrainerProfile(userTrainerDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Registration successful " + createdTrainer.getUser().getUsername() + " " + createdTrainer.getUser().getPassword());
@@ -64,9 +61,7 @@ public class TrainerController {
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        Trainer trainer = trainerFacade.getTrainerProfile(username, password).orElseThrow();
-        TrainerDto trainerDto = trainerMapper.toTrainerDto(trainer);
-
+        TrainerDto trainerDto = trainerFacade.getTrainerProfile(username, password);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
     }
 
@@ -74,15 +69,18 @@ public class TrainerController {
     ResponseEntity<TrainerDto> updateTraineeProfile(
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestHeader("firstName") String firstName,
-            @RequestHeader("lastName") String lastName,
-            @RequestHeader("Specialization") String specialization,
-            @RequestHeader("isActive") boolean isActive,
+            @RequestBody TrainerDto trainerDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        Trainer trainee = trainerFacade.updateTrainerProfile(username, password, firstName, lastName, isActive, specialization);
-        TrainerDto profileDTO = trainerMapper.toTrainerDto(trainee);
+        TrainerDto profileDTO = trainerFacade.updateTrainerProfile(
+                username,
+                password,
+                trainerDto.getFirstName(),
+                trainerDto.getLastName(),
+                trainerDto.isActive(),
+                trainerDto.getSpecialization()
+        );
 
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
     }
@@ -96,7 +94,7 @@ public class TrainerController {
     ){
         log.info("TransactionId: {}", transactionId);
 
-        List<Training> trainings = trainingFacade.getTrainerTrainings(
+        List<TrainingDto> trainingDtoList = trainingFacade.getTrainerTrainings(
                 username,
                 password,
                 trainerTrainingsDto.getFromDate(),
@@ -104,7 +102,6 @@ public class TrainerController {
                 trainerTrainingsDto.getTraineeName()
         );
 
-        List<TrainingDto> trainingDtoList = trainings.stream().map(training -> trainerMapper.toTrainingDto(training)).toList();
         return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);
     }
 
@@ -112,7 +109,7 @@ public class TrainerController {
     ResponseEntity<Void> updateTraineeStatus (
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestHeader("isActive") boolean isActive
+            @RequestParam boolean isActive
     ) {
         if (isActive) {
             trainerFacade.activateTrainer(username, password);

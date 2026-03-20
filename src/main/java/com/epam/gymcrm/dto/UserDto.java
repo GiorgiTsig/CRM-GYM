@@ -4,7 +4,6 @@ public class UserDto {
     private String username;
     private String firstName;
     private String lastName;
-    private boolean isActive;
 
     public String getUsername() {
         return username;
@@ -30,11 +29,4 @@ public class UserDto {
         this.lastName = lastName;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
 }

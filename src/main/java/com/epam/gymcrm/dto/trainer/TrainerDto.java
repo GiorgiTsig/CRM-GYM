@@ -1,29 +1,44 @@
 package com.epam.gymcrm.dto.trainer;
 
-import com.epam.gymcrm.dto.TrainingTypeDto;
-import com.epam.gymcrm.dto.UserDto;
-
 import java.util.List;
 
 public class TrainerDto {
-    private UserDto user;
-    private TrainingTypeDto trainingType;
+    private String firstName;
+    private String lastName;
+    private String specialization;
+    private boolean isActive;
     private List<TraineeDto> trainees;
 
-    public UserDto getUser() {
-        return user;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setUser(UserDto user) {
-        this.user = user;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public TrainingTypeDto getTrainingType() {
-        return trainingType;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setTrainingType(TrainingTypeDto trainingType) {
-        this.trainingType = trainingType;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public List<TraineeDto> getTrainees() {

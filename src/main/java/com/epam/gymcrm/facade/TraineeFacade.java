@@ -3,6 +3,11 @@ package com.epam.gymcrm.facade;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.trainee.CreateTraineeDto;
+import com.epam.gymcrm.dto.trainee.TraineeDto;
+import com.epam.gymcrm.dto.trainee.TrainerDto;
+import com.epam.gymcrm.dto.trainee.TrainerListDto;
+import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
 import com.epam.gymcrm.service.TrainerService;
 import jakarta.validation.Valid;
@@ -23,30 +28,35 @@ public class TraineeFacade {
 
     private final TraineeService traineeService;
     private final TrainerService trainerService;
+    private final TraineeMapper traineeMapper;
 
-    public TraineeFacade(TraineeService traineeService, TrainerService trainerService) {
+    public TraineeFacade(TraineeService traineeService, TrainerService trainerService, TraineeMapper traineeMapper) {
         this.traineeService = traineeService;
         this.trainerService = trainerService;
+        this.traineeMapper = traineeMapper;
     }
 
-    public Trainee createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
-       return traineeService.createTraineeProfile(user, trainee);
+    public Trainee createTraineeProfile(CreateTraineeDto createTraineeDto) {
+       Trainee traineeDto = traineeMapper.toTrainee(createTraineeDto);
+       traineeService.createTraineeProfile(traineeDto);
+       return  traineeDto;
     }
 
     public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {
         return traineeService.authenticateTrainee(username, password);
     }
 
-    public Optional<Trainee> getTraineeProfile(@NotBlank String username, @NotBlank String password) {
+    public TraineeDto getTraineeProfile(@NotBlank String username, @NotBlank String password) {
         traineeService.authenticateTrainee(username, password);
-        return traineeService.getTrainee(username);
+        Trainee trainee = traineeService.getTrainee(username).orElseThrow();
+        return traineeMapper.toTraineeDto(trainee);
     }
 
     public void changeTraineePassword(@NotBlank String username, @NotBlank String password, @NotBlank String newPassword) {
         traineeService.changeTraineePassword(username, password, newPassword);
     }
 
-    public Trainee updateTraineeProfile(
+    public TraineeDto updateTraineeProfile(
             @NotBlank String username,
             @NotBlank String password,
             @NotBlank String firstName,
@@ -55,7 +65,8 @@ public class TraineeFacade {
             @NotBlank String address,
             @NotNull boolean isActive
     ) {
-       return traineeService.updateTraineeProfile(username, password, firstName, lastName, dateOfBirth, address, isActive);
+       Trainee trainee = traineeService.updateTraineeProfile(username, password, firstName, lastName, dateOfBirth, address, isActive);
+       return traineeMapper.toTraineeDto(trainee);
     }
 
     public void activateTrainee(@NotBlank String username, @NotBlank String password) {
@@ -70,16 +81,18 @@ public class TraineeFacade {
         traineeService.deleteTrainee(username, password);
     }
 
-    public List<Trainer> updateTraineeTrainers(
+    public List<TrainerDto> updateTraineeTrainers(
             @NotBlank String username,
             @NotBlank String password,
             Set<@NotNull String> trainerUsernames
     ) {
-       return traineeService.updateTraineeTrainers(username, password, trainerUsernames);
+        List<Trainer> trainers = traineeService.updateTraineeTrainers(username, password, trainerUsernames);
+        return trainers.stream().map(traineeMapper::toTrainerDto).toList();
     }
 
-    public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {
+    public List<TrainerDto> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {
         traineeService.authenticateTrainee(username, password);
-        return trainerService.getUnassignedTrainersForTrainee(username);
+        List<Trainer> trainers = trainerService.getUnassignedTrainersForTrainee(username);
+        return trainers.stream().map(traineeMapper::toTrainerDto).toList();
     }
 }
