@@ -42,7 +42,7 @@ public class AuthController {
     ResponseEntity<String> changePassword(
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestBody String newPassword,
+            @RequestParam String newPassword,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);

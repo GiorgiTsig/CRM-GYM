@@ -152,6 +152,8 @@ class TraineeControllerTest {
     @Test
     void updateTraineeTrainers_shouldReturnTrainerDtoList_whenUpdateSuccessful() {
         Set<String> trainerUsernames = Set.of("trainer.one", "trainer.two");
+        TrainerListDto trainerListDto = new TrainerListDto();
+        trainerListDto.setTrainerUsernames(trainerUsernames);
         TrainerDto dto1 = new TrainerDto();
         UserDto userDto = new UserDto();
         dto1.setUser(userDto);
@@ -164,16 +166,16 @@ class TraineeControllerTest {
 
         List<TrainerDto> trainers = List.of(dto1, dto2);
 
-        when(traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, trainerUsernames))
+        when(traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, trainerListDto))
                 .thenReturn(trainers);
 
         ResponseEntity<List<TrainerDto>> response =
-                traineeController.updateTraineeTrainers(USERNAME, PASSWORD, trainerUsernames, null);
+                traineeController.updateTraineeTrainers(USERNAME, PASSWORD, trainerListDto, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(List.of(dto1, dto2), response.getBody());
 
-        verify(traineeFacade).updateTraineeTrainers(USERNAME, PASSWORD, trainerUsernames);
+        verify(traineeFacade).updateTraineeTrainers(USERNAME, PASSWORD, trainerListDto);
     }
 
     @Test

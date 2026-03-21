@@ -2,7 +2,6 @@ package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.trainee.CreateTraineeDto;
 import com.epam.gymcrm.dto.trainee.TraineeDto;
 import com.epam.gymcrm.dto.trainee.TrainerDto;
@@ -10,16 +9,13 @@ import com.epam.gymcrm.dto.trainee.TrainerListDto;
 import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
 import com.epam.gymcrm.service.TrainerService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -84,7 +80,7 @@ public class TraineeFacade {
     public List<TrainerDto> updateTraineeTrainers(
             @NotBlank String username,
             @NotBlank String password,
-            Set<@NotNull String> trainerUsernames
+            TrainerListDto trainerUsernames
     ) {
         List<Trainer> trainers = traineeService.updateTraineeTrainers(username, password, trainerUsernames);
         return trainers.stream().map(traineeMapper::toTrainerDto).toList();

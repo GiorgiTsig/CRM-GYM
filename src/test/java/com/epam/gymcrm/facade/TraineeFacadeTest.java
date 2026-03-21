@@ -6,6 +6,7 @@ import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.trainee.CreateTraineeDto;
 import com.epam.gymcrm.dto.trainee.TraineeDto;
 import com.epam.gymcrm.dto.trainee.TrainerDto;
+import com.epam.gymcrm.dto.trainee.TrainerListDto;
 import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
 import com.epam.gymcrm.service.TrainerService;
@@ -76,10 +77,12 @@ class TraineeFacadeTest {
     @Test
     void updateTraineeTrainersDelegatesAllArguments() {
         Set<String> newTrainers = Set.of("t1", "t2");
+        TrainerListDto trainerListDto = new TrainerListDto();
+        trainerListDto.setTrainerUsernames(newTrainers);
 
-        traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, newTrainers);
+        traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, trainerListDto);
 
-        verify(traineeService).updateTraineeTrainers(USERNAME, PASSWORD, newTrainers);
+        verify(traineeService).updateTraineeTrainers(USERNAME, PASSWORD, trainerListDto);
     }
 
     @Test

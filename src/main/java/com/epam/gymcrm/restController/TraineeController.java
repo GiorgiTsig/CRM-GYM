@@ -104,7 +104,7 @@ public class TraineeController {
     ResponseEntity<List<TrainerDto>> updateTraineeTrainers(
             @RequestHeader("username") String username,
             @RequestHeader("password") String password,
-            @RequestBody Set<@NotNull String> trainerList,
+            @RequestBody TrainerListDto trainerList,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);

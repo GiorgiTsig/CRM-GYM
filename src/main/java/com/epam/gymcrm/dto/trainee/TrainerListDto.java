@@ -1,13 +1,15 @@
 package com.epam.gymcrm.dto.trainee;
 
-public class TrainerListDto {
-    private String trainerUsername;
+import java.util.Set;
 
-    public String getTrainerUsername() {
-        return trainerUsername;
+public class TrainerListDto {
+    private Set<String> trainerUsernames;
+
+    public Set<String> getTrainerUsernames() {
+        return trainerUsernames;
     }
 
-    public void setTrainerUsername(String trainerUsername) {
-        this.trainerUsername = trainerUsername;
+    public void setTrainerUsernames(Set<String> trainerUsernames) {
+        this.trainerUsernames = trainerUsernames;
     }
 }
