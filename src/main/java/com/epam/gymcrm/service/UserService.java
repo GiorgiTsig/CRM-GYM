@@ -1,7 +1,9 @@
 package com.epam.gymcrm.service;
 
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.repository.UserRepository;
+import jakarta.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,5 +29,14 @@ public class UserService {
     public Optional<User> getUser(String username) {
         log.info("Selecting user with id: {}", username);
         return userRepository.getUsersByUsername(username);
+    }
+
+    @Transactional
+    public User updatePassword(String username, @NotEmpty String newPassword) {
+        log.info("Started Changing Password");
+        User user = this.getUser(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
+        user.setPassword(newPassword);
+        userRepository.save(user);
+        return user;
     }
 }

@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -63,6 +61,7 @@ public class Training {
 
     }
 
+
     public UUID getId() {
         return id;
     }
@@ -71,10 +70,36 @@ public class Training {
         this.id = id;
     }
 
-    public String getName() {return name;}
+    public Trainee getTrainee() {
+        return trainee;
+    }
+
+    public void setTrainee(Trainee trainee) {
+        this.trainee = trainee;
+    }
+
+    public Trainer getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public TrainingType getType() {
+        return type;
+    }
+
+    public void setType(TrainingType type) {
+        this.type = type;
     }
 
     public LocalDate getDate() {
@@ -91,29 +116,5 @@ public class Training {
 
     public void setDuration(Integer duration) {
         this.duration = duration;
-    }
-
-    public TrainingType getType() {
-        return type;
-    }
-
-    public Trainee getTraineeId() {
-        return trainee;
-    }
-
-    public void setTraineeId(Trainee traineeId) {
-        this.trainee = traineeId;
-    }
-
-    public Trainer getTrainerId() {
-        return trainer;
-    }
-
-    public void setTrainerId(Trainer trainerId) {
-        this.trainer = trainerId;
-    }
-
-    public void setType(TrainingType type) {
-        this.type = type;
     }
 }

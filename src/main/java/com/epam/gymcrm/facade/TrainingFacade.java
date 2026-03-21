@@ -1,15 +1,18 @@
 package com.epam.gymcrm.facade;
 
-import com.epam.gymcrm.searchCriteria.TraineeTrainingSearchCriteria;
-import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
 import com.epam.gymcrm.domain.Training;
+import com.epam.gymcrm.dto.trainee.TrainingDto;
+import com.epam.gymcrm.mappper.TraineeMapper;
+import com.epam.gymcrm.mappper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
 import com.epam.gymcrm.service.TrainingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -17,36 +20,58 @@ import java.util.List;
 public class TrainingFacade {
 
     private final TrainingService trainingService;
-    public TrainerService trainerService;
+    private TrainerService trainerService;
+    private TraineeMapper traineeMapper;
+    private TrainerMapper trainerMapper;
 
-    public TrainingFacade(TrainingService trainingService, TrainerService trainerService) {
+    public TrainingFacade(
+            TrainingService trainingService,
+            TrainerService trainerService,
+            TraineeMapper traineeMapper,
+            TrainerMapper trainerMapper
+    ) {
         this.trainingService = trainingService;
         this.trainerService = trainerService;
+        this.traineeMapper = traineeMapper;
+        this.trainerMapper = trainerMapper;
     }
 
-    public Training addTraining(
-            @NotBlank String trainerUsername,
-            @NotBlank String password,
-            @NotBlank String traineeUsername,
-            @Valid Training training
-    ) {
-        trainerService.authenticateTrainer(traineeUsername, password);
-       return trainingService.createTraining(trainerUsername, traineeUsername, training);
-    }
-
-    public List<Training> getTraineeTrainings(
+    public void addTraining(
             @NotBlank String traineeUsername,
             @NotBlank String password,
-            TraineeTrainingSearchCriteria criteria
+            @Valid TrainingDto trainingDto
     ) {
-        return trainingService.getTraineeTrainings(traineeUsername, password, criteria);
+       trainerService.authenticateTrainer(traineeUsername, password);
+       trainingService.createTraining(
+               traineeUsername,
+               trainingDto.getTrainerUsername(),
+               new Training(
+                       trainingDto.getName(),
+                       trainingDto.getDate(),
+                       trainingDto.getDuration()
+               )
+       );
     }
 
-    public List<Training> getTrainerTrainings(
+    public List<TrainingDto> getTraineeTrainings(
+            @NotBlank String traineeUsername,
+            @NotBlank String password,
+            @DateTimeFormat LocalDate fromDate,
+            @DateTimeFormat LocalDate toDate,
+            @NotBlank String trainingType
+    ) {
+        List<Training> trainings = trainingService.getTraineeTrainings(traineeUsername, password, fromDate, toDate, trainingType);
+        return (List<TrainingDto>) trainings.stream().map(training -> traineeMapper.toTrainingDto(training)).toList();
+    }
+
+    public List<com.epam.gymcrm.dto.trainer.TrainingDto> getTrainerTrainings(
             @NotBlank String trainerUsername,
             @NotBlank String password,
-            TrainerTrainingSearchCriteria criteria
+            @DateTimeFormat LocalDate fromDate,
+            @DateTimeFormat LocalDate toDate,
+            @NotBlank String traineeName
     ) {
-        return trainingService.getTrainerTrainings(trainerUsername, password, criteria);
+        List<Training> trainings =  trainingService.getTrainerTrainings(trainerUsername, password, fromDate, toDate, traineeName);
+        return trainings.stream().map(training -> trainerMapper.toTrainingDto(training)).toList();
     }
 }

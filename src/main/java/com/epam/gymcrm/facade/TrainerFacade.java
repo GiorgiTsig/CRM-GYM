@@ -2,9 +2,13 @@ package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
+import com.epam.gymcrm.dto.trainer.TrainerDto;
+import com.epam.gymcrm.mappper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -16,36 +20,42 @@ import java.util.Optional;
 public class TrainerFacade {
 
     private final TrainerService trainerService;
+    private final TrainerMapper  trainerMapper;
 
-    public TrainerFacade(TrainerService trainerService) {
+    public TrainerFacade(TrainerService trainerService, TrainerMapper trainerMapper) {
         this.trainerService = trainerService;
+        this.trainerMapper = trainerMapper;
     }
 
-    public Trainer createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String trainingType) {
-       return trainerService.createTrainerProfile(user, trainer, trainingType);
+    public Trainer createTrainerProfile(CreateTrainerDto createTrainerDto) {
+       Trainer trainer = trainerMapper.toTrainer(createTrainerDto);
+       return trainerService.createTrainerProfile(trainer.getUser(), trainer, trainer.getTrainingType().getTrainingTypeName());
     }
 
     public boolean authenticateTrainer(@NotBlank String username, @NotBlank String password) {
         return trainerService.authenticateTrainer(username, password);
     }
 
-    public Optional<Trainer> getTrainerProfile(@NotBlank String username, @NotBlank String password) {
+    public TrainerDto getTrainerProfile(@NotBlank String username, @NotBlank String password) {
         trainerService.authenticateTrainer(username, password);
-        return trainerService.getTrainer(username);
+        Trainer trainer = trainerService.getTrainer(username).orElseThrow();
+        return trainerMapper.toTrainerDto(trainer);
     }
 
     public void changeTrainerPassword(@NotBlank String username, @NotBlank String password, @NotBlank String newPassword) {
         trainerService.changeTrainerPassword(username, password, newPassword);
     }
 
-    public void updateTrainerProfile(
+    public TrainerDto updateTrainerProfile(
             @NotBlank String username,
             @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
+            @NotNull boolean isActive,
             @NotBlank String specialization
     ) {
-        trainerService.updateTrainerProfile(username, password, firstName, lastName, specialization);
+       Trainer trainer = trainerService.updateTrainerProfile(username, password, firstName, lastName, isActive, specialization);
+       return trainerMapper.toTrainerDto(trainer);
     }
 
     public void activateTrainer(@NotBlank String username, @NotBlank String password) {

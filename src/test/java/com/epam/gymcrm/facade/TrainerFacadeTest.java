@@ -1,7 +1,11 @@
 package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainer;
+import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
+import com.epam.gymcrm.dto.trainer.TrainerDto;
+import com.epam.gymcrm.mappper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +29,9 @@ class TrainerFacadeTest {
     @Mock
     private TrainerService trainerService;
 
+    @Mock
+    private TrainerMapper trainerMapper;
+
     @InjectMocks
     private TrainerFacade trainerFacade;
 
@@ -32,9 +39,15 @@ class TrainerFacadeTest {
     void createTrainerProfileDelegatesToService() {
         User user = new User();
         Trainer trainer = new Trainer();
+        CreateTrainerDto createTrainerDto = new CreateTrainerDto();
+        TrainingType type = new TrainingType();
+        type.setTrainingTypeName(TRAINING_TYPE);
+        trainer.setUser(user);
+        trainer.setTrainingType(type);
+        when(trainerMapper.toTrainer(createTrainerDto)).thenReturn(trainer);
         when(trainerService.createTrainerProfile(user, trainer, TRAINING_TYPE)).thenReturn(trainer);
 
-        Trainer result = trainerFacade.createTrainerProfile(user, trainer, TRAINING_TYPE);
+        Trainer result = trainerFacade.createTrainerProfile(createTrainerDto);
 
         assertSame(trainer, result);
         verify(trainerService).createTrainerProfile(user, trainer, TRAINING_TYPE);
@@ -43,13 +56,14 @@ class TrainerFacadeTest {
     @Test
     void getTrainerProfileAuthenticatesBeforeFetching() {
         Trainer trainer = new Trainer();
+        TrainerDto trainerDto = new TrainerDto();
         when(trainerService.authenticateTrainer(USERNAME, PASSWORD)).thenReturn(true);
         when(trainerService.getTrainer(USERNAME)).thenReturn(Optional.of(trainer));
+        when(trainerMapper.toTrainerDto(trainer)).thenReturn(trainerDto);
 
-        Optional<Trainer> result = trainerFacade.getTrainerProfile(USERNAME, PASSWORD);
+        TrainerDto result = trainerFacade.getTrainerProfile(USERNAME, PASSWORD);
 
-        assertTrue(result.isPresent());
-        assertSame(trainer, result.get());
+        assertSame(trainerDto, result);
         InOrder inOrder = inOrder(trainerService);
         inOrder.verify(trainerService).authenticateTrainer(USERNAME, PASSWORD);
         inOrder.verify(trainerService).getTrainer(USERNAME);
@@ -57,9 +71,9 @@ class TrainerFacadeTest {
 
     @Test
     void updateTrainerProfileDelegatesAllArguments() {
-        trainerFacade.updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", "Strength");
+        trainerFacade.updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", true,"Strength");
 
-        verify(trainerService).updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", "Strength");
+        verify(trainerService).updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", true,"Strength");
     }
 
     @Test

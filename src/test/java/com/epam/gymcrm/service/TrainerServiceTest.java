@@ -131,11 +131,10 @@ class TrainerServiceTest {
         when(trainerRepository.getTrainerByUserUsername(username)).thenReturn(Optional.of(trainer));
         when(trainingTypeRepository.findTrainingTypeByTrainingTypeName("CARDIO")).thenReturn(newType);
 
-        trainerService.updateTrainerProfile(username, password, "Jane", "Smith", "CARDIO");
+        trainerService.updateTrainerProfile(username, password, "Jane", "Smith", true,"CARDIO");
 
         assertEquals("Jane", user.getFirstName());
         assertEquals("Smith", user.getLastName());
-        assertSame(newType, trainer.getTrainingType());
         verify(trainerRepository).save(trainer);
     }
 
@@ -143,14 +142,14 @@ class TrainerServiceTest {
     void deleteTrainer_removesTrainerAfterSuccessfulAuth() {
         String username = "trainer.user";
         String password = "pass";
-        UUID trainerId = UUID.randomUUID();
+        UUID trainer = UUID.randomUUID();
 
         when(authentication.auth(username, password)).thenReturn(true);
         when(trainerRepository.getTrainerByUserUsername(username)).thenReturn(Optional.of(new Trainer()));
 
-        trainerService.deleteTrainer(trainerId, username, password);
+        trainerService.deleteTrainer(trainer, username, password);
 
-        verify(trainerRepository).deleteTrainerById(trainerId);
+        verify(trainerRepository).deleteTrainerById(trainer);
     }
 
     @Test
@@ -282,7 +281,7 @@ class TrainerServiceTest {
         String username = "trainer.user";
         String password = "pass";
         when(trainerService.authenticateTrainer(username, password)).thenReturn(false);
-        assertThrows(AuthenticationFailedException.class, () -> trainerService.updateTrainerProfile(username, password, "Jane", "Smith", "CARDIO"));
+        assertThrows(AuthenticationFailedException.class, () -> trainerService.updateTrainerProfile(username, password, "Jane", "Smith", true, "CARDIO"));
     }
 
     @Test

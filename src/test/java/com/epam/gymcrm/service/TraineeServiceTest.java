@@ -1,5 +1,6 @@
 package com.epam.gymcrm.service;
 
+import com.epam.gymcrm.dto.trainee.TrainerListDto;
 import com.epam.gymcrm.repository.TraineeRepository;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
@@ -48,12 +49,14 @@ class TraineeServiceTest {
         user.setFirstName("John");
         user.setLastName("Doe");
         Trainee trainee = new Trainee();
+        trainee.setUser(user);
+        user.setTrainee(trainee);
 
         when(passwordGenerator.generatePassword()).thenReturn("generatedPass");
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(traineeRepository.save(trainee)).thenReturn(trainee);
 
-        Trainee result = traineeService.createTraineeProfile(user, trainee);
+        Trainee result = traineeService.createTraineeProfile(trainee);
 
         assertEquals("generatedPass", user.getPassword());
         assertEquals("john.doe", user.getUsername());
@@ -97,7 +100,8 @@ class TraineeServiceTest {
                 "New",
                 "Surname",
                 java.time.LocalDate.of(1990, 1, 1),
-                "New address"
+                "New address",
+                true
         );
 
         assertEquals("New", user.getFirstName());
@@ -110,6 +114,7 @@ class TraineeServiceTest {
     @Test
     void updateTraineeTrainers_replacesOldAndAddsNew() {
         String username = "trainee.user";
+        String password = "pwd";
         Trainee trainee = new Trainee();
         User traineeUser = new User();
         traineeUser.setActive(true);
@@ -129,15 +134,16 @@ class TraineeServiceTest {
 
         trainee.setTrainers(new ArrayList<>(List.of(oldTrainer)));
 
-        when(authentication.auth(username, "pw")).thenReturn(true);
-        when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee), Optional.of(trainee));
+        TrainerListDto trainerListDto = new TrainerListDto();
+        trainerListDto.setTrainerUsernames(Set.of("new"));
 
-        when(trainerService.getAllTrainersUserUsername(Set.of("old")))
-                .thenReturn(Set.of(oldTrainer));
-        when(trainerService.getAllTrainersUserUsername(Set.of("new")))
-                .thenReturn(Set.of(newTrainer));
+        when(authentication.auth(username, password)).thenReturn(true);
+        when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee));
 
-        traineeService.updateTraineeTrainers(username, "pw", Set.of("new"));
+        when(trainerService.getAllTrainersUserUsername(Set.of("old"))).thenReturn(Set.of(oldTrainer));
+        when(trainerService.getAllTrainersUserUsername(Set.of("new"))).thenReturn(Set.of(newTrainer));
+
+        traineeService.updateTraineeTrainers(username, password, trainerListDto);
 
         Set<String> resultUsernames = trainee.getTrainers().stream()
                 .map(Trainer::getUser)

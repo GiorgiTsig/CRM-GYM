@@ -30,12 +30,18 @@ public class Trainee {
     )
     private List<Trainer> trainers;
 
-    @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "trainee", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Training> trainings;
 
     public Trainee(LocalDate dateOfBirth, String address) {
         this.dateOfBirth = dateOfBirth;
         this.address = address;
+    }
+
+    public Trainee(LocalDate dateOfBirth, String address, User user) {
+        this.dateOfBirth = dateOfBirth;
+        this.address = address;
+        this.user = user;
     }
 
     public Trainee() {
