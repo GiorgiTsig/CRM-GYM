@@ -4,9 +4,8 @@ import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.trainee.CreateTraineeDto;
-import com.epam.gymcrm.dto.trainee.TraineeDto;
+import com.epam.gymcrm.dto.trainee.TraineeProfileDto;
 import com.epam.gymcrm.dto.trainee.TrainerDto;
-import com.epam.gymcrm.dto.trainee.TrainerListDto;
 import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
 import com.epam.gymcrm.service.TrainerService;
@@ -62,12 +61,12 @@ class TraineeFacadeTest {
     void getTraineeProfileAuthenticatesBeforeFetching() {
         String traineeProfile = "ad";
         Trainee trainee = new Trainee();
-        TraineeDto traineeDto = new TraineeDto();
+        TraineeProfileDto traineeDto = new TraineeProfileDto();
         when(traineeService.authenticateTrainee(USERNAME, PASSWORD)).thenReturn(true);
         when(traineeService.getTrainee(traineeProfile)).thenReturn(Optional.of(trainee));
         when(traineeMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
 
-        TraineeDto result = traineeFacade.getTraineeProfile(USERNAME, PASSWORD, traineeProfile);
+        TraineeProfileDto result = traineeFacade.getTraineeProfile(USERNAME, PASSWORD, traineeProfile);
 
         assertSame(traineeDto, result);
         InOrder inOrder = inOrder(traineeService);

@@ -2,7 +2,7 @@ package com.epam.gymcrm.dto.TrainingType;
 
 import java.util.UUID;
 
-public class TrainingTypeDto {
+public class TrainingTypeDetailsDto {
     private UUID id;
     private String trainingTypeName;
 

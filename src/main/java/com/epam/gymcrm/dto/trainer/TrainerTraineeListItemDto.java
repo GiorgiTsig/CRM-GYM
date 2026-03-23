@@ -1,29 +1,13 @@
-package com.epam.gymcrm.dto.trainer.request;
+package com.epam.gymcrm.dto.trainer;
 
+import java.util.List;
 
-public class TrainerRequestDto {
-    private String username;
-    private String password;
+public class TrainerTraineeListItemDto {
     private String firstName;
     private String lastName;
     private String specialization;
     private boolean isActive;
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    private List<TraineeDto> trainees;
 
     public String getFirstName() {
         return firstName;
@@ -55,5 +39,13 @@ public class TrainerRequestDto {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public List<TraineeDto> getTrainees() {
+        return trainees;
+    }
+
+    public void setTrainees(List<TraineeDto> trainees) {
+        this.trainees = trainees;
     }
 }

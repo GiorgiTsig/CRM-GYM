@@ -8,7 +8,7 @@ import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.*;
 import com.epam.gymcrm.dto.trainee.request.TraineeTrainingsRequestDto;
 import com.epam.gymcrm.dto.trainee.request.TraineeUpdateRequestDto;
-import com.epam.gymcrm.dto.trainee.request.TrainerRequestDto;
+import com.epam.gymcrm.dto.trainee.request.TraineeTrainerAssignmentRequestDto;
 import com.epam.gymcrm.facade.TraineeFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import org.junit.jupiter.api.Test;
@@ -69,12 +69,12 @@ class TraineeControllerTest {
         AuthenticationDto authController = new AuthenticationDto();
         authController.setUsername(USERNAME);
         authController.setPassword(PASSWORD);
-        TraineeDto traineeDto = new TraineeDto();
+        TraineeProfileDto traineeDto = new TraineeProfileDto();
         traineeDto.setFirstName(USERNAME);
 
         when(traineeFacade.getTraineeProfile(authController.getUsername(), authController.getPassword(), traineeProfile)).thenReturn(traineeDto);
 
-        ResponseEntity<TraineeDto> response =
+        ResponseEntity<TraineeProfileDto> response =
                 traineeController.traineeProfile(authController, traineeProfile, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -101,7 +101,7 @@ class TraineeControllerTest {
         traineeUpdateRequestDto.setAddress(address);
         traineeUpdateRequestDto.setActive(true);
 
-        TraineeDto traineeDto = new TraineeDto();
+        TraineeProfileDto traineeDto = new TraineeProfileDto();
 
         traineeDto.setFirstName(USERNAME);
         traineeDto.setFirstName(firstName);
@@ -113,7 +113,7 @@ class TraineeControllerTest {
 
         when(traineeFacade.updateTraineeProfile(USERNAME, PASSWORD, firstName, lastName, LocalDate.of(2026, 2, 2), address, true)).thenReturn(traineeDto);
 
-        ResponseEntity<TraineeDto> response = traineeController.updateTraineeProfile(traineeUpdateRequestDto, null);
+        ResponseEntity<TraineeProfileDto> response = traineeController.updateTraineeProfile(traineeUpdateRequestDto, null);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(traineeDto, response.getBody());
 
@@ -167,7 +167,7 @@ class TraineeControllerTest {
     @Test
     void updateTraineeTrainers_shouldReturnTrainerDtoList_whenUpdateSuccessful() {
         Set<String> trainerUsernames = Set.of("trainer.one", "trainer.two");
-        TrainerRequestDto trainerList = new TrainerRequestDto();
+        TraineeTrainerAssignmentRequestDto trainerList = new TraineeTrainerAssignmentRequestDto();
         trainerList.setUsername(USERNAME);
         trainerList.setPassword(PASSWORD);
         trainerList.setTrainerUsernames(trainerUsernames);
@@ -204,9 +204,9 @@ class TraineeControllerTest {
         traineeTrainingsRequestDtoDto.setToDate(LocalDate.of(2026, 2, 1));
         traineeTrainingsRequestDtoDto.setTrainingType("MMA");
 
-        TrainingDto trainingDto1 = new TrainingDto();
-        TrainingDto trainingDto2 = new TrainingDto();
-        List<TrainingDto> trainings = List.of(trainingDto1, trainingDto2);
+        TraineeTrainingDto trainingDto1 = new TraineeTrainingDto();
+        TraineeTrainingDto trainingDto2 = new TraineeTrainingDto();
+        List<TraineeTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
 
         when(trainingFacade.getTraineeTrainings(
                 traineeTrainingsRequestDtoDto.getUsername(),
@@ -217,7 +217,7 @@ class TraineeControllerTest {
         )).thenReturn(trainings);
 
 
-        ResponseEntity<List<TrainingDto>> response =
+        ResponseEntity<List<TraineeTrainingDto>> response =
                 traineeController.getTraineeTrainingsList(traineeTrainingsRequestDtoDto, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

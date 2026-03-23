@@ -1,8 +1,9 @@
 package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Training;
-import com.epam.gymcrm.dto.trainee.TrainingDto;
+import com.epam.gymcrm.dto.trainee.TraineeTrainingDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
+import com.epam.gymcrm.dto.trainer.TrainerTrainingDto;
 import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.mappper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
@@ -65,14 +66,14 @@ class TrainingFacadeTest {
     void getTraineeTrainingsDelegatesToService() {
         Training training = new Training();
         List<Training> trainings = List.of(training);
-        TrainingDto trainingDto = new TrainingDto();
-        List<TrainingDto> expectedDtoList = List.of(trainingDto);
+        TraineeTrainingDto trainingDto = new TraineeTrainingDto();
+        List<TraineeTrainingDto> expectedDtoList = List.of(trainingDto);
         when(trainingService.getTraineeTrainings(TRAINEE_USERNAME, PASSWORD, FROM, TO, "MMA"))
                 .thenReturn(trainings);
 
         when(traineeMapper.toTrainingDto(training)).thenReturn(trainingDto);
 
-        List<TrainingDto> result = trainingFacade.getTraineeTrainings(TRAINEE_USERNAME, PASSWORD, FROM, TO, "MMA");
+        List<TraineeTrainingDto> result = trainingFacade.getTraineeTrainings(TRAINEE_USERNAME, PASSWORD, FROM, TO, "MMA");
         assertEquals(expectedDtoList, result);
         verify(trainingService).getTraineeTrainings(TRAINEE_USERNAME, PASSWORD, FROM, TO, "MMA");
     }
@@ -81,15 +82,15 @@ class TrainingFacadeTest {
         Training training = new Training();
         List<Training> trainings = List.of(training);
 
-        com.epam.gymcrm.dto.trainer.TrainingDto trainingDto = new com.epam.gymcrm.dto.trainer.TrainingDto();
-        List<com.epam.gymcrm.dto.trainer.TrainingDto> expectedDtoList = List.of(trainingDto);
+        TrainerTrainingDto trainingDto = new TrainerTrainingDto();
+        List<TrainerTrainingDto> expectedDtoList = List.of(trainingDto);
 
         when(trainingService.getTrainerTrainings(TRAINER_USERNAME, PASSWORD, FROM, TO, "Toby"))
                 .thenReturn(trainings);
 
         when(trainerMapper.toTrainingDto(training)).thenReturn(trainingDto);
 
-        List<com.epam.gymcrm.dto.trainer.TrainingDto> result =
+        List<TrainerTrainingDto> result =
                 trainingFacade.getTrainerTrainings(TRAINER_USERNAME, PASSWORD, FROM, TO, "Toby");
 
         assertEquals(expectedDtoList, result);

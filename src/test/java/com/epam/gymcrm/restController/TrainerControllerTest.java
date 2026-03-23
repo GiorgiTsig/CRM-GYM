@@ -6,10 +6,10 @@ import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.auth.ActiveDto;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
-import com.epam.gymcrm.dto.trainer.TrainerDto;
+import com.epam.gymcrm.dto.trainer.TrainerTraineeListItemDto;
 import com.epam.gymcrm.dto.trainer.TrainerTrainingsDto;
-import com.epam.gymcrm.dto.trainer.TrainingDto;
-import com.epam.gymcrm.dto.trainer.request.TrainerRequestDto;
+import com.epam.gymcrm.dto.trainer.TrainerTrainingDto;
+import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerTrainingsRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
@@ -76,11 +76,11 @@ class TrainerControllerTest {
         authController.setUsername(USERNAME);
         authController.setPassword(PASSWORD);
 
-        TrainerDto trainerDto = new TrainerDto();
+        TrainerTraineeListItemDto trainerDto = new TrainerTraineeListItemDto();
 
         when(trainerFacade.getTrainerProfile(authController.getUsername(), authController.getPassword())).thenReturn(trainerDto);
 
-        ResponseEntity<TrainerDto> response =
+        ResponseEntity<TrainerTraineeListItemDto> response =
                 trainerController.getTrainerProfile(authController, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -91,7 +91,7 @@ class TrainerControllerTest {
 
     @Test
     void updateTraineeProfile_shouldReturnTrainerDto_whenUpdateSuccessful() {
-        TrainerRequestDto trainerRequestDto = new TrainerRequestDto();
+        TrainerProfileUpdateRequestDto trainerRequestDto = new TrainerProfileUpdateRequestDto();
         trainerRequestDto.setUsername(USERNAME);
         trainerRequestDto.setPassword(PASSWORD);
         trainerRequestDto.setFirstName(FIRST_NAME);
@@ -99,7 +99,7 @@ class TrainerControllerTest {
         trainerRequestDto.setSpecialization(SPECIALIZATION);
         trainerRequestDto.setActive(true);
 
-        TrainerDto trainerDto = new TrainerDto();
+        TrainerTraineeListItemDto trainerDto = new TrainerTraineeListItemDto();
         trainerDto.setFirstName(FIRST_NAME);
         trainerDto.setLastName(LAST_NAME);
         trainerDto.setSpecialization(SPECIALIZATION);
@@ -114,7 +114,7 @@ class TrainerControllerTest {
                 SPECIALIZATION
         )).thenReturn(trainerDto);
 
-        ResponseEntity<TrainerDto> response =
+        ResponseEntity<TrainerTraineeListItemDto> response =
                 trainerController.updateTraineeProfile(
                         trainerRequestDto,
                         null
@@ -140,9 +140,9 @@ class TrainerControllerTest {
         requestDto.setToDate(LocalDate.of(2026, 2, 1));
         requestDto.setTraineeName("Jane");
 
-        TrainingDto trainingDto1 = new TrainingDto();
-        TrainingDto trainingDto2 = new TrainingDto();
-        List<com.epam.gymcrm.dto.trainer.TrainingDto> trainings = List.of(trainingDto1, trainingDto2);
+        TrainerTrainingDto trainingDto1 = new TrainerTrainingDto();
+        TrainerTrainingDto trainingDto2 = new TrainerTrainingDto();
+        List<TrainerTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
 
         TrainerTrainingsRequestDto trainerTrainingsRequestDto = new TrainerTrainingsRequestDto();
         trainerTrainingsRequestDto.setUsername(USERNAME);
@@ -160,7 +160,7 @@ class TrainerControllerTest {
         )).thenReturn(trainings);
 
 
-        ResponseEntity<List<TrainingDto>> response =
+        ResponseEntity<List<TrainerTrainingDto>> response =
                 trainerController.getTrainerTrainingsList(trainerTrainingsRequestDto, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

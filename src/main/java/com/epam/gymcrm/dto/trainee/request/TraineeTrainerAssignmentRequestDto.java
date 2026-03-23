@@ -2,7 +2,7 @@ package com.epam.gymcrm.dto.trainee.request;
 
 import java.util.Set;
 
-public class TrainerRequestDto {
+public class TraineeTrainerAssignmentRequestDto {
     private String username;
     private String password;
     private Set<String> trainerUsernames;

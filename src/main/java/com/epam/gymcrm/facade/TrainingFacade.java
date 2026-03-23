@@ -1,8 +1,9 @@
 package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Training;
-import com.epam.gymcrm.dto.trainee.TrainingDto;
+import com.epam.gymcrm.dto.trainee.TraineeTrainingDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
+import com.epam.gymcrm.dto.trainer.TrainerTrainingDto;
 import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.mappper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
@@ -52,7 +53,7 @@ public class TrainingFacade {
        );
     }
 
-    public List<TrainingDto> getTraineeTrainings(
+    public List<TraineeTrainingDto> getTraineeTrainings(
             @NotBlank String traineeUsername,
             @NotBlank String password,
             @DateTimeFormat LocalDate fromDate,
@@ -60,10 +61,10 @@ public class TrainingFacade {
             @NotBlank String trainingType
     ) {
         List<Training> trainings = trainingService.getTraineeTrainings(traineeUsername, password, fromDate, toDate, trainingType);
-        return (List<TrainingDto>) trainings.stream().map(training -> traineeMapper.toTrainingDto(training)).toList();
+        return (List<TraineeTrainingDto>) trainings.stream().map(training -> traineeMapper.toTrainingDto(training)).toList();
     }
 
-    public List<com.epam.gymcrm.dto.trainer.TrainingDto> getTrainerTrainings(
+    public List<TrainerTrainingDto> getTrainerTrainings(
             @NotBlank String trainerUsername,
             @NotBlank String password,
             @DateTimeFormat LocalDate fromDate,

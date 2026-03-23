@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.util.List;
 
-public class TraineeDto {
+public class TraineeProfileDto {
     private String firstName;
     private String lastName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

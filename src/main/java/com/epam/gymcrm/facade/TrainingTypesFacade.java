@@ -1,7 +1,7 @@
 package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.TrainingType;
-import com.epam.gymcrm.dto.TrainingType.TrainingTypeDto;
+import com.epam.gymcrm.dto.TrainingType.TrainingTypeDetailsDto;
 import com.epam.gymcrm.mappper.TrainingTypeMapper;
 import com.epam.gymcrm.service.TrainingTypeService;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class TrainingTypesFacade {
         this.trainingTypeMapper = trainingTypeMapper;
     }
 
-    public List<TrainingTypeDto> findAll() {
+    public List<TrainingTypeDetailsDto> findAll() {
         List<TrainingType> trainingTypes = trainingTypeService.findAll();
         return trainingTypes.stream().map(trainingType -> trainingTypeMapper.toTrainingTypeDto(trainingType)).toList();
     }

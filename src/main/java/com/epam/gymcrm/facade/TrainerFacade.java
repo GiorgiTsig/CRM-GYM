@@ -1,19 +1,16 @@
 package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
-import com.epam.gymcrm.dto.trainer.TrainerDto;
+import com.epam.gymcrm.dto.trainer.TrainerTraineeListItemDto;
 import com.epam.gymcrm.mappper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @Validated
@@ -36,7 +33,7 @@ public class TrainerFacade {
         return trainerService.authenticateTrainer(username, password);
     }
 
-    public TrainerDto getTrainerProfile(@NotBlank String username, @NotBlank String password) {
+    public TrainerTraineeListItemDto getTrainerProfile(@NotBlank String username, @NotBlank String password) {
         trainerService.authenticateTrainer(username, password);
         Trainer trainer = trainerService.getTrainer(username).orElseThrow();
         return trainerMapper.toTrainerDto(trainer);
@@ -46,7 +43,7 @@ public class TrainerFacade {
         trainerService.changeTrainerPassword(username, password, newPassword);
     }
 
-    public TrainerDto updateTrainerProfile(
+    public TrainerTraineeListItemDto updateTrainerProfile(
             @NotBlank String username,
             @NotBlank String password,
             @NotBlank String firstName,

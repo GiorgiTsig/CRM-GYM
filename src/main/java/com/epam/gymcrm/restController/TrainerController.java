@@ -3,11 +3,10 @@ package com.epam.gymcrm.restController;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.dto.auth.ActiveDto;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
-import com.epam.gymcrm.dto.trainer.TrainerTrainingsDto;
-import com.epam.gymcrm.dto.trainer.TrainingDto;
+import com.epam.gymcrm.dto.trainer.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
-import com.epam.gymcrm.dto.trainer.TrainerDto;
-import com.epam.gymcrm.dto.trainer.request.TrainerRequestDto;
+import com.epam.gymcrm.dto.trainer.TrainerTraineeListItemDto;
+import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerTrainingsRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
@@ -50,23 +49,23 @@ public class TrainerController {
 
 
     @GetMapping("/get")
-    ResponseEntity<TrainerDto> getTrainerProfile(
+    ResponseEntity<TrainerTraineeListItemDto> getTrainerProfile(
             @RequestBody AuthenticationDto authController,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        TrainerDto trainerDto = trainerFacade.getTrainerProfile(authController.getUsername(), authController.getPassword());
+        TrainerTraineeListItemDto trainerDto = trainerFacade.getTrainerProfile(authController.getUsername(), authController.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
     }
 
     @PutMapping("/update")
-    ResponseEntity<TrainerDto> updateTraineeProfile(
-            @RequestBody TrainerRequestDto trainerRequestDto,
+    ResponseEntity<TrainerTraineeListItemDto> updateTraineeProfile(
+            @RequestBody TrainerProfileUpdateRequestDto trainerRequestDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        TrainerDto profileDTO = trainerFacade.updateTrainerProfile(
+        TrainerTraineeListItemDto profileDTO = trainerFacade.updateTrainerProfile(
                 trainerRequestDto.getUsername(),
                 trainerRequestDto.getPassword(),
                 trainerRequestDto.getFirstName(),
@@ -79,13 +78,13 @@ public class TrainerController {
     }
 
     @GetMapping("/get/trainings")
-    ResponseEntity<List<TrainingDto>> getTrainerTrainingsList(
+    ResponseEntity<List<TrainerTrainingDto>> getTrainerTrainingsList(
             @RequestBody TrainerTrainingsRequestDto trainerTrainingsRequestDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
 
-        List<TrainingDto> trainingDtoList = trainingFacade.getTrainerTrainings(
+        List<TrainerTrainingDto> trainingDtoList = trainingFacade.getTrainerTrainings(
                 trainerTrainingsRequestDto.getUsername(),
                 trainerTrainingsRequestDto.getPassword(),
                 trainerTrainingsRequestDto.getFromDate(),

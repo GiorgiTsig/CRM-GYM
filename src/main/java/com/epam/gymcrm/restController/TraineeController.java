@@ -6,7 +6,7 @@ import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.*;
 import com.epam.gymcrm.dto.trainee.request.TraineeTrainingsRequestDto;
 import com.epam.gymcrm.dto.trainee.request.TraineeUpdateRequestDto;
-import com.epam.gymcrm.dto.trainee.request.TrainerRequestDto;
+import com.epam.gymcrm.dto.trainee.request.TraineeTrainerAssignmentRequestDto;
 import com.epam.gymcrm.facade.TraineeFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import org.slf4j.Logger;
@@ -47,14 +47,14 @@ public class TraineeController {
     }
 
     @GetMapping("/get")
-    ResponseEntity<TraineeDto> traineeProfile(
+    ResponseEntity<TraineeProfileDto> traineeProfile(
             @RequestBody AuthenticationDto authController,
             @RequestParam("trainee") String traineeProfile,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        TraineeDto profileDTO = traineeFacade.getTraineeProfile(
+        TraineeProfileDto profileDTO = traineeFacade.getTraineeProfile(
                 authController.getUsername(),
                 authController.getPassword(),
                 traineeProfile
@@ -65,12 +65,12 @@ public class TraineeController {
 
 
     @PutMapping("/update")
-    ResponseEntity<TraineeDto> updateTraineeProfile(
+    ResponseEntity<TraineeProfileDto> updateTraineeProfile(
             @RequestBody TraineeUpdateRequestDto traineeDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        TraineeDto profileDTO = traineeFacade.updateTraineeProfile(
+        TraineeProfileDto profileDTO = traineeFacade.updateTraineeProfile(
                 traineeDto.getUsername(),
                 traineeDto.getPassword(),
                 traineeDto.getFirstName(),
@@ -105,7 +105,7 @@ public class TraineeController {
 
     @PutMapping("/update/trainers")
     ResponseEntity<List<TrainerDto>> updateTraineeTrainers(
-            @RequestBody TrainerRequestDto trainerList,
+            @RequestBody TraineeTrainerAssignmentRequestDto trainerList,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
@@ -121,12 +121,12 @@ public class TraineeController {
 
 
     @GetMapping("/get/trainings")
-    ResponseEntity<List<TrainingDto>> getTraineeTrainingsList(
+    ResponseEntity<List<TraineeTrainingDto>> getTraineeTrainingsList(
             @RequestBody TraineeTrainingsRequestDto traineeTrainingsRequestDtoDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
-        List<TrainingDto> trainingDtoList = trainingFacade.getTraineeTrainings(
+        List<TraineeTrainingDto> trainingDtoList = trainingFacade.getTraineeTrainings(
                 traineeTrainingsRequestDtoDto.getUsername(),
                 traineeTrainingsRequestDtoDto.getPassword(),
                 traineeTrainingsRequestDtoDto.getFromDate(),

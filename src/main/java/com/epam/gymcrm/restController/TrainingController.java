@@ -1,8 +1,6 @@
 package com.epam.gymcrm.restController;
 
-import com.epam.gymcrm.dto.TrainingType.TrainingTypeDto;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
-import com.epam.gymcrm.dto.trainee.TrainingDto;
+import com.epam.gymcrm.dto.TrainingType.TrainingTypeDetailsDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.facade.TrainingTypesFacade;
@@ -39,8 +37,8 @@ public class TrainingController {
     }
 
     @GetMapping("/get")
-    ResponseEntity<List<TrainingTypeDto>> getTrainingType() {
-        List<TrainingTypeDto> trainingTypesDto =  trainingTypesFacade.findAll();
+    ResponseEntity<List<TrainingTypeDetailsDto>> getTrainingType() {
+        List<TrainingTypeDetailsDto> trainingTypesDto =  trainingTypesFacade.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(trainingTypesDto);
     }
 
