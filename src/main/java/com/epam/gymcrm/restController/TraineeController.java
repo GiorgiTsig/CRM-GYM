@@ -1,6 +1,5 @@
 package com.epam.gymcrm.restController;
 
-import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.dto.auth.ActiveDto;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.*;
@@ -36,7 +35,7 @@ public class TraineeController {
         this.trainingFacade = trainingFacade;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/creation")
     ResponseEntity<AuthenticationDto> create(
             @RequestBody CreateTraineeDto traineeDto
     ) {

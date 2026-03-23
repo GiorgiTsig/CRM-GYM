@@ -58,7 +58,7 @@ public class TrainingFacade {
             @NotBlank String password,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
-            @NotBlank String trainingType
+            String trainingType
     ) {
         List<Training> trainings = trainingService.getTraineeTrainings(traineeUsername, password, fromDate, toDate, trainingType);
         return (List<TraineeTrainingDto>) trainings.stream().map(training -> traineeMapper.toTrainingDto(training)).toList();
@@ -69,7 +69,7 @@ public class TrainingFacade {
             @NotBlank String password,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
-            @NotBlank String traineeName
+            String traineeName
     ) {
         List<Training> trainings =  trainingService.getTrainerTrainings(trainerUsername, password, fromDate, toDate, traineeName);
         return trainings.stream().map(training -> trainerMapper.toTrainingDto(training)).toList();

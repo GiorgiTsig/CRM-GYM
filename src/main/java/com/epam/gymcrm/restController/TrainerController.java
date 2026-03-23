@@ -36,7 +36,7 @@ public class TrainerController {
         this.trainerFacade = trainerFacade;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/creation")
     ResponseEntity<AuthenticationDto> create(
             @RequestBody CreateTrainerDto userTrainerDto
     ) {

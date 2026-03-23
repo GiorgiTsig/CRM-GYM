@@ -28,7 +28,7 @@ public class TrainingController {
         this.trainingTypesFacade = trainingTypesFacade;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/training")
     ResponseEntity<Void> addTraining(
             @RequestBody TrainingRequestDto trainingRequestDto
     ) {
@@ -36,7 +36,7 @@ public class TrainingController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/training")
+    @GetMapping("/type")
     ResponseEntity<List<TrainingTypeDetailsDto>> getTrainingType() {
         List<TrainingTypeDetailsDto> trainingTypesDto =  trainingTypesFacade.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(trainingTypesDto);
