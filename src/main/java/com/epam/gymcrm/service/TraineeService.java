@@ -3,7 +3,6 @@ package com.epam.gymcrm.service;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.dto.trainee.TrainerListDto;
 import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.repository.TraineeRepository;

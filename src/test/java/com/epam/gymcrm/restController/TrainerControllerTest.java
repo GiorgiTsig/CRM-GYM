@@ -5,10 +5,9 @@ import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.auth.ActiveDto;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
-import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
-import com.epam.gymcrm.dto.trainer.TrainerTraineeListItemDto;
-import com.epam.gymcrm.dto.trainer.TrainerTrainingsDto;
-import com.epam.gymcrm.dto.trainer.TrainerTrainingDto;
+import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerTrainingsRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
@@ -73,16 +72,12 @@ class TrainerControllerTest {
 
     @Test
     void getTrainerProfile_shouldReturnTrainerDto_whenCredentialsValid() {
-        AuthenticationDto authController = new AuthenticationDto();
-        authController.setUsername(USERNAME);
-        authController.setPassword(PASSWORD);
+        TrainerProfileDto trainerDto = new TrainerProfileDto();
 
-        TrainerTraineeListItemDto trainerDto = new TrainerTraineeListItemDto();
+        when(trainerFacade.getTrainerProfile(USERNAME, PASSWORD)).thenReturn(trainerDto);
 
-        when(trainerFacade.getTrainerProfile(authController.getUsername(), authController.getPassword())).thenReturn(trainerDto);
-
-        ResponseEntity<TrainerTraineeListItemDto> response =
-                trainerController.getTrainerProfile(authController, null);
+        ResponseEntity<TrainerProfileDto> response =
+                trainerController.getTrainerProfile(USERNAME, PASSWORD, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(trainerDto, response.getBody());
@@ -100,7 +95,7 @@ class TrainerControllerTest {
         trainerRequestDto.setSpecialization(SPECIALIZATION);
         trainerRequestDto.setActive(true);
 
-        TrainerTraineeListItemDto trainerDto = new TrainerTraineeListItemDto();
+        TrainerProfileDto trainerDto = new TrainerProfileDto();
         trainerDto.setFirstName(FIRST_NAME);
         trainerDto.setLastName(LAST_NAME);
         trainerDto.setSpecialization(SPECIALIZATION);
@@ -115,7 +110,7 @@ class TrainerControllerTest {
                 SPECIALIZATION
         )).thenReturn(trainerDto);
 
-        ResponseEntity<TrainerTraineeListItemDto> response =
+        ResponseEntity<TrainerProfileDto> response =
                 trainerController.updateTraineeProfile(
                         trainerRequestDto,
                         null
@@ -136,18 +131,11 @@ class TrainerControllerTest {
 
     @Test
     void getTrainerTrainingsList_shouldReturnTrainingDtoList_whenRequestIsValid() {
-        TrainerTrainingsDto requestDto = new TrainerTrainingsDto();
-        requestDto.setFromDate(LocalDate.of(2026, 1, 1));
-        requestDto.setToDate(LocalDate.of(2026, 2, 1));
-        requestDto.setTraineeName("Jane");
-
         TrainerTrainingDto trainingDto1 = new TrainerTrainingDto();
         TrainerTrainingDto trainingDto2 = new TrainerTrainingDto();
         List<TrainerTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
 
         TrainerTrainingsRequestDto trainerTrainingsRequestDto = new TrainerTrainingsRequestDto();
-        trainerTrainingsRequestDto.setUsername(USERNAME);
-        trainerTrainingsRequestDto.setPassword(PASSWORD);
         trainerTrainingsRequestDto.setFromDate(LocalDate.of(2026, 1, 1));
         trainerTrainingsRequestDto.setToDate(LocalDate.of(2026, 2, 1));
         trainerTrainingsRequestDto.setTraineeName("Jane");
@@ -155,14 +143,14 @@ class TrainerControllerTest {
         when(trainingFacade.getTrainerTrainings(
                 USERNAME,
                 PASSWORD,
-                requestDto.getFromDate(),
-                requestDto.getToDate(),
-                requestDto.getTraineeName()
+                trainerTrainingsRequestDto.getFromDate(),
+                trainerTrainingsRequestDto.getToDate(),
+                trainerTrainingsRequestDto.getTraineeName()
         )).thenReturn(trainings);
 
 
         ResponseEntity<List<TrainerTrainingDto>> response =
-                trainerController.getTrainerTrainingsList(trainerTrainingsRequestDto, null);
+                trainerController.getTrainerTrainingsList(USERNAME, PASSWORD, trainerTrainingsRequestDto, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(List.of(trainingDto1, trainingDto2), response.getBody());
@@ -170,9 +158,9 @@ class TrainerControllerTest {
         verify(trainingFacade).getTrainerTrainings(
                 USERNAME,
                 PASSWORD,
-                requestDto.getFromDate(),
-                requestDto.getToDate(),
-                requestDto.getTraineeName()
+                trainerTrainingsRequestDto.getFromDate(),
+                trainerTrainingsRequestDto.getToDate(),
+                trainerTrainingsRequestDto.getTraineeName()
         );
     }
 

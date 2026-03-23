@@ -39,11 +39,11 @@ class TrainingServiceTest {
 
     @Test
     void getTraineeTrainings_throwsWhenTraineeCredentialsAreInvalid() {
-        when(traineeService.authenticateTrainee("trainee.user", "bad")).thenReturn(false);
+        when(traineeService.authenticateTrainee("user", "bad")).thenReturn(false);
 
         assertThrows(
                 AuthenticationFailedException.class,
-                () -> trainingService.getTraineeTrainings("trainee.user", "bad", FROM, TO, "YOGA")
+                () -> trainingService.getTraineeTrainings("user", "bad", "trainee.user",FROM, TO, "pw","YOGA")
         );
     }
 
@@ -124,44 +124,48 @@ class TrainingServiceTest {
     @Test
     void getTraineeTrainings_whenAuthenticationFails_throwsAuthenticationFailedException() {
         String traineeUsername = "john";
+        String username = "sd";
         String password = "bad";
 
-        when(traineeService.authenticateTrainee(traineeUsername, password)).thenReturn(false);
+        when(traineeService.authenticateTrainee(username, password)).thenReturn(false);
 
         assertThrows(AuthenticationFailedException.class,
-                () -> trainingService.getTraineeTrainings(traineeUsername, password, FROM, TO, "YOGA"));
+                () -> trainingService.getTraineeTrainings(username, password, traineeUsername, FROM, TO, "pw","YOGA"));
 
-        verify(traineeService).authenticateTrainee(traineeUsername, password);
+        verify(traineeService).authenticateTrainee(username, password);
         verifyNoInteractions(trainingRepository);
     }
 
     @Test
     void getTraineeTrainings_whenAuthenticated_returnsTrainings() {
         String traineeUsername = "john";
+        String user = "s";
         String password = "good";
 
         List<Training> trainings = List.of(new Training(), new Training());
 
-        when(traineeService.authenticateTrainee(traineeUsername, password)).thenReturn(true);
+        when(traineeService.authenticateTrainee(user, password)).thenReturn(true);
         when(trainingRepository
-                .findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
+                .findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeNameAndTrainerUserUsername(
                         traineeUsername,
                         FROM,
                         TO,
-                        "YOGA"
+                        "YOGA",
+                        "pw"
                 )).thenReturn(trainings);
 
-        List<Training> result = trainingService.getTraineeTrainings(traineeUsername, password, FROM, TO, "YOGA");
+        List<Training> result = trainingService.getTraineeTrainings(user, password, traineeUsername, FROM, TO, "pw","YOGA");
 
         assertEquals(trainings, result);
 
-        verify(traineeService).authenticateTrainee(traineeUsername, password);
+        verify(traineeService).authenticateTrainee(user, password);
         verify(trainingRepository)
-                .findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
+                .findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeNameAndTrainerUserUsername(
                         traineeUsername,
                         FROM,
                         TO,
-                        "YOGA"
+                        "YOGA",
+                        "pw"
                 );
     }
 

@@ -4,9 +4,9 @@ import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
-import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
-import com.epam.gymcrm.dto.trainer.TrainerTraineeListItemDto;
-import com.epam.gymcrm.mappper.TrainerMapper;
+import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
+import com.epam.gymcrm.mapper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,12 +61,12 @@ class TrainerFacadeTest {
     @Test
     void getTrainerProfileAuthenticatesBeforeFetching() {
         Trainer trainer = new Trainer();
-        TrainerTraineeListItemDto trainerDto = new TrainerTraineeListItemDto();
+        TrainerProfileDto trainerDto = new TrainerProfileDto();
         when(trainerService.authenticateTrainer(USERNAME, PASSWORD)).thenReturn(true);
         when(trainerService.getTrainer(USERNAME)).thenReturn(Optional.of(trainer));
         when(trainerMapper.toTrainerDto(trainer)).thenReturn(trainerDto);
 
-        TrainerTraineeListItemDto result = trainerFacade.getTrainerProfile(USERNAME, PASSWORD);
+        TrainerProfileDto result = trainerFacade.getTrainerProfile(USERNAME, PASSWORD);
 
         assertSame(trainerDto, result);
         InOrder inOrder = inOrder(trainerService);

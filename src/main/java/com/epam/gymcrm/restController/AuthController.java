@@ -29,11 +29,12 @@ public class AuthController {
 
     @GetMapping("/login")
     ResponseEntity<Void> auth(
-            @RequestBody AuthenticationDto authRequest,
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(authRequest.getUsername(), authRequest.getPassword());
+        authentication.auth(authUsername, authPassword);
 
         return ResponseEntity.ok().build();
     }
@@ -41,7 +42,7 @@ public class AuthController {
     @PostMapping("/password")
     ResponseEntity<String> changePassword(
             @RequestBody AuthenticationDto authRequest,
-            @RequestParam String newPassword,
+            @RequestParam("password") String newPassword,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);

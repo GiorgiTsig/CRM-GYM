@@ -18,11 +18,12 @@ public interface TrainingRepository extends JpaRepository<Training, UUID> {
 
     void deleteTrainingByTraineeUserUsername(String traineeUserUsername);
 
-    List<Training> findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
-            String username,
+    List<Training> findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeNameAndTrainerUserUsername(
+            String traineeUserUsername,
             LocalDate dateAfter,
             LocalDate dateBefore,
-            String trainingType
+            String trainingType,
+            String trainerUserUsername
     );
 
     List<Training> findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(

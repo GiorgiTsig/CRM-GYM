@@ -1,10 +1,19 @@
-package com.epam.gymcrm.dto.trainer;
+package com.epam.gymcrm.dto.trainee.response;
 
 
-public class CreateTrainerDto {
+public class TrainerDto {
+    private String username;
     private String firstName;
     private String lastName;
     private String trainingTypeName;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getFirstName() {
         return firstName;

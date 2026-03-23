@@ -3,10 +3,10 @@ package com.epam.gymcrm.facade;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
-import com.epam.gymcrm.dto.trainee.CreateTraineeDto;
-import com.epam.gymcrm.dto.trainee.TraineeProfileDto;
-import com.epam.gymcrm.dto.trainee.TrainerDto;
-import com.epam.gymcrm.mappper.TraineeMapper;
+import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
+import com.epam.gymcrm.dto.trainee.response.TraineeProfileDto;
+import com.epam.gymcrm.dto.trainee.response.TrainerDto;
+import com.epam.gymcrm.mapper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
 import com.epam.gymcrm.service.TrainerService;
 import jakarta.validation.constraints.NotBlank;
@@ -33,9 +33,9 @@ public class TraineeFacade {
     }
 
     public AuthenticationDto createTraineeProfile(CreateTraineeDto createTraineeDto) {
-       Trainee traineeDto = traineeMapper.toTrainee(createTraineeDto);
-       Trainee trainee = traineeService.createTraineeProfile(traineeDto);
-       return  traineeMapper.toAuth(trainee);
+       Trainee trainee = traineeMapper.toTrainee(createTraineeDto);
+       Trainee createdTrainee = traineeService.createTraineeProfile(trainee);
+       return traineeMapper.toAuth(createdTrainee);
     }
 
     public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {

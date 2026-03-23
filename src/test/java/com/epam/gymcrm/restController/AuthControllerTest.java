@@ -35,17 +35,13 @@ class AuthControllerTest {
 
     @Test
     void auth_shouldReturnOk_whenCredentialsValid() {
-        AuthenticationDto authControllerDto = new AuthenticationDto();
-        authControllerDto.setUsername(USERNAME);
-        authControllerDto.setPassword(PASSWORD);
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
-        when(authentication.auth(authControllerDto.getUsername(), authControllerDto.getPassword())).thenReturn(true);
-
-        ResponseEntity<Void> response = authController.auth(authControllerDto, null);
+        ResponseEntity<Void> response = authController.auth(USERNAME, PASSWORD, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        verify(authentication).auth(authControllerDto.getUsername(), authControllerDto.getPassword());
+        verify(authentication).auth(USERNAME, PASSWORD);
     }
 
     @Test

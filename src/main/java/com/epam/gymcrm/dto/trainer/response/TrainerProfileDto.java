@@ -1,8 +1,10 @@
-package com.epam.gymcrm.dto.trainer;
+package com.epam.gymcrm.dto.trainer.response;
+
+import com.epam.gymcrm.dto.trainer.TraineeDto;
 
 import java.util.List;
 
-public class TrainerTraineeListItemDto {
+public class TrainerProfileDto {
     private String firstName;
     private String lastName;
     private String specialization;

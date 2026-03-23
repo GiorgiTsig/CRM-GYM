@@ -1,15 +1,15 @@
-package com.epam.gymcrm.dto.trainer;
+package com.epam.gymcrm.dto.trainee.response;
 
 import com.epam.gymcrm.dto.TrainingTypeDto;
 
 import java.time.LocalDate;
 
-public class TrainerTrainingDto {
+public class TraineeTrainingDto {
     private String name;
     private LocalDate date;
     private TrainingTypeDto type;
     private Integer duration;
-    private String traineeUsername;
+    private String trainerUsername;
 
     public String getName() {
         return name;
@@ -43,11 +43,11 @@ public class TrainerTrainingDto {
         this.duration = duration;
     }
 
-    public String getTraineeUsername() {
-        return traineeUsername;
+    public String getTrainerUsername() {
+        return trainerUsername;
     }
 
-    public void setTraineeUsername(String traineeUsername) {
-        this.traineeUsername = traineeUsername;
+    public void setTrainerUsername(String trainerUsername) {
+        this.trainerUsername = trainerUsername;
     }
 }

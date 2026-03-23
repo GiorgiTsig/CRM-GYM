@@ -1,17 +1,10 @@
-package com.epam.gymcrm.dto;
+package com.epam.gymcrm.dto.trainer.request;
 
-public class UserDto {
-    private String username;
+
+public class CreateTrainerDto {
     private String firstName;
     private String lastName;
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    private String trainingTypeName;
 
     public String getFirstName() {
         return firstName;
@@ -29,4 +22,11 @@ public class UserDto {
         this.lastName = lastName;
     }
 
+    public String getTrainingTypeName() {
+        return trainingTypeName;
+    }
+
+    public void setTrainingTypeName(String trainingTypeName) {
+        this.trainingTypeName = trainingTypeName;
+    }
 }

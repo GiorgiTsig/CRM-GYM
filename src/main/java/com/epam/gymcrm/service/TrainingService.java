@@ -79,21 +79,24 @@ public class TrainingService {
 
     @Transactional(readOnly = true)
     public List<Training> getTraineeTrainings(
-            @NotBlank String traineeUsername,
+            @NotBlank String username,
             @NotBlank String password,
+            @NotBlank String traineeUsername,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
+            String trainerUsername,
             String trainingType
     ) {
-        if (!traineeService.authenticateTrainee(traineeUsername, password)) {
+        if (!traineeService.authenticateTrainee(username, password)) {
             throw new AuthenticationFailedException("Invalid credentials");
         }
         log.info("Selecting trainee trainings with username: {}", traineeUsername);
-        return trainingRepository.findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
+        return trainingRepository.findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeNameAndTrainerUserUsername(
                 traineeUsername,
                 fromDate,
                 toDate,
-                trainingType
+                trainingType,
+                trainerUsername
         );
     }
 

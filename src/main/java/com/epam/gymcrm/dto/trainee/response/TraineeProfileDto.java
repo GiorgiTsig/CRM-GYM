@@ -1,4 +1,4 @@
-package com.epam.gymcrm.dto.trainee;
+package com.epam.gymcrm.dto.trainee.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

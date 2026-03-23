@@ -28,7 +28,7 @@ public class TrainingController {
         this.trainingTypesFacade = trainingTypesFacade;
     }
 
-    @PostMapping("/training")
+    @PostMapping("/")
     ResponseEntity<Void> addTraining(
             @RequestBody TrainingRequestDto trainingRequestDto
     ) {
@@ -36,9 +36,12 @@ public class TrainingController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/type")
-    ResponseEntity<List<TrainingTypeDetailsDto>> getTrainingType() {
-        List<TrainingTypeDetailsDto> trainingTypesDto =  trainingTypesFacade.findAll();
+    @GetMapping("/types")
+    ResponseEntity<List<TrainingTypeDetailsDto>> getTrainingType(
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword
+    ) {
+        List<TrainingTypeDetailsDto> trainingTypesDto =  trainingTypesFacade.findAll(authUsername, authPassword);
         return ResponseEntity.status(HttpStatus.OK).body(trainingTypesDto);
     }
 

@@ -3,26 +3,18 @@ package com.epam.gymcrm.dto.trainee.request;
 import java.time.LocalDate;
 
 public class TraineeTrainingsRequestDto {
-    private String username;
-    private String password;
+    private String traineeUsername;
     private LocalDate fromDate;
     private LocalDate toDate;
+    private String trainerUsername;
     private String trainingType;
 
-    public String getUsername() {
-        return username;
+    public String getTraineeUsername() {
+        return traineeUsername;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setTraineeUsername(String traineeUsername) {
+        this.traineeUsername = traineeUsername;
     }
 
     public LocalDate getFromDate() {
@@ -39,6 +31,15 @@ public class TraineeTrainingsRequestDto {
 
     public void setToDate(LocalDate toDate) {
         this.toDate = toDate;
+    }
+
+
+    public String getTrainerUsername() {
+        return trainerUsername;
+    }
+
+    public void setTrainerUsername(String trainerUsername) {
+        this.trainerUsername = trainerUsername;
     }
 
     public String getTrainingType() {

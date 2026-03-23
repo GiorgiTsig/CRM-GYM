@@ -1,4 +1,4 @@
-package com.epam.gymcrm.mappper;
+package com.epam.gymcrm.mapper;
 
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.dto.TrainingType.TrainingTypeDetailsDto;

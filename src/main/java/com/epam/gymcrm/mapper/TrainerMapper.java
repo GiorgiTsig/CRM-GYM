@@ -1,12 +1,11 @@
-package com.epam.gymcrm.mappper;
+package com.epam.gymcrm.mapper;
 
 import com.epam.gymcrm.domain.*;
-import com.epam.gymcrm.dto.UserDto;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
-import com.epam.gymcrm.dto.trainer.TrainerTrainingDto;
-import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
+import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.TraineeDto;
-import com.epam.gymcrm.dto.trainer.TrainerTraineeListItemDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -21,8 +20,11 @@ public interface TrainerMapper {
     @Mapping(target = "lastName", source = "user.lastName")
     @Mapping(target = "specialization", source = "trainingType.trainingTypeName")
     @Mapping(target = "active", source = "user.active")
-    TrainerTraineeListItemDto toTrainerDto(Trainer trainer);
-    UserDto toUserDto(User user);
+    TrainerProfileDto toTrainerDto(Trainer trainer);
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "firstName", source = "user.firstName")
+    @Mapping(target = "lastName", source = "user.lastName")
     TraineeDto toTraineeDto(Trainee trainee);
 
     @Mapping(target = "traineeUsername", source = "trainee.user.username")
