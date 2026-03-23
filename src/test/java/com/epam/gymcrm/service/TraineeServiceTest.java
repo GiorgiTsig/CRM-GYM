@@ -134,16 +134,13 @@ class TraineeServiceTest {
 
         trainee.setTrainers(new ArrayList<>(List.of(oldTrainer)));
 
-        TrainerListDto trainerListDto = new TrainerListDto();
-        trainerListDto.setTrainerUsernames(Set.of("new"));
-
         when(authentication.auth(username, password)).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee));
 
         when(trainerService.getAllTrainersUserUsername(Set.of("old"))).thenReturn(Set.of(oldTrainer));
         when(trainerService.getAllTrainersUserUsername(Set.of("new"))).thenReturn(Set.of(newTrainer));
 
-        traineeService.updateTraineeTrainers(username, password, trainerListDto);
+        traineeService.updateTraineeTrainers(username, password, Set.of("new"));
 
         Set<String> resultUsernames = trainee.getTrainers().stream()
                 .map(Trainer::getUser)

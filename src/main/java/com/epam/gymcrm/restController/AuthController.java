@@ -1,5 +1,6 @@
 package com.epam.gymcrm.restController;
 
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.service.UserService;
 import com.epam.gymcrm.util.Authentication;
 import org.slf4j.Logger;
@@ -28,26 +29,24 @@ public class AuthController {
 
     @GetMapping("/login")
     ResponseEntity<Void> auth(
-            @RequestHeader("username") String username,
-            @RequestHeader("password") String password,
+            @RequestBody AuthenticationDto authController,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(username, password);
+        authentication.auth(authController.getUsername(), authController.getPassword());
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/password")
     ResponseEntity<String> changePassword(
-            @RequestHeader("username") String username,
-            @RequestHeader("password") String password,
+            @RequestBody AuthenticationDto authController,
             @RequestParam String newPassword,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(username, password);
-        userService.updatePassword(username, newPassword);
+        authentication.auth(authController.getUsername(), authController.getPassword());
+        userService.updatePassword(authController.getUsername(), newPassword);
 
         return ResponseEntity.status(HttpStatus.OK).body("Password changed successfully");
     }

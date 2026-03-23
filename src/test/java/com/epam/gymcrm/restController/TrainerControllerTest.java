@@ -3,10 +3,14 @@ package com.epam.gymcrm.restController;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.auth.ActiveDto;
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.TrainerDto;
 import com.epam.gymcrm.dto.trainer.TrainerTrainingsDto;
 import com.epam.gymcrm.dto.trainer.TrainingDto;
+import com.epam.gymcrm.dto.trainer.request.TrainerRequestDto;
+import com.epam.gymcrm.dto.trainer.request.TrainerTrainingsRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import org.junit.jupiter.api.Test;
@@ -68,12 +72,16 @@ class TrainerControllerTest {
 
     @Test
     void getTrainerProfile_shouldReturnTrainerDto_whenCredentialsValid() {
+        AuthenticationDto authController = new AuthenticationDto();
+        authController.setUsername(USERNAME);
+        authController.setPassword(PASSWORD);
+
         TrainerDto trainerDto = new TrainerDto();
 
-        when(trainerFacade.getTrainerProfile(USERNAME, PASSWORD)).thenReturn(trainerDto);
+        when(trainerFacade.getTrainerProfile(authController.getUsername(), authController.getPassword())).thenReturn(trainerDto);
 
         ResponseEntity<TrainerDto> response =
-                trainerController.getTrainerProfile(USERNAME, PASSWORD, null);
+                trainerController.getTrainerProfile(authController, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(trainerDto, response.getBody());
@@ -83,8 +91,13 @@ class TrainerControllerTest {
 
     @Test
     void updateTraineeProfile_shouldReturnTrainerDto_whenUpdateSuccessful() {
-        User user = new User();
-        user.setUsername(USERNAME);
+        TrainerRequestDto trainerRequestDto = new TrainerRequestDto();
+        trainerRequestDto.setUsername(USERNAME);
+        trainerRequestDto.setPassword(PASSWORD);
+        trainerRequestDto.setFirstName(FIRST_NAME);
+        trainerRequestDto.setLastName(LAST_NAME);
+        trainerRequestDto.setSpecialization(SPECIALIZATION);
+        trainerRequestDto.setActive(true);
 
         TrainerDto trainerDto = new TrainerDto();
         trainerDto.setFirstName(FIRST_NAME);
@@ -103,9 +116,7 @@ class TrainerControllerTest {
 
         ResponseEntity<TrainerDto> response =
                 trainerController.updateTraineeProfile(
-                        USERNAME,
-                        PASSWORD,
-                        trainerDto,
+                        trainerRequestDto,
                         null
                 );
 
@@ -133,6 +144,13 @@ class TrainerControllerTest {
         TrainingDto trainingDto2 = new TrainingDto();
         List<com.epam.gymcrm.dto.trainer.TrainingDto> trainings = List.of(trainingDto1, trainingDto2);
 
+        TrainerTrainingsRequestDto trainerTrainingsRequestDto = new TrainerTrainingsRequestDto();
+        trainerTrainingsRequestDto.setUsername(USERNAME);
+        trainerTrainingsRequestDto.setPassword(PASSWORD);
+        trainerTrainingsRequestDto.setFromDate(LocalDate.of(2026, 1, 1));
+        trainerTrainingsRequestDto.setToDate(LocalDate.of(2026, 2, 1));
+        trainerTrainingsRequestDto.setTraineeName("Jane");
+
         when(trainingFacade.getTrainerTrainings(
                 USERNAME,
                 PASSWORD,
@@ -143,7 +161,7 @@ class TrainerControllerTest {
 
 
         ResponseEntity<List<TrainingDto>> response =
-                trainerController.getTrainerTrainingsList(USERNAME, PASSWORD, requestDto, null);
+                trainerController.getTrainerTrainingsList(trainerTrainingsRequestDto, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(List.of(trainingDto1, trainingDto2), response.getBody());
@@ -159,27 +177,35 @@ class TrainerControllerTest {
 
     @Test
     void updateTraineeStatus_shouldActivateTrainer_whenIsActiveTrue() {
-        doNothing().when(trainerFacade).activateTrainer(USERNAME, PASSWORD);
+        ActiveDto activeDto = new ActiveDto();
+        activeDto.setUsername(USERNAME);
+        activeDto.setPassword(PASSWORD);
+        activeDto.setActive(true);
+        doNothing().when(trainerFacade).activateTrainer(activeDto.getUsername(), activeDto.getPassword());
 
         ResponseEntity<Void> response =
-                trainerController.updateTraineeStatus(USERNAME, PASSWORD, true);
+                trainerController.updateTraineeStatus(activeDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        verify(trainerFacade).activateTrainer(USERNAME, PASSWORD);
-        verify(trainerFacade, never()).deactivateTrainer(USERNAME, PASSWORD);
+        verify(trainerFacade).activateTrainer(activeDto.getUsername(), activeDto.getPassword());
+        verify(trainerFacade, never()).deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
     }
 
     @Test
     void updateTraineeStatus_shouldDeactivateTrainer_whenIsActiveFalse() {
-        doNothing().when(trainerFacade).deactivateTrainer(USERNAME, PASSWORD);
+        ActiveDto activeDto = new ActiveDto();
+        activeDto.setUsername(USERNAME);
+        activeDto.setPassword(PASSWORD);
+        activeDto.setActive(false);
+        doNothing().when(trainerFacade).deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
 
         ResponseEntity<Void> response =
-                trainerController.updateTraineeStatus(USERNAME, PASSWORD, false);
+                trainerController.updateTraineeStatus(activeDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        verify(trainerFacade).deactivateTrainer(USERNAME, PASSWORD);
-        verify(trainerFacade, never()).activateTrainer(USERNAME, PASSWORD);
+        verify(trainerFacade).deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
+        verify(trainerFacade, never()).activateTrainer(activeDto.getUsername(), activeDto.getPassword());
     }
 }

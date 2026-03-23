@@ -1,11 +1,11 @@
 package com.epam.gymcrm.restController;
 
-import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.dto.TrainingType.TrainingTypeDto;
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.TrainingDto;
+import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.facade.TrainingTypesFacade;
-import com.epam.gymcrm.mappper.TrainingTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,6 @@ public class TrainingController {
 
     private TrainingFacade trainingFacade;
     private TrainingTypesFacade trainingTypesFacade;
-    private TrainingTypeMapper trainingTypeMapper;
 
     @Autowired
     public void setTrainingFacade(TrainingFacade trainingFacade) {
@@ -31,25 +30,17 @@ public class TrainingController {
         this.trainingTypesFacade = trainingTypesFacade;
     }
 
-    @Autowired
-    public void setTrainingTypeMapper(TrainingTypeMapper trainingTypeMapper) {
-        this.trainingTypeMapper = trainingTypeMapper;
-    }
-
     @PostMapping("/create")
     ResponseEntity<Void> addTraining(
-            @RequestHeader("traineeUsername") String traineeUsername,
-            @RequestHeader("password") String password,
-            @RequestBody TrainingDto trainingDto
+            @RequestBody TrainingRequestDto trainingRequestDto
     ) {
-        trainingFacade.addTraining(traineeUsername, password, trainingDto);
+        trainingFacade.addTraining(trainingRequestDto);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/get")
     ResponseEntity<List<TrainingTypeDto>> getTrainingType() {
-        List<TrainingType> trainingTypes =  trainingTypesFacade.findAll();
-        var trainingTypesDto = trainingTypes.stream().map(trainingType -> trainingTypeMapper.toTrainingTypeDto(trainingType)).toList();
+        List<TrainingTypeDto> trainingTypesDto =  trainingTypesFacade.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(trainingTypesDto);
     }
 

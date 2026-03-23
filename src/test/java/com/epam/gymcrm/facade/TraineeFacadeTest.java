@@ -60,29 +60,28 @@ class TraineeFacadeTest {
 
     @Test
     void getTraineeProfileAuthenticatesBeforeFetching() {
+        String traineeProfile = "ad";
         Trainee trainee = new Trainee();
         TraineeDto traineeDto = new TraineeDto();
         when(traineeService.authenticateTrainee(USERNAME, PASSWORD)).thenReturn(true);
-        when(traineeService.getTrainee(USERNAME)).thenReturn(Optional.of(trainee));
+        when(traineeService.getTrainee(traineeProfile)).thenReturn(Optional.of(trainee));
         when(traineeMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
 
-        TraineeDto result = traineeFacade.getTraineeProfile(USERNAME, PASSWORD);
+        TraineeDto result = traineeFacade.getTraineeProfile(USERNAME, PASSWORD, traineeProfile);
 
         assertSame(traineeDto, result);
         InOrder inOrder = inOrder(traineeService);
         inOrder.verify(traineeService).authenticateTrainee(USERNAME, PASSWORD);
-        inOrder.verify(traineeService).getTrainee(USERNAME);
+        inOrder.verify(traineeService).getTrainee(traineeProfile);
     }
 
     @Test
     void updateTraineeTrainersDelegatesAllArguments() {
         Set<String> newTrainers = Set.of("t1", "t2");
-        TrainerListDto trainerListDto = new TrainerListDto();
-        trainerListDto.setTrainerUsernames(newTrainers);
 
-        traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, trainerListDto);
+        traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, newTrainers);
 
-        verify(traineeService).updateTraineeTrainers(USERNAME, PASSWORD, trainerListDto);
+        verify(traineeService).updateTraineeTrainers(USERNAME, PASSWORD, newTrainers);
     }
 
     @Test

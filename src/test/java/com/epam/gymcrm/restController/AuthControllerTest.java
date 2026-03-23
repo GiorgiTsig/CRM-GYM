@@ -1,6 +1,7 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.service.UserService;
 import com.epam.gymcrm.util.Authentication;
 import org.junit.jupiter.api.Test;
@@ -34,17 +35,25 @@ class AuthControllerTest {
 
     @Test
     void auth_shouldReturnOk_whenCredentialsValid() {
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+        AuthenticationDto authControllerDto = new AuthenticationDto();
+        authControllerDto.setUsername(USERNAME);
+        authControllerDto.setPassword(PASSWORD);
 
-        ResponseEntity<Void> response = authController.auth(USERNAME, PASSWORD, null);
+        when(authentication.auth(authControllerDto.getUsername(), authControllerDto.getPassword())).thenReturn(true);
+
+        ResponseEntity<Void> response = authController.auth(authControllerDto, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        verify(authentication).auth(USERNAME, PASSWORD);
+        verify(authentication).auth(authControllerDto.getUsername(), authControllerDto.getPassword());
     }
 
     @Test
     void changePassword_shouldReturnOkMessage_whenPasswordUpdated() {
+        AuthenticationDto authControllerDto = new AuthenticationDto();
+        authControllerDto.setUsername(USERNAME);
+        authControllerDto.setPassword(PASSWORD);
+
         User user = new User();
         user.setUsername(USERNAME);
         user.setPassword(PASSWORD);
@@ -53,7 +62,7 @@ class AuthControllerTest {
         doReturn(user).when(userService).updatePassword(USERNAME, NEW_PASSWORD);
 
         ResponseEntity<String> response =
-                authController.changePassword(USERNAME, PASSWORD, NEW_PASSWORD, null);
+                authController.changePassword(authControllerDto, NEW_PASSWORD, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Password changed successfully", response.getBody());

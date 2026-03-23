@@ -99,7 +99,7 @@ public class TraineeService {
     @Transactional
     public List<Trainer> updateTraineeTrainers(
             @NotBlank String username, @NotBlank String password,
-            TrainerListDto trainerUsernames
+            Set<@NotNull String> trainerUsernames
     ) {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainee(username, password)) {
@@ -110,8 +110,8 @@ public class TraineeService {
 
         //Current trainers are those stored in the DB. The new trainer is provided by the user, and the unmatched old trainer will be deleted.
         var assignedTrainerUsernames = trainee.getTrainers().stream().map(Trainer::getUser).map(User::getUsername).collect(Collectors.toSet());
-        var trainerUsernamesToAdd = trainerUsernames.getTrainerUsernames().stream().filter(trainer -> !assignedTrainerUsernames.contains(trainer)).collect(Collectors.toSet());
-        var trainerUsernamesToRemove = assignedTrainerUsernames.stream().filter(trainer -> !trainerUsernames.getTrainerUsernames().contains(trainer)).collect(Collectors.toSet());
+        var trainerUsernamesToAdd = trainerUsernames.stream().filter(trainer -> !assignedTrainerUsernames.contains(trainer)).collect(Collectors.toSet());
+        var trainerUsernamesToRemove = assignedTrainerUsernames.stream().filter(trainer -> !trainerUsernames.contains(trainer)).collect(Collectors.toSet());
 
         Set<Trainer> trainersToRemove = trainerService.getAllTrainersUserUsername(trainerUsernamesToRemove);
         Set<Trainer> trainersToAdd = trainerService.getAllTrainersUserUsername(trainerUsernamesToAdd);

@@ -2,10 +2,12 @@ package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.CreateTraineeDto;
 import com.epam.gymcrm.dto.trainee.TraineeDto;
 import com.epam.gymcrm.dto.trainee.TrainerDto;
 import com.epam.gymcrm.dto.trainee.TrainerListDto;
+import com.epam.gymcrm.dto.trainee.request.TrainerRequestDto;
 import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
 import com.epam.gymcrm.service.TrainerService;
@@ -42,9 +44,9 @@ public class TraineeFacade {
         return traineeService.authenticateTrainee(username, password);
     }
 
-    public TraineeDto getTraineeProfile(@NotBlank String username, @NotBlank String password) {
+    public TraineeDto getTraineeProfile(@NotBlank String username, @NotBlank String password, @NotBlank String traineeProfile) {
         traineeService.authenticateTrainee(username, password);
-        Trainee trainee = traineeService.getTrainee(username).orElseThrow();
+        Trainee trainee = traineeService.getTrainee(traineeProfile).orElseThrow();
         return traineeMapper.toTraineeDto(trainee);
     }
 
@@ -80,7 +82,7 @@ public class TraineeFacade {
     public List<TrainerDto> updateTraineeTrainers(
             @NotBlank String username,
             @NotBlank String password,
-            TrainerListDto trainerUsernames
+            Set<@NotNull String> trainerUsernames
     ) {
         List<Trainer> trainers = traineeService.updateTraineeTrainers(username, password, trainerUsernames);
         return trainers.stream().map(traineeMapper::toTrainerDto).toList();

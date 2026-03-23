@@ -1,10 +1,14 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.Trainer;
+import com.epam.gymcrm.dto.auth.ActiveDto;
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.TrainerTrainingsDto;
 import com.epam.gymcrm.dto.trainer.TrainingDto;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.TrainerDto;
+import com.epam.gymcrm.dto.trainer.request.TrainerRequestDto;
+import com.epam.gymcrm.dto.trainer.request.TrainerTrainingsRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import org.slf4j.Logger;
@@ -47,31 +51,28 @@ public class TrainerController {
 
     @GetMapping("/get")
     ResponseEntity<TrainerDto> getTrainerProfile(
-            @RequestHeader("username") String username,
-            @RequestHeader("password") String password,
+            @RequestBody AuthenticationDto authController,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        TrainerDto trainerDto = trainerFacade.getTrainerProfile(username, password);
+        TrainerDto trainerDto = trainerFacade.getTrainerProfile(authController.getUsername(), authController.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
     }
 
     @PutMapping("/update")
     ResponseEntity<TrainerDto> updateTraineeProfile(
-            @RequestHeader("username") String username,
-            @RequestHeader("password") String password,
-            @RequestBody TrainerDto trainerDto,
+            @RequestBody TrainerRequestDto trainerRequestDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
         TrainerDto profileDTO = trainerFacade.updateTrainerProfile(
-                username,
-                password,
-                trainerDto.getFirstName(),
-                trainerDto.getLastName(),
-                trainerDto.isActive(),
-                trainerDto.getSpecialization()
+                trainerRequestDto.getUsername(),
+                trainerRequestDto.getPassword(),
+                trainerRequestDto.getFirstName(),
+                trainerRequestDto.getLastName(),
+                trainerRequestDto.isActive(),
+                trainerRequestDto.getSpecialization()
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
@@ -79,19 +80,17 @@ public class TrainerController {
 
     @GetMapping("/get/trainings")
     ResponseEntity<List<TrainingDto>> getTrainerTrainingsList(
-            @RequestHeader("username") String username,
-            @RequestHeader("password") String password,
-            @RequestBody(required = false) TrainerTrainingsDto trainerTrainingsDto,
+            @RequestBody TrainerTrainingsRequestDto trainerTrainingsRequestDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
 
         List<TrainingDto> trainingDtoList = trainingFacade.getTrainerTrainings(
-                username,
-                password,
-                trainerTrainingsDto.getFromDate(),
-                trainerTrainingsDto.getToDate(),
-                trainerTrainingsDto.getTraineeName()
+                trainerTrainingsRequestDto.getUsername(),
+                trainerTrainingsRequestDto.getPassword(),
+                trainerTrainingsRequestDto.getFromDate(),
+                trainerTrainingsRequestDto.getToDate(),
+                trainerTrainingsRequestDto.getTraineeName()
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);
@@ -99,16 +98,12 @@ public class TrainerController {
 
     @PatchMapping("/status")
     ResponseEntity<Void> updateTraineeStatus (
-            @RequestHeader("username") String username,
-            @RequestHeader("password") String password,
-            @RequestParam boolean isActive
+            @RequestBody ActiveDto activeDto
     ) {
-        if (isActive) {
-            trainerFacade.activateTrainer(username, password);
-        }
-
-        if (!isActive) {
-            trainerFacade.deactivateTrainer(username, password);
+        if (activeDto.isActive()) {
+            trainerFacade.activateTrainer(activeDto.getUsername(), activeDto.getPassword());
+        } else  {
+            trainerFacade.deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
 
         }
 

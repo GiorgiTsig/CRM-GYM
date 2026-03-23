@@ -2,6 +2,7 @@ package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.dto.trainee.TrainingDto;
+import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.mappper.TraineeMapper;
 import com.epam.gymcrm.mappper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
@@ -46,18 +47,18 @@ class TrainingFacadeTest {
 
     @Test
     void addTrainingAuthenticatesTrainerThenCreatesTraining() {
-        TrainingDto trainingDto = new TrainingDto();
+        TrainingRequestDto trainingDto = new TrainingRequestDto();
         trainingDto.setName("Martial Art");
         trainingDto.setDate(FROM);
         trainingDto.setDuration(90);
         trainingDto.setTrainerUsername(TRAINER_USERNAME);
 
-        when(trainerService.authenticateTrainer(TRAINEE_USERNAME, PASSWORD)).thenReturn(true);
+        when(trainerService.authenticateTrainer(trainingDto.getUsername(), trainingDto.getPassword())).thenReturn(true);
 
-        trainingFacade.addTraining(TRAINEE_USERNAME, PASSWORD, trainingDto);
+        trainingFacade.addTraining(trainingDto);
 
         InOrder inOrder = inOrder(trainerService, trainingService);
-        inOrder.verify(trainerService).authenticateTrainer(TRAINEE_USERNAME, PASSWORD);
+        inOrder.verify(trainerService).authenticateTrainer(trainingDto.getUsername(), trainingDto.getPassword());
     }
 
     @Test
