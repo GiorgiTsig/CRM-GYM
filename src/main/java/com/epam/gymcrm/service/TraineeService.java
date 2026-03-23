@@ -120,7 +120,7 @@ public class TraineeService {
         trainee.getTrainers().addAll(trainersToAdd);
 
         traineeRepository.save(trainee);
-        log.info("TrainerDto updated successfully with id: {}", trainee.getId());
+        log.info("Trainee trainers updated successfully: {}", trainee.getId());
         return trainee.getTrainers();
     }
 

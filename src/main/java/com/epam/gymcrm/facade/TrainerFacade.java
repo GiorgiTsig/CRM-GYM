@@ -4,6 +4,8 @@ import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
+import com.epam.gymcrm.exception.AuthenticationFailedException;
+import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.mapper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
 import jakarta.validation.constraints.NotBlank;
@@ -36,8 +38,13 @@ public class TrainerFacade {
     }
 
     public TrainerProfileDto getTrainerProfile(@NotBlank String username, @NotBlank String password) {
-        trainerService.authenticateTrainer(username, password);
-        Trainer trainer = trainerService.getTrainer(username).orElseThrow();
+        boolean auth = trainerService.authenticateTrainer(username, password);
+
+        if (!auth) {
+            throw new AuthenticationFailedException("Invalid credentials");
+        }
+
+        Trainer trainer = trainerService.getTrainer(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         return trainerMapper.toTrainerDto(trainer);
     }
 

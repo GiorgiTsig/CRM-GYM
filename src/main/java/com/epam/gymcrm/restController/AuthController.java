@@ -39,7 +39,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/password")
+    @PutMapping("/password")
     ResponseEntity<String> changePassword(
             @RequestBody AuthenticationDto authRequest,
             @RequestParam("password") String newPassword,

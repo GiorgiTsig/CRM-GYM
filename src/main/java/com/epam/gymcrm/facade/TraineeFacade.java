@@ -6,6 +6,8 @@ import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
 import com.epam.gymcrm.dto.trainee.response.TraineeProfileDto;
 import com.epam.gymcrm.dto.trainee.response.TrainerDto;
+import com.epam.gymcrm.exception.AuthenticationFailedException;
+import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.mapper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
 import com.epam.gymcrm.service.TrainerService;
@@ -44,7 +46,7 @@ public class TraineeFacade {
 
     public TraineeProfileDto getTraineeProfile(@NotBlank String username, @NotBlank String password, @NotBlank String traineeProfile) {
         traineeService.authenticateTrainee(username, password);
-        Trainee trainee = traineeService.getTrainee(traineeProfile).orElseThrow();
+        Trainee trainee = traineeService.getTrainee(traineeProfile).orElseThrow(() -> new EntityNotFoundException("Trainee doesn't exist"));
         return traineeMapper.toTraineeDto(trainee);
     }
 

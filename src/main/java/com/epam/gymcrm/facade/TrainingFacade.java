@@ -4,6 +4,7 @@ import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.dto.trainee.response.TraineeTrainingDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
+import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.mapper.TraineeMapper;
 import com.epam.gymcrm.mapper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
@@ -41,7 +42,12 @@ public class TrainingFacade {
     public void addTraining(
             @Valid TrainingRequestDto trainingRequestDto
     ) {
-       trainerService.authenticateTrainer(trainingRequestDto.getUsername(), trainingRequestDto.getPassword());
+       boolean auth = trainerService.authenticateTrainer(trainingRequestDto.getAuthUsername(), trainingRequestDto.getAuthPassword());
+
+       if (!auth) {
+           throw new AuthenticationFailedException("Invalid credentials");
+       }
+
        trainingService.createTraining(
                trainingRequestDto.getTraineeUsername(),
                trainingRequestDto.getTrainerUsername(),
@@ -63,7 +69,7 @@ public class TrainingFacade {
             String trainingType
     ) {
         List<Training> trainings = trainingService.getTraineeTrainings(username, password, traineeUsername, fromDate, toDate, trainerUsername, trainingType);
-        return (List<TraineeTrainingDto>) trainings.stream().map(training -> traineeMapper.toTrainingDto(training)).toList();
+        return trainings.stream().map(training -> traineeMapper.toTrainingDto(training)).toList();
     }
 
     public List<TrainerTrainingDto> getTrainerTrainings(
@@ -72,9 +78,9 @@ public class TrainingFacade {
             @NotBlank String trainerUsername,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
-            String traineeName
+            String traineeUsername
     ) {
-        List<Training> trainings =  trainingService.getTrainerTrainings(username, password, trainerUsername, fromDate, toDate, traineeName);
+        List<Training> trainings =  trainingService.getTrainerTrainings(username, password, trainerUsername, fromDate, toDate, traineeUsername);
         return trainings.stream().map(training -> trainerMapper.toTrainingDto(training)).toList();
     }
 }

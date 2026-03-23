@@ -41,8 +41,8 @@ public class TrainingLoader extends AbstractDataLoader {
     public void processTraining(JsonNode node) {
         Training training = objectMapper.convertValue(node, Training.class);
         trainingService.createTraining(
-                training.getTrainer().getUser().getUsername(),
                 training.getTrainee().getUser().getUsername(),
+                training.getTrainer().getUser().getUsername(),
                 new Training(
                         training.getName(), training.getDate(),
                         training.getDuration()

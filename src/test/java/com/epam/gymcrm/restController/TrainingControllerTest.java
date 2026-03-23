@@ -37,8 +37,8 @@ class TrainingControllerTest {
         TrainingTypeDto trainingType = new TrainingTypeDto();
         trainingType.setTrainingTypeName("MMA");
         TrainingRequestDto trainingDto = new TrainingRequestDto();
-        trainingDto.setUsername(TRAINEE_USERNAME);
-        trainingDto.setPassword(PASSWORD);
+        trainingDto.setAuthUsername(TRAINEE_USERNAME);
+        trainingDto.setAuthPassword(PASSWORD);
         trainingDto.setTrainerUsername(TRAINER_USERNAME);
         trainingDto.setDate(TRAINING_DATE);
         trainingDto.setDuration(TRAINING_DURATION);

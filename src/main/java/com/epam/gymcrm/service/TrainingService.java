@@ -107,7 +107,7 @@ public class TrainingService {
             @NotBlank String trainerUsername,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
-            String traineeName
+            String traineeUsername
     ) {
         if (!trainerService.authenticateTrainer(username, password)) {
             throw new AuthenticationFailedException("Invalid credentials");
@@ -117,7 +117,7 @@ public class TrainingService {
                 trainerUsername,
                 fromDate,
                 toDate,
-                traineeName
+                traineeUsername
         );
     }
 }

@@ -60,7 +60,7 @@ public class TrainerController {
     }
 
     @PutMapping("/profile")
-    ResponseEntity<TrainerProfileDto> updateTraineeProfile(
+    ResponseEntity<TrainerProfileDto> updateTrainerStatus(
             @RequestBody TrainerProfileUpdateRequestDto trainerRequestDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
@@ -101,7 +101,7 @@ public class TrainerController {
     }
 
     @PatchMapping("/profile/status")
-    ResponseEntity<Void> updateTraineeStatus (
+    ResponseEntity<Void> updateTrainerProfile (
             @RequestBody ActiveDto activeDto
     ) {
         if (activeDto.isActive()) {

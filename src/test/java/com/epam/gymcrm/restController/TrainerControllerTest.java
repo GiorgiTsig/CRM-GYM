@@ -108,7 +108,7 @@ class TrainerControllerTest {
         )).thenReturn(trainerDto);
 
         ResponseEntity<TrainerProfileDto> response =
-                trainerController.updateTraineeProfile(
+                trainerController.updateTrainerStatus(
                         trainerRequestDto,
                         null
                 );
@@ -174,7 +174,7 @@ class TrainerControllerTest {
         doNothing().when(trainerFacade).activateTrainer(activeDto.getUsername(), activeDto.getPassword());
 
         ResponseEntity<Void> response =
-                trainerController.updateTraineeStatus(activeDto);
+                trainerController.updateTrainerProfile(activeDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
@@ -191,7 +191,7 @@ class TrainerControllerTest {
         doNothing().when(trainerFacade).deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
 
         ResponseEntity<Void> response =
-                trainerController.updateTraineeStatus(activeDto);
+                trainerController.updateTrainerProfile(activeDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 

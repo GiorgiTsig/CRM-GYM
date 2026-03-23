@@ -53,12 +53,12 @@ class TrainingFacadeTest {
         trainingDto.setDuration(90);
         trainingDto.setTrainerUsername(TRAINER_USERNAME);
 
-        when(trainerService.authenticateTrainer(trainingDto.getUsername(), trainingDto.getPassword())).thenReturn(true);
+        when(trainerService.authenticateTrainer(trainingDto.getAuthUsername(), trainingDto.getAuthPassword())).thenReturn(true);
 
         trainingFacade.addTraining(trainingDto);
 
         InOrder inOrder = inOrder(trainerService, trainingService);
-        inOrder.verify(trainerService).authenticateTrainer(trainingDto.getUsername(), trainingDto.getPassword());
+        inOrder.verify(trainerService).authenticateTrainer(trainingDto.getAuthUsername(), trainingDto.getAuthPassword());
     }
 
     @Test

@@ -2,7 +2,6 @@ package com.epam.gymcrm.util;
 
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.exception.AuthenticationFailedException;
-import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
