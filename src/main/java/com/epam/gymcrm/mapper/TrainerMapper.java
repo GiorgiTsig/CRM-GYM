@@ -4,7 +4,7 @@ import com.epam.gymcrm.domain.*;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
-import com.epam.gymcrm.dto.trainer.TraineeDto;
+import com.epam.gymcrm.dto.trainer.response.TraineeDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

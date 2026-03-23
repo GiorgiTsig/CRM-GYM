@@ -1,4 +1,4 @@
-package com.epam.gymcrm.dto.trainer;
+package com.epam.gymcrm.dto.trainer.response;
 
 
 public class TraineeDto {

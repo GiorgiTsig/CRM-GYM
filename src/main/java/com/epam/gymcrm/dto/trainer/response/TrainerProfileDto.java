@@ -1,7 +1,5 @@
 package com.epam.gymcrm.dto.trainer.response;
 
-import com.epam.gymcrm.dto.trainer.TraineeDto;
-
 import java.util.List;
 
 public class TrainerProfileDto {
