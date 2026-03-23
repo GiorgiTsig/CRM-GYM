@@ -36,7 +36,7 @@ public class TrainingController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/get")
+    @GetMapping("/training")
     ResponseEntity<List<TrainingTypeDetailsDto>> getTrainingType() {
         List<TrainingTypeDetailsDto> trainingTypesDto =  trainingTypesFacade.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(trainingTypesDto);
