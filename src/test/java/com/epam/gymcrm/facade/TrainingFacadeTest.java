@@ -84,15 +84,15 @@ class TrainingFacadeTest {
         TrainerTrainingDto trainingDto = new TrainerTrainingDto();
         List<TrainerTrainingDto> expectedDtoList = List.of(trainingDto);
 
-        when(trainingService.getTrainerTrainings(TRAINER_USERNAME, PASSWORD, FROM, TO, "Toby"))
+        when(trainingService.getTrainerTrainings(USERNAME, PASSWORD, TRAINER_USERNAME, FROM, TO, "Toby"))
                 .thenReturn(trainings);
 
         when(trainerMapper.toTrainingDto(training)).thenReturn(trainingDto);
 
         List<TrainerTrainingDto> result =
-                trainingFacade.getTrainerTrainings(TRAINER_USERNAME, PASSWORD, FROM, TO, "Toby");
+                trainingFacade.getTrainerTrainings(USERNAME, PASSWORD, TRAINER_USERNAME, FROM, TO, "Toby");
 
         assertEquals(expectedDtoList, result);
-        verify(trainingService).getTrainerTrainings(TRAINER_USERNAME, PASSWORD, FROM, TO, "Toby");
+        verify(trainingService).getTrainerTrainings(USERNAME, PASSWORD, TRAINER_USERNAME, FROM, TO, "Toby");
     }
 }

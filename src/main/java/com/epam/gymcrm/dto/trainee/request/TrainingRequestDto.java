@@ -11,6 +11,7 @@ public class TrainingRequestDto {
     private LocalDate date;
     private TrainingTypeDto type;
     private Integer duration;
+    private String traineeUsername;
     private String trainerUsername;
 
     public String getUsername() {
@@ -67,5 +68,13 @@ public class TrainingRequestDto {
 
     public void setTrainerUsername(String trainerUsername) {
         this.trainerUsername = trainerUsername;
+    }
+
+    public String getTraineeUsername() {
+        return traineeUsername;
+    }
+
+    public void setTraineeUsername(String traineeUsername) {
+        this.traineeUsername = traineeUsername;
     }
 }

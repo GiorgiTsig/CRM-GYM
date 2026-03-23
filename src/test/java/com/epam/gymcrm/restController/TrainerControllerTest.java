@@ -9,7 +9,6 @@ import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
-import com.epam.gymcrm.dto.trainer.request.TrainerTrainingsRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import org.junit.jupiter.api.Test;
@@ -92,7 +91,6 @@ class TrainerControllerTest {
         trainerRequestDto.setPassword(PASSWORD);
         trainerRequestDto.setFirstName(FIRST_NAME);
         trainerRequestDto.setLastName(LAST_NAME);
-        trainerRequestDto.setSpecialization(SPECIALIZATION);
         trainerRequestDto.setActive(true);
 
         TrainerProfileDto trainerDto = new TrainerProfileDto();
@@ -106,8 +104,7 @@ class TrainerControllerTest {
                 PASSWORD,
                 FIRST_NAME,
                 LAST_NAME,
-                true,
-                SPECIALIZATION
+                true
         )).thenReturn(trainerDto);
 
         ResponseEntity<TrainerProfileDto> response =
@@ -124,8 +121,7 @@ class TrainerControllerTest {
                 PASSWORD,
                 FIRST_NAME,
                 LAST_NAME,
-                true,
-                SPECIALIZATION
+                true
         );
     }
 
@@ -135,22 +131,26 @@ class TrainerControllerTest {
         TrainerTrainingDto trainingDto2 = new TrainerTrainingDto();
         List<TrainerTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
 
-        TrainerTrainingsRequestDto trainerTrainingsRequestDto = new TrainerTrainingsRequestDto();
-        trainerTrainingsRequestDto.setFromDate(LocalDate.of(2026, 1, 1));
-        trainerTrainingsRequestDto.setToDate(LocalDate.of(2026, 2, 1));
-        trainerTrainingsRequestDto.setTraineeName("Jane");
-
         when(trainingFacade.getTrainerTrainings(
                 USERNAME,
                 PASSWORD,
-                trainerTrainingsRequestDto.getFromDate(),
-                trainerTrainingsRequestDto.getToDate(),
-                trainerTrainingsRequestDto.getTraineeName()
+                "trainer.username",
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 2, 1),
+                "trainee.username"
         )).thenReturn(trainings);
 
 
         ResponseEntity<List<TrainerTrainingDto>> response =
-                trainerController.getTrainerTrainingsList(USERNAME, PASSWORD, trainerTrainingsRequestDto, null);
+                trainerController.getTrainerTrainingsList(
+                        USERNAME,
+                        PASSWORD,
+                        "trainer.username",
+                        LocalDate.of(2026, 1, 1),
+                        LocalDate.of(2026, 2, 1),
+                        "trainee.username",
+                        null
+                );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(List.of(trainingDto1, trainingDto2), response.getBody());
@@ -158,9 +158,10 @@ class TrainerControllerTest {
         verify(trainingFacade).getTrainerTrainings(
                 USERNAME,
                 PASSWORD,
-                trainerTrainingsRequestDto.getFromDate(),
-                trainerTrainingsRequestDto.getToDate(),
-                trainerTrainingsRequestDto.getTraineeName()
+                "trainer.username",
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 2, 1),
+                "trainee.username"
         );
     }
 

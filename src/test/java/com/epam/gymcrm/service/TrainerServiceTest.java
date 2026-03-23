@@ -129,9 +129,8 @@ class TrainerServiceTest {
 
         when(authentication.auth(username, password)).thenReturn(true);
         when(trainerRepository.getTrainerByUserUsername(username)).thenReturn(Optional.of(trainer));
-        when(trainingTypeRepository.findTrainingTypeByTrainingTypeName("CARDIO")).thenReturn(newType);
 
-        trainerService.updateTrainerProfile(username, password, "Jane", "Smith", true,"CARDIO");
+        trainerService.updateTrainerProfile(username, password, "Jane", "Smith", true);
 
         assertEquals("Jane", user.getFirstName());
         assertEquals("Smith", user.getLastName());
@@ -281,7 +280,7 @@ class TrainerServiceTest {
         String username = "trainer.user";
         String password = "pass";
         when(trainerService.authenticateTrainer(username, password)).thenReturn(false);
-        assertThrows(AuthenticationFailedException.class, () -> trainerService.updateTrainerProfile(username, password, "Jane", "Smith", true, "CARDIO"));
+        assertThrows(AuthenticationFailedException.class, () -> trainerService.updateTrainerProfile(username, password, "Jane", "Smith", true));
     }
 
     @Test

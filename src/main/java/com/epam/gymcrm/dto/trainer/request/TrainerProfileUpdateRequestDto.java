@@ -6,7 +6,6 @@ public class TrainerProfileUpdateRequestDto {
     private String password;
     private String firstName;
     private String lastName;
-    private String specialization;
     private boolean isActive;
 
     public String getUsername() {
@@ -39,14 +38,6 @@ public class TrainerProfileUpdateRequestDto {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public String getSpecialization() {
-        return specialization;
-    }
-
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
     }
 
     public boolean isActive() {

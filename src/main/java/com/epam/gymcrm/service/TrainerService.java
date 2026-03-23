@@ -100,8 +100,7 @@ public class TrainerService {
             @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
-            @NotNull boolean isActive,
-            @NotBlank String specialization
+            @NotNull boolean isActive
     ) {
         log.info("Checking user with Username/Password");
         if (!authenticateTrainer(username, password)) {
@@ -115,7 +114,6 @@ public class TrainerService {
         user.setActive(isActive);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-        trainer.setTrainingType(trainingType(specialization));
 
         trainerRepository.save(trainer);
         log.info("Trainer profile updated successfully for username: {}", username);

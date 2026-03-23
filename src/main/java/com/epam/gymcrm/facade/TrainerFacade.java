@@ -50,10 +50,9 @@ public class TrainerFacade {
             @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
-            @NotNull boolean isActive,
-            @NotBlank String specialization
+            @NotNull boolean isActive
     ) {
-       Trainer trainer = trainerService.updateTrainerProfile(username, password, firstName, lastName, isActive, specialization);
+       Trainer trainer = trainerService.updateTrainerProfile(username, password, firstName, lastName, isActive);
        return trainerMapper.toTrainerDto(trainer);
     }
 

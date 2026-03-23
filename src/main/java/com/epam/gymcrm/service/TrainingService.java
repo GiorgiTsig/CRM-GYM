@@ -102,13 +102,14 @@ public class TrainingService {
 
     @Transactional(readOnly = true)
     public List<Training> getTrainerTrainings(
-            @NotBlank String trainerUsername,
+            @NotBlank String username,
             @NotBlank String password,
+            @NotBlank String trainerUsername,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
             String traineeName
     ) {
-        if (!trainerService.authenticateTrainer(trainerUsername, password)) {
+        if (!trainerService.authenticateTrainer(username, password)) {
             throw new AuthenticationFailedException("Invalid credentials");
         }
         log.info("Selecting trainer trainings with username: {}", trainerUsername);

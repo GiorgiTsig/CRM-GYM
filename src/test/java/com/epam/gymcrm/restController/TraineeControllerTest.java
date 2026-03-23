@@ -2,7 +2,6 @@ package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.dto.auth.ActiveDto;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
-import com.epam.gymcrm.dto.trainee.request.TraineeTrainingsRequestDto;
 import com.epam.gymcrm.dto.trainee.request.TraineeUpdateRequestDto;
 import com.epam.gymcrm.dto.trainee.request.TraineeTrainerAssignmentRequestDto;
 import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
@@ -178,12 +177,6 @@ class TraineeControllerTest {
 
     @Test
     void getTraineeTrainingsList_shouldReturnTrainingDtoList_whenRequestIsValid() {
-        TraineeTrainingsRequestDto traineeTrainingsRequestDtoDto = new TraineeTrainingsRequestDto();
-        traineeTrainingsRequestDtoDto.setFromDate(LocalDate.of(2026, 1, 1));
-        traineeTrainingsRequestDtoDto.setToDate(LocalDate.of(2026, 2, 1));
-        traineeTrainingsRequestDtoDto.setTrainerUsername("pw");
-        traineeTrainingsRequestDtoDto.setTrainingType("MMA");
-
         TraineeTrainingDto trainingDto1 = new TraineeTrainingDto();
         TraineeTrainingDto trainingDto2 = new TraineeTrainingDto();
         List<TraineeTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
@@ -191,16 +184,25 @@ class TraineeControllerTest {
         when(trainingFacade.getTraineeTrainings(
                 USERNAME,
                 PASSWORD,
-                traineeTrainingsRequestDtoDto.getTraineeUsername(),
-                traineeTrainingsRequestDtoDto.getFromDate(),
-                traineeTrainingsRequestDtoDto.getToDate(),
-                traineeTrainingsRequestDtoDto.getTrainerUsername(),
-                traineeTrainingsRequestDtoDto.getTrainingType()
+                "trainee.user",
+                LocalDate.of(1999, 1, 1),
+                LocalDate.of(1999, 1, 2),
+                "trainer.user",
+                "MMA"
         )).thenReturn(trainings);
 
 
         ResponseEntity<List<TraineeTrainingDto>> response =
-                traineeController.getTraineeTrainingsList(USERNAME, PASSWORD, traineeTrainingsRequestDtoDto, null);
+                traineeController.getTraineeTrainingsList(
+                        USERNAME,
+                        PASSWORD,
+                        "trainee.user",
+                        LocalDate.of(1999, 1, 1),
+                        LocalDate.of(1999, 1, 2),
+                        "trainer.user",
+                        "MMA",
+                        null
+                );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(List.of(trainingDto1, trainingDto2), response.getBody());
@@ -208,11 +210,11 @@ class TraineeControllerTest {
         verify(trainingFacade).getTraineeTrainings(
                 USERNAME,
                 PASSWORD,
-                traineeTrainingsRequestDtoDto.getTraineeUsername(),
-                traineeTrainingsRequestDtoDto.getFromDate(),
-                traineeTrainingsRequestDtoDto.getToDate(),
-                traineeTrainingsRequestDtoDto.getTrainerUsername(),
-                traineeTrainingsRequestDtoDto.getTrainingType()
+                "trainee.user",
+                LocalDate.of(1999, 1, 1),
+                LocalDate.of(1999, 1, 2),
+                "trainer.user",
+                "MMA"
         );
     }
 

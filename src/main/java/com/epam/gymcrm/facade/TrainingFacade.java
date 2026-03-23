@@ -43,7 +43,7 @@ public class TrainingFacade {
     ) {
        trainerService.authenticateTrainer(trainingRequestDto.getUsername(), trainingRequestDto.getPassword());
        trainingService.createTraining(
-               trainingRequestDto.getUsername(),
+               trainingRequestDto.getTraineeUsername(),
                trainingRequestDto.getTrainerUsername(),
                new Training(
                        trainingRequestDto.getName(),
@@ -67,13 +67,14 @@ public class TrainingFacade {
     }
 
     public List<TrainerTrainingDto> getTrainerTrainings(
-            @NotBlank String trainerUsername,
+            @NotBlank String username,
             @NotBlank String password,
+            @NotBlank String trainerUsername,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
             String traineeName
     ) {
-        List<Training> trainings =  trainingService.getTrainerTrainings(trainerUsername, password, fromDate, toDate, traineeName);
+        List<Training> trainings =  trainingService.getTrainerTrainings(username, password, trainerUsername, fromDate, toDate, traineeName);
         return trainings.stream().map(training -> trainerMapper.toTrainingDto(training)).toList();
     }
 }

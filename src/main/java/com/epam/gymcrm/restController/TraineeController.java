@@ -2,7 +2,6 @@ package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.dto.auth.ActiveDto;
 import com.epam.gymcrm.dto.auth.AuthenticationDto;
-import com.epam.gymcrm.dto.trainee.request.TraineeTrainingsRequestDto;
 import com.epam.gymcrm.dto.trainee.request.TraineeUpdateRequestDto;
 import com.epam.gymcrm.dto.trainee.request.TraineeTrainerAssignmentRequestDto;
 import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
@@ -18,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -128,18 +128,22 @@ public class TraineeController {
     ResponseEntity<List<TraineeTrainingDto>> getTraineeTrainingsList(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
-            @RequestBody TraineeTrainingsRequestDto traineeTrainingsRequestDto,
+            @RequestParam("traineeUsername") String traineeUsername,
+            @RequestParam("fromDate") LocalDate fromDate,
+            @RequestParam("toDate") LocalDate toDate,
+            @RequestParam("trainerUsername") String trainerUsername,
+            @RequestParam("trainingType") String trainingType,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
         List<TraineeTrainingDto> trainingDtoList = trainingFacade.getTraineeTrainings(
                 authUsername,
                 authPassword,
-                traineeTrainingsRequestDto.getTraineeUsername(),
-                traineeTrainingsRequestDto.getFromDate(),
-                traineeTrainingsRequestDto.getToDate(),
-                traineeTrainingsRequestDto.getTrainerUsername(),
-                traineeTrainingsRequestDto.getTrainingType()
+                traineeUsername,
+                fromDate,
+                toDate,
+                trainerUsername,
+                trainingType
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);

@@ -49,18 +49,18 @@ class TrainingServiceTest {
 
     @Test
     void getTrainerTrainings_returnsDataWhenCredentialsAreValid() {
-        String username = "trainer.user";
+        String username = "user";
         String password = "pass";
 
         List<Training> trainings = List.of(new Training());
 
         when(trainerService.authenticateTrainer(username, password)).thenReturn(true);
         when(trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(
-                username, FROM, TO, "toby")).thenReturn(trainings
+                "trainer.user", FROM, TO, "toby")).thenReturn(trainings
         );
 
 
-        List<Training> result = trainingService.getTrainerTrainings(username, password, FROM, TO, "toby");
+        List<Training> result = trainingService.getTrainerTrainings(username, password, "trainer.user", FROM, TO, "toby");
 
         assertEquals(trainings, result);
     }
@@ -171,42 +171,42 @@ class TrainingServiceTest {
 
     @Test
     void getTrainerTrainings_whenAuthenticationFails_throwsAuthenticationFailedException() {
-        String trainerUsername = "mike";
+        String username = "mike";
         String password = "bad";
 
-        when(trainerService.authenticateTrainer(trainerUsername, password)).thenReturn(false);
+        when(trainerService.authenticateTrainer(username, password)).thenReturn(false);
 
         assertThrows(AuthenticationFailedException.class,
-                () -> trainingService.getTrainerTrainings(trainerUsername, password, FROM, TO, "toby"));
+                () -> trainingService.getTrainerTrainings(username, password,"trainer.user", FROM, TO, "toby"));
 
-        verify(trainerService).authenticateTrainer(trainerUsername, password);
+        verify(trainerService).authenticateTrainer(username, password);
         verifyNoInteractions(trainingRepository);
     }
 
     @Test
     void getTrainerTrainings_whenAuthenticated_returnsTrainings() {
-        String trainerUsername = "mike";
+        String username = "mike";
         String password = "good";
 
         List<Training> trainings = List.of(new Training());
 
-        when(trainerService.authenticateTrainer(trainerUsername, password)).thenReturn(true);
+        when(trainerService.authenticateTrainer(username, password)).thenReturn(true);
         when(trainingRepository
                 .findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(
-                        trainerUsername,
+                        "trainer.username",
                         FROM,
                         TO,
                         "toby"
                 )).thenReturn(trainings);
 
-        List<Training> result = trainingService.getTrainerTrainings(trainerUsername, password, FROM, TO, "toby");
+        List<Training> result = trainingService.getTrainerTrainings(username, password, "trainer.username", FROM, TO, "toby");
 
         assertEquals(trainings, result);
 
-        verify(trainerService).authenticateTrainer(trainerUsername, password);
+        verify(trainerService).authenticateTrainer(username, password);
         verify(trainingRepository)
                 .findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(
-                        trainerUsername,
+                        "trainer.username",
                         FROM,
                         TO,
                         "toby"

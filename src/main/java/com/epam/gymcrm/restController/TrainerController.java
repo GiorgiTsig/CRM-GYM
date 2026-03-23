@@ -6,7 +6,6 @@ import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
-import com.epam.gymcrm.dto.trainer.request.TrainerTrainingsRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -70,8 +70,7 @@ public class TrainerController {
                 trainerRequestDto.getPassword(),
                 trainerRequestDto.getFirstName(),
                 trainerRequestDto.getLastName(),
-                trainerRequestDto.isActive(),
-                trainerRequestDto.getSpecialization()
+                trainerRequestDto.isActive()
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
@@ -81,7 +80,10 @@ public class TrainerController {
     ResponseEntity<List<TrainerTrainingDto>> getTrainerTrainingsList(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
-            @RequestBody TrainerTrainingsRequestDto trainerTrainingsRequestDto,
+            @RequestParam("trainerUsername") String trainerUsername,
+            @RequestParam("fromDate") LocalDate fromDate,
+            @RequestParam("toDate") LocalDate toDate,
+            @RequestParam("traineeUsername") String traineeUsername,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
@@ -89,9 +91,10 @@ public class TrainerController {
         List<TrainerTrainingDto> trainingDtoList = trainingFacade.getTrainerTrainings(
                 authUsername,
                 authPassword,
-                trainerTrainingsRequestDto.getFromDate(),
-                trainerTrainingsRequestDto.getToDate(),
-                trainerTrainingsRequestDto.getTraineeName()
+                trainerUsername,
+                fromDate,
+                toDate,
+                traineeUsername
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);
