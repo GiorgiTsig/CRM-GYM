@@ -2,6 +2,7 @@ package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.CreateTraineeDto;
 import com.epam.gymcrm.dto.trainee.TraineeProfileDto;
 import com.epam.gymcrm.dto.trainee.TrainerDto;
@@ -31,10 +32,10 @@ public class TraineeFacade {
         this.traineeMapper = traineeMapper;
     }
 
-    public Trainee createTraineeProfile(CreateTraineeDto createTraineeDto) {
+    public AuthenticationDto createTraineeProfile(CreateTraineeDto createTraineeDto) {
        Trainee traineeDto = traineeMapper.toTrainee(createTraineeDto);
-       traineeService.createTraineeProfile(traineeDto);
-       return  traineeDto;
+       Trainee trainee = traineeService.createTraineeProfile(traineeDto);
+       return  traineeMapper.toAuth(trainee);
     }
 
     public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {

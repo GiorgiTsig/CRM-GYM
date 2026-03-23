@@ -37,25 +37,25 @@ public class TrainerController {
     }
 
     @PostMapping("/create")
-    ResponseEntity<String> create(
+    ResponseEntity<AuthenticationDto> create(
             @RequestBody CreateTrainerDto userTrainerDto
     ) {
-        Trainer createdTrainer = trainerFacade.createTrainerProfile(userTrainerDto);
+        AuthenticationDto trainerCred = trainerFacade.createTrainerProfile(userTrainerDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Registration successful " + createdTrainer.getUser().getUsername() + " " + createdTrainer.getUser().getPassword());
+                .body(trainerCred);
 
     }
 
 
-    @GetMapping("/get")
+    @GetMapping("/profile")
     ResponseEntity<TrainerTraineeListItemDto> getTrainerProfile(
-            @RequestBody AuthenticationDto authController,
+            @RequestBody AuthenticationDto authRequest,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        TrainerTraineeListItemDto trainerDto = trainerFacade.getTrainerProfile(authController.getUsername(), authController.getPassword());
+        TrainerTraineeListItemDto trainerDto = trainerFacade.getTrainerProfile(authRequest.getUsername(), authRequest.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
     }
 
@@ -77,7 +77,7 @@ public class TrainerController {
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
     }
 
-    @GetMapping("/get/trainings")
+    @GetMapping("/profile/trainings")
     ResponseEntity<List<TrainerTrainingDto>> getTrainerTrainingsList(
             @RequestBody TrainerTrainingsRequestDto trainerTrainingsRequestDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId

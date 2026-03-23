@@ -37,26 +37,26 @@ public class TraineeController {
     }
 
     @PostMapping("/create")
-    ResponseEntity<String> create(
+    ResponseEntity<AuthenticationDto> create(
             @RequestBody CreateTraineeDto traineeDto
     ) {
-        Trainee trainee = traineeFacade.createTraineeProfile(traineeDto);
+        AuthenticationDto traineeCred = traineeFacade.createTraineeProfile(traineeDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Registration successful " + trainee.getUser().getUsername() + " " + trainee.getUser().getPassword());
+                .body(traineeCred);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/profile")
     ResponseEntity<TraineeProfileDto> traineeProfile(
-            @RequestBody AuthenticationDto authController,
-            @RequestParam("trainee") String traineeProfile,
+            @RequestBody AuthenticationDto authRequest,
+            @RequestParam("username") String traineeProfile,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
         TraineeProfileDto profileDTO = traineeFacade.getTraineeProfile(
-                authController.getUsername(),
-                authController.getPassword(),
+                authRequest.getUsername(),
+                authRequest.getPassword(),
                 traineeProfile
         );
 
@@ -85,21 +85,21 @@ public class TraineeController {
 
     @DeleteMapping("/delete")
     ResponseEntity<Void> deleteTraineeProfile(
-            @RequestBody AuthenticationDto authController,
+            @RequestBody AuthenticationDto authRequest,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        traineeFacade.deleteTrainee(authController.getUsername(), authController.getPassword());
+        traineeFacade.deleteTrainee(authRequest.getUsername(), authRequest.getPassword());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/get/unassigned")
+    @GetMapping("/profile/unassigned")
     ResponseEntity<List<TrainerDto>> getActiveTrainersNotAssignedToTrainee(
-            @RequestBody AuthenticationDto authController,
+            @RequestBody AuthenticationDto authRequest,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        List<TrainerDto> trainerDtoList = traineeFacade.getUnassignedTrainersForTrainee(authController.getUsername(), authController.getPassword());
+        List<TrainerDto> trainerDtoList = traineeFacade.getUnassignedTrainersForTrainee(authRequest.getUsername(), authRequest.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(trainerDtoList);
     }
 
@@ -120,7 +120,7 @@ public class TraineeController {
     }
 
 
-    @GetMapping("/get/trainings")
+    @GetMapping("/profile/trainings")
     ResponseEntity<List<TraineeTrainingDto>> getTraineeTrainingsList(
             @RequestBody TraineeTrainingsRequestDto traineeTrainingsRequestDtoDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId

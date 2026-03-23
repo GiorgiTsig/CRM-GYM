@@ -48,6 +48,7 @@ class TrainerControllerTest {
     @Test
     void create_shouldReturnCreatedResponse_whenTrainerIsValid() {
         CreateTrainerDto createTrainerDto = new CreateTrainerDto();
+        AuthenticationDto authenticationDto = new AuthenticationDto();
 
         User user = new User();
         user.setUsername(USERNAME);
@@ -60,12 +61,12 @@ class TrainerControllerTest {
         createdTrainer.setUser(user);
         createdTrainer.setTrainingType(trainingType);
 
-        when(trainerFacade.createTrainerProfile(createTrainerDto)).thenReturn(createdTrainer);
+        when(trainerFacade.createTrainerProfile(createTrainerDto)).thenReturn(authenticationDto);
 
-        ResponseEntity<String> response = trainerController.create(createTrainerDto);
+        ResponseEntity<AuthenticationDto> response = trainerController.create(createTrainerDto);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals("Registration successful " + USERNAME + " " + PASSWORD, response.getBody());
+        assertEquals(authenticationDto, response.getBody());
 
         verify(trainerFacade).createTrainerProfile(createTrainerDto);
     }

@@ -1,6 +1,7 @@
 package com.epam.gymcrm.mappper;
 
 import com.epam.gymcrm.domain.*;
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.TraineeTrainingDto;
 import com.epam.gymcrm.dto.UserDto;
 import com.epam.gymcrm.dto.trainee.*;
@@ -23,4 +24,8 @@ public interface TraineeMapper {
 
     @Mapping(target = "trainerUsername", source = "trainer.user.username")
     TraineeTrainingDto toTrainingDto(Training training);
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "password", source = "user.password")
+    AuthenticationDto toAuth(Trainee trainee);
 }

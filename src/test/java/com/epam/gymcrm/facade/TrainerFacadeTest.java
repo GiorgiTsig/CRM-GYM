@@ -3,6 +3,7 @@ package com.epam.gymcrm.facade;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.auth.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.TrainerTraineeListItemDto;
 import com.epam.gymcrm.mappper.TrainerMapper;
@@ -41,15 +42,19 @@ class TrainerFacadeTest {
         Trainer trainer = new Trainer();
         CreateTrainerDto createTrainerDto = new CreateTrainerDto();
         TrainingType type = new TrainingType();
+
+        AuthenticationDto authenticationDto = new AuthenticationDto();
+
         type.setTrainingTypeName(TRAINING_TYPE);
         trainer.setUser(user);
         trainer.setTrainingType(type);
         when(trainerMapper.toTrainer(createTrainerDto)).thenReturn(trainer);
         when(trainerService.createTrainerProfile(user, trainer, TRAINING_TYPE)).thenReturn(trainer);
+        when(trainerMapper.toAuth(trainer)).thenReturn(authenticationDto);
 
-        Trainer result = trainerFacade.createTrainerProfile(createTrainerDto);
+        AuthenticationDto result = trainerFacade.createTrainerProfile(createTrainerDto);
 
-        assertSame(trainer, result);
+        assertSame(authenticationDto, result);
         verify(trainerService).createTrainerProfile(user, trainer, TRAINING_TYPE);
     }
 

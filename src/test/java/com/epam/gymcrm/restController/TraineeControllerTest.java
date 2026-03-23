@@ -46,19 +46,14 @@ class TraineeControllerTest {
         traineeDto.setFirstName("John");
         traineeDto.setLastName("Doe");
 
-        User user = new User();
-        user.setUsername("John.Doe");
-        user.setPassword("12345");
+        AuthenticationDto authenticationDto = new AuthenticationDto();
 
-        Trainee createdTrainee = new Trainee();
-        createdTrainee.setUser(user);
+        when(traineeFacade.createTraineeProfile(traineeDto)).thenReturn(authenticationDto);
 
-        when(traineeFacade.createTraineeProfile(traineeDto)).thenReturn(createdTrainee);
-
-        ResponseEntity<String> response = traineeController.create(traineeDto);
+        ResponseEntity<AuthenticationDto> response = traineeController.create(traineeDto);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals("Registration successful John.Doe 12345", response.getBody());
+        assertEquals(authenticationDto, response.getBody());
 
         verify(traineeFacade).createTraineeProfile(traineeDto);
     }

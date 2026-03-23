@@ -29,24 +29,24 @@ public class AuthController {
 
     @GetMapping("/login")
     ResponseEntity<Void> auth(
-            @RequestBody AuthenticationDto authController,
+            @RequestBody AuthenticationDto authRequest,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(authController.getUsername(), authController.getPassword());
+        authentication.auth(authRequest.getUsername(), authRequest.getPassword());
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/password")
     ResponseEntity<String> changePassword(
-            @RequestBody AuthenticationDto authController,
+            @RequestBody AuthenticationDto authRequest,
             @RequestParam String newPassword,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(authController.getUsername(), authController.getPassword());
-        userService.updatePassword(authController.getUsername(), newPassword);
+        authentication.auth(authRequest.getUsername(), authRequest.getPassword());
+        userService.updatePassword(authRequest.getUsername(), newPassword);
 
         return ResponseEntity.status(HttpStatus.OK).body("Password changed successfully");
     }
