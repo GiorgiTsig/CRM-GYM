@@ -3,6 +3,7 @@ package com.epam.gymcrm.restController;
 import com.epam.gymcrm.dto.TrainingTypeDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.facade.TrainingFacade;
+import com.epam.gymcrm.util.Authentication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,9 @@ class TrainingControllerTest {
     @Mock
     private TrainingFacade trainingFacade;
 
+    @Mock
+    private Authentication authentication;
+
     @InjectMocks
     private TrainingController trainingController;
 
@@ -37,19 +41,20 @@ class TrainingControllerTest {
         TrainingTypeDto trainingType = new TrainingTypeDto();
         trainingType.setTrainingTypeName("MMA");
         TrainingRequestDto trainingDto = new TrainingRequestDto();
-        trainingDto.setAuthUsername(TRAINEE_USERNAME);
-        trainingDto.setAuthPassword(PASSWORD);
         trainingDto.setTrainerUsername(TRAINER_USERNAME);
         trainingDto.setDate(TRAINING_DATE);
         trainingDto.setDuration(TRAINING_DURATION);
         trainingDto.setName(TRAINING_NAME);
         trainingDto.setType(trainingType);
+        when(authentication.auth("au", "ps")).thenReturn(true);
 
         doNothing().when(trainingFacade).addTraining(
                 eq(trainingDto)
         );
 
         ResponseEntity<Void> response = trainingController.addTraining(
+                "au",
+                "ps",
                 trainingDto
         );
 

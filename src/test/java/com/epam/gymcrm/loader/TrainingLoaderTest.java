@@ -72,7 +72,7 @@ class TrainingLoaderTest {
         ArgumentCaptor<String> trainerUser = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> traineeUser = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Training> trainingCaptor = ArgumentCaptor.forClass(Training.class);
-        verify(trainingService).createTraining(trainerUser.capture(), traineeUser.capture(), trainingCaptor.capture());
+        verify(trainingService).createTraining(traineeUser.capture(), trainerUser.capture(), trainingCaptor.capture());
         assertEquals("trainer", trainerUser.getValue());
         assertEquals("trainee", traineeUser.getValue());
         assertEquals("Session", trainingCaptor.getValue().getName());

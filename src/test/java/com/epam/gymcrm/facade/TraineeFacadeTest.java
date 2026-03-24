@@ -3,7 +3,7 @@ package com.epam.gymcrm.facade;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
 import com.epam.gymcrm.dto.trainee.response.TraineeProfileDto;
 import com.epam.gymcrm.dto.trainee.response.TrainerDto;
@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class TraineeFacadeTest {
 
     private static final String USERNAME = "jdoe";
-    private static final String PASSWORD = "pass";
 
     @Mock
     private TraineeService traineeService;
@@ -65,15 +64,13 @@ class TraineeFacadeTest {
         String traineeProfile = "ad";
         Trainee trainee = new Trainee();
         TraineeProfileDto traineeDto = new TraineeProfileDto();
-        when(traineeService.authenticateTrainee(USERNAME, PASSWORD)).thenReturn(true);
         when(traineeService.getTrainee(traineeProfile)).thenReturn(Optional.of(trainee));
         when(traineeMapper.toTraineeDto(trainee)).thenReturn(traineeDto);
 
-        TraineeProfileDto result = traineeFacade.getTraineeProfile(USERNAME, PASSWORD, traineeProfile);
+        TraineeProfileDto result = traineeFacade.getTraineeProfile(traineeProfile);
 
         assertSame(traineeDto, result);
         InOrder inOrder = inOrder(traineeService);
-        inOrder.verify(traineeService).authenticateTrainee(USERNAME, PASSWORD);
         inOrder.verify(traineeService).getTrainee(traineeProfile);
     }
 
@@ -81,9 +78,9 @@ class TraineeFacadeTest {
     void updateTraineeTrainersDelegatesAllArguments() {
         Set<String> newTrainers = Set.of("t1", "t2");
 
-        traineeFacade.updateTraineeTrainers(USERNAME, PASSWORD, newTrainers);
+        traineeFacade.updateTraineeTrainers(USERNAME, newTrainers);
 
-        verify(traineeService).updateTraineeTrainers(USERNAME, PASSWORD, newTrainers);
+        verify(traineeService).updateTraineeTrainers(USERNAME,  newTrainers);
     }
 
     @Test
@@ -94,15 +91,13 @@ class TraineeFacadeTest {
         TrainerDto trainerDto = new TrainerDto();
         List<TrainerDto> expectedDtoList = List.of(trainerDto);
 
-        when(traineeService.authenticateTrainee(USERNAME, PASSWORD)).thenReturn(true);
         when(trainerService.getUnassignedTrainersForTrainee(USERNAME)).thenReturn(trainers);
         when(traineeMapper.toTrainerDto(trainer)).thenReturn(trainerDto);
 
-        List<TrainerDto> result = traineeFacade.getUnassignedTrainersForTrainee(USERNAME, PASSWORD);
+        List<TrainerDto> result = traineeFacade.getUnassignedTrainersForTrainee(USERNAME);
         assertEquals(expectedDtoList, result);
 
         InOrder inOrder = inOrder(traineeService, trainerService);
-        inOrder.verify(traineeService).authenticateTrainee(USERNAME, PASSWORD);
         inOrder.verify(trainerService).getUnassignedTrainersForTrainee(USERNAME);
     }
 
@@ -111,16 +106,14 @@ class TraineeFacadeTest {
         LocalDate dob = LocalDate.of(1990, 1, 1);
         String address = "123 Main St";
 
-        traineeFacade.updateTraineeProfile(USERNAME, PASSWORD, "John", "Doe", dob, address, true);
-        traineeFacade.changeTraineePassword(USERNAME, PASSWORD, "newPass");
-        traineeFacade.activateTrainee(USERNAME, PASSWORD);
-        traineeFacade.deactivateTrainee(USERNAME, PASSWORD);
-        traineeFacade.deleteTrainee(USERNAME, PASSWORD);
+        traineeFacade.updateTraineeProfile(USERNAME, "John", "Doe", dob, address, true);
+        traineeFacade.activateTrainee(USERNAME);
+        traineeFacade.deactivateTrainee(USERNAME);
+        traineeFacade.deleteTrainee(USERNAME);
 
-        verify(traineeService).updateTraineeProfile(USERNAME, PASSWORD, "John", "Doe", dob, address, true);
-        verify(traineeService).changeTraineePassword(USERNAME, PASSWORD, "newPass");
-        verify(traineeService).activateTrainee(USERNAME, PASSWORD);
-        verify(traineeService).deactivateTrainee(USERNAME, PASSWORD);
-        verify(traineeService).deleteTrainee(USERNAME, PASSWORD);
+        verify(traineeService).updateTraineeProfile(USERNAME, "John", "Doe", dob, address, true);
+        verify(traineeService).activateTrainee(USERNAME);
+        verify(traineeService).deactivateTrainee(USERNAME);
+        verify(traineeService).deleteTrainee(USERNAME);
     }
 }

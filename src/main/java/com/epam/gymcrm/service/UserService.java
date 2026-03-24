@@ -32,7 +32,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updatePassword(String username, @NotEmpty String newPassword) {
+    public User updatePassword(@NotEmpty String username, @NotEmpty String newPassword) {
         log.info("Started Changing Password");
         User user = this.getUser(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
         user.setPassword(newPassword);

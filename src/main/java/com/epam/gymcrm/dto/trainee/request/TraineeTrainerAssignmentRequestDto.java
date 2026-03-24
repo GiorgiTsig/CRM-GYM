@@ -4,7 +4,6 @@ import java.util.Set;
 
 public class TraineeTrainerAssignmentRequestDto {
     private String username;
-    private String password;
     private Set<String> trainerUsernames;
 
     public String getUsername() {
@@ -13,14 +12,6 @@ public class TraineeTrainerAssignmentRequestDto {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public Set<String> getTrainerUsernames() {

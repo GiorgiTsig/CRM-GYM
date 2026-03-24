@@ -1,13 +1,14 @@
 package com.epam.gymcrm.restController;
 
-import com.epam.gymcrm.dto.auth.ActiveDto;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
+import com.epam.gymcrm.dto.auth.request.ActiveDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
+import com.epam.gymcrm.util.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public class TrainerController {
     private static final Logger log = LoggerFactory.getLogger(TrainerController.class);
     private TrainerFacade trainerFacade;
     private TrainingFacade trainingFacade;
+    private Authentication authentication;
 
     @Autowired
     public void setTrainingFacade(TrainingFacade trainingFacade) {
@@ -35,7 +37,12 @@ public class TrainerController {
         this.trainerFacade = trainerFacade;
     }
 
-    @PostMapping("/")
+    @Autowired
+    public void setAuthentication(Authentication authentication) {
+        this.authentication = authentication;
+    }
+
+    @PostMapping("/profile")
     ResponseEntity<AuthenticationDto> create(
             @RequestBody CreateTrainerDto userTrainerDto
     ) {
@@ -46,28 +53,30 @@ public class TrainerController {
 
     }
 
-
     @GetMapping("/profile")
     ResponseEntity<TrainerProfileDto> getTrainerProfile(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
+            @RequestParam("trainerProfile") String trainerProfile,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-
-        TrainerProfileDto trainerDto = trainerFacade.getTrainerProfile(authUsername, authPassword);
+        authentication.auth(authUsername, authPassword);
+        TrainerProfileDto trainerDto = trainerFacade.getTrainerProfile(trainerProfile);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
     }
 
     @PutMapping("/profile")
     ResponseEntity<TrainerProfileDto> updateTrainerStatus(
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
             @RequestBody TrainerProfileUpdateRequestDto trainerRequestDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
+        authentication.auth(authUsername, authPassword);
         TrainerProfileDto profileDTO = trainerFacade.updateTrainerProfile(
                 trainerRequestDto.getUsername(),
-                trainerRequestDto.getPassword(),
                 trainerRequestDto.getFirstName(),
                 trainerRequestDto.getLastName(),
                 trainerRequestDto.isActive()
@@ -88,9 +97,8 @@ public class TrainerController {
     ){
         log.info("TransactionId: {}", transactionId);
 
+        authentication.auth(authUsername, authPassword);
         List<TrainerTrainingDto> trainingDtoList = trainingFacade.getTrainerTrainings(
-                authUsername,
-                authPassword,
                 trainerUsername,
                 fromDate,
                 toDate,
@@ -102,12 +110,15 @@ public class TrainerController {
 
     @PatchMapping("/profile/status")
     ResponseEntity<Void> updateTrainerProfile (
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
             @RequestBody ActiveDto activeDto
     ) {
+        authentication.auth(authUsername, authPassword);
         if (activeDto.isActive()) {
-            trainerFacade.activateTrainer(activeDto.getUsername(), activeDto.getPassword());
+            trainerFacade.activateTrainer(activeDto.getUsername());
         } else  {
-            trainerFacade.deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
+            trainerFacade.deactivateTrainer(activeDto.getUsername());
 
         }
 

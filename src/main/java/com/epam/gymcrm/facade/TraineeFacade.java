@@ -2,11 +2,10 @@ package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
 import com.epam.gymcrm.dto.trainee.response.TraineeProfileDto;
 import com.epam.gymcrm.dto.trainee.response.TrainerDto;
-import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.mapper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
@@ -40,56 +39,44 @@ public class TraineeFacade {
        return traineeMapper.toAuth(createdTrainee);
     }
 
-    public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {
-        return traineeService.authenticateTrainee(username, password);
-    }
-
-    public TraineeProfileDto getTraineeProfile(@NotBlank String username, @NotBlank String password, @NotBlank String traineeProfile) {
-        traineeService.authenticateTrainee(username, password);
+    public TraineeProfileDto getTraineeProfile(@NotBlank String traineeProfile) {
         Trainee trainee = traineeService.getTrainee(traineeProfile).orElseThrow(() -> new EntityNotFoundException("Trainee doesn't exist"));
         return traineeMapper.toTraineeDto(trainee);
     }
 
-    public void changeTraineePassword(@NotBlank String username, @NotBlank String password, @NotBlank String newPassword) {
-        traineeService.changeTraineePassword(username, password, newPassword);
-    }
-
     public TraineeProfileDto updateTraineeProfile(
             @NotBlank String username,
-            @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
-            @NotNull LocalDate dateOfBirth,
-            @NotBlank String address,
+            LocalDate dateOfBirth,
+            String address,
             @NotNull boolean isActive
     ) {
-       Trainee trainee = traineeService.updateTraineeProfile(username, password, firstName, lastName, dateOfBirth, address, isActive);
+       Trainee trainee = traineeService.updateTraineeProfile(username, firstName, lastName, dateOfBirth, address, isActive);
        return traineeMapper.toTraineeDto(trainee);
     }
 
-    public void activateTrainee(@NotBlank String username, @NotBlank String password) {
-        traineeService.activateTrainee(username, password);
+    public void activateTrainee(@NotBlank String username) {
+        traineeService.activateTrainee(username);
     }
 
-    public void deactivateTrainee(@NotBlank String username, @NotBlank String password) {
-        traineeService.deactivateTrainee(username, password);
+    public void deactivateTrainee(@NotBlank String username) {
+        traineeService.deactivateTrainee(username);
     }
 
-    public void deleteTrainee(@NotBlank String username, @NotBlank String password) {
-        traineeService.deleteTrainee(username, password);
+    public void deleteTrainee(@NotBlank String username) {
+        traineeService.deleteTrainee(username);
     }
 
     public List<TrainerDto> updateTraineeTrainers(
             @NotBlank String username,
-            @NotBlank String password,
             Set<@NotNull String> trainerUsernames
     ) {
-        List<Trainer> trainers = traineeService.updateTraineeTrainers(username, password, trainerUsernames);
+        List<Trainer> trainers = traineeService.updateTraineeTrainers(username, trainerUsernames);
         return trainers.stream().map(traineeMapper::toTrainerDto).toList();
     }
 
-    public List<TrainerDto> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {
-        traineeService.authenticateTrainee(username, password);
+    public List<TrainerDto> getUnassignedTrainersForTrainee(@NotBlank String username) {
         List<Trainer> trainers = trainerService.getUnassignedTrainersForTrainee(username);
         return trainers.stream().map(traineeMapper::toTrainerDto).toList();
     }

@@ -14,16 +14,13 @@ public class TrainingTypesFacade {
 
     private TrainingTypeService trainingTypeService;
     private TrainingTypeMapper trainingTypeMapper;
-    private Authentication authentication;
 
-    public TrainingTypesFacade(TrainingTypeService trainingTypeService, TrainingTypeMapper trainingTypeMapper, Authentication authentication) {
+    public TrainingTypesFacade(TrainingTypeService trainingTypeService, TrainingTypeMapper trainingTypeMapper) {
         this.trainingTypeService = trainingTypeService;
         this.trainingTypeMapper = trainingTypeMapper;
-        this.authentication = authentication;
     }
 
-    public List<TrainingTypeDetailsDto> findAll(String username, String password) {
-        authentication.auth(username, password);
+    public List<TrainingTypeDetailsDto> findAll() {
         List<TrainingType> trainingTypes = trainingTypeService.findAll();
         return trainingTypes.stream().map(trainingType -> trainingTypeMapper.toTrainingTypeDto(trainingType)).toList();
     }

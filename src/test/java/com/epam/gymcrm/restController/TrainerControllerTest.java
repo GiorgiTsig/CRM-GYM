@@ -3,14 +3,15 @@ package com.epam.gymcrm.restController;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.dto.auth.ActiveDto;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
+import com.epam.gymcrm.dto.auth.request.ActiveDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
+import com.epam.gymcrm.util.Authentication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +40,9 @@ class TrainerControllerTest {
 
     @Mock
     private TrainingFacade trainingFacade;
+
+    @Mock
+    private Authentication authentication;
 
     @InjectMocks
     private TrainerController trainerController;
@@ -72,23 +76,23 @@ class TrainerControllerTest {
     @Test
     void getTrainerProfile_shouldReturnTrainerDto_whenCredentialsValid() {
         TrainerProfileDto trainerDto = new TrainerProfileDto();
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
-        when(trainerFacade.getTrainerProfile(USERNAME, PASSWORD)).thenReturn(trainerDto);
+        when(trainerFacade.getTrainerProfile("trainer")).thenReturn(trainerDto);
 
         ResponseEntity<TrainerProfileDto> response =
-                trainerController.getTrainerProfile(USERNAME, PASSWORD, null);
+                trainerController.getTrainerProfile(USERNAME, PASSWORD, "trainer", null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(trainerDto, response.getBody());
 
-        verify(trainerFacade).getTrainerProfile(USERNAME, PASSWORD);
+        verify(trainerFacade).getTrainerProfile("trainer");
     }
 
     @Test
     void updateTraineeProfile_shouldReturnTrainerDto_whenUpdateSuccessful() {
         TrainerProfileUpdateRequestDto trainerRequestDto = new TrainerProfileUpdateRequestDto();
         trainerRequestDto.setUsername(USERNAME);
-        trainerRequestDto.setPassword(PASSWORD);
         trainerRequestDto.setFirstName(FIRST_NAME);
         trainerRequestDto.setLastName(LAST_NAME);
         trainerRequestDto.setActive(true);
@@ -98,10 +102,10 @@ class TrainerControllerTest {
         trainerDto.setLastName(LAST_NAME);
         trainerDto.setSpecialization(SPECIALIZATION);
         trainerDto.setActive(true);
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         when(trainerFacade.updateTrainerProfile(
                 USERNAME,
-                PASSWORD,
                 FIRST_NAME,
                 LAST_NAME,
                 true
@@ -109,6 +113,8 @@ class TrainerControllerTest {
 
         ResponseEntity<TrainerProfileDto> response =
                 trainerController.updateTrainerStatus(
+                        USERNAME,
+                        PASSWORD,
                         trainerRequestDto,
                         null
                 );
@@ -118,7 +124,6 @@ class TrainerControllerTest {
 
         verify(trainerFacade).updateTrainerProfile(
                 USERNAME,
-                PASSWORD,
                 FIRST_NAME,
                 LAST_NAME,
                 true
@@ -130,10 +135,9 @@ class TrainerControllerTest {
         TrainerTrainingDto trainingDto1 = new TrainerTrainingDto();
         TrainerTrainingDto trainingDto2 = new TrainerTrainingDto();
         List<TrainerTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         when(trainingFacade.getTrainerTrainings(
-                USERNAME,
-                PASSWORD,
                 "trainer.username",
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 2, 1),
@@ -156,8 +160,6 @@ class TrainerControllerTest {
         assertEquals(List.of(trainingDto1, trainingDto2), response.getBody());
 
         verify(trainingFacade).getTrainerTrainings(
-                USERNAME,
-                PASSWORD,
                 "trainer.username",
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 2, 1),
@@ -169,33 +171,33 @@ class TrainerControllerTest {
     void updateTraineeStatus_shouldActivateTrainer_whenIsActiveTrue() {
         ActiveDto activeDto = new ActiveDto();
         activeDto.setUsername(USERNAME);
-        activeDto.setPassword(PASSWORD);
         activeDto.setActive(true);
-        doNothing().when(trainerFacade).activateTrainer(activeDto.getUsername(), activeDto.getPassword());
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+        doNothing().when(trainerFacade).activateTrainer(activeDto.getUsername());
 
         ResponseEntity<Void> response =
-                trainerController.updateTrainerProfile(activeDto);
+                trainerController.updateTrainerProfile(USERNAME, PASSWORD, activeDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        verify(trainerFacade).activateTrainer(activeDto.getUsername(), activeDto.getPassword());
-        verify(trainerFacade, never()).deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
+        verify(trainerFacade).activateTrainer(activeDto.getUsername());
+        verify(trainerFacade, never()).deactivateTrainer(activeDto.getUsername());
     }
 
     @Test
     void updateTraineeStatus_shouldDeactivateTrainer_whenIsActiveFalse() {
         ActiveDto activeDto = new ActiveDto();
         activeDto.setUsername(USERNAME);
-        activeDto.setPassword(PASSWORD);
         activeDto.setActive(false);
-        doNothing().when(trainerFacade).deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+        doNothing().when(trainerFacade).deactivateTrainer(activeDto.getUsername());
 
         ResponseEntity<Void> response =
-                trainerController.updateTrainerProfile(activeDto);
+                trainerController.updateTrainerProfile(USERNAME, PASSWORD, activeDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        verify(trainerFacade).deactivateTrainer(activeDto.getUsername(), activeDto.getPassword());
-        verify(trainerFacade, never()).activateTrainer(activeDto.getUsername(), activeDto.getPassword());
+        verify(trainerFacade).deactivateTrainer(activeDto.getUsername());
+        verify(trainerFacade, never()).activateTrainer(activeDto.getUsername());
     }
 }

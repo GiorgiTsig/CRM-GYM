@@ -1,7 +1,7 @@
 package com.epam.gymcrm.restController;
 
-import com.epam.gymcrm.dto.auth.ActiveDto;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
+import com.epam.gymcrm.dto.auth.request.ActiveDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.request.TraineeUpdateRequestDto;
 import com.epam.gymcrm.dto.trainee.request.TraineeTrainerAssignmentRequestDto;
 import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
@@ -10,6 +10,7 @@ import com.epam.gymcrm.dto.trainee.response.TraineeTrainingDto;
 import com.epam.gymcrm.dto.trainee.response.TrainerDto;
 import com.epam.gymcrm.facade.TraineeFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
+import com.epam.gymcrm.util.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class TraineeController {
     private static final Logger log = LoggerFactory.getLogger(TraineeController.class);
     private TraineeFacade traineeFacade;
     private TrainingFacade trainingFacade;
+    private Authentication authentication;
 
     @Autowired
     public void setTraineeFacade(TraineeFacade traineeFacade) {
@@ -38,7 +40,12 @@ public class TraineeController {
         this.trainingFacade = trainingFacade;
     }
 
-    @PostMapping("/")
+    @Autowired
+    public void setAuthentication(Authentication authentication) {
+        this.authentication = authentication;
+    }
+
+    @PostMapping("/profile")
     ResponseEntity<AuthenticationDto> create(
             @RequestBody CreateTraineeDto traineeDto
     ) {
@@ -52,16 +59,13 @@ public class TraineeController {
     ResponseEntity<TraineeProfileDto> traineeProfile(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
-            @RequestParam("username") String traineeProfile,
+            @RequestParam("traineeProfile") String traineeProfile,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        TraineeProfileDto profileDTO = traineeFacade.getTraineeProfile(
-                authUsername,
-                authPassword,
-                traineeProfile
-        );
+        authentication.auth(authUsername, authPassword);
+        TraineeProfileDto profileDTO = traineeFacade.getTraineeProfile(traineeProfile);
 
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
     }
@@ -69,13 +73,15 @@ public class TraineeController {
 
     @PutMapping("/profile")
     ResponseEntity<TraineeProfileDto> updateTraineeProfile(
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
             @RequestBody TraineeUpdateRequestDto traineeDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
+        authentication.auth(authUsername, authPassword);
         TraineeProfileDto profileDTO = traineeFacade.updateTraineeProfile(
                 traineeDto.getUsername(),
-                traineeDto.getPassword(),
                 traineeDto.getFirstName(),
                 traineeDto.getLastName(),
                 traineeDto.getDateOfBirth(),
@@ -88,11 +94,14 @@ public class TraineeController {
 
     @DeleteMapping("/profile")
     ResponseEntity<Void> deleteTraineeProfile(
-            @RequestBody AuthenticationDto authRequest,
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
+            @RequestParam("traineeUsername") String traineeUsername,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        traineeFacade.deleteTrainee(authRequest.getUsername(), authRequest.getPassword());
+        authentication.auth(authUsername, authPassword);
+        traineeFacade.deleteTrainee(traineeUsername);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -100,23 +109,27 @@ public class TraineeController {
     ResponseEntity<List<TrainerDto>> getActiveTrainersNotAssignedToTrainee(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
+            @RequestParam("traineeUsername") String traineeUsername,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        List<TrainerDto> trainerDtoList = traineeFacade.getUnassignedTrainersForTrainee(authUsername, authPassword);
+        authentication.auth(authUsername, authPassword);
+        List<TrainerDto> trainerDtoList = traineeFacade.getUnassignedTrainersForTrainee(traineeUsername);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDtoList);
     }
 
     @PutMapping("/profile/trainers")
     ResponseEntity<List<TrainerDto>> updateTraineeTrainers(
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
             @RequestBody TraineeTrainerAssignmentRequestDto trainerList,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
+        authentication.auth(authUsername, authPassword);
         List<TrainerDto> trainerDtoList = traineeFacade.updateTraineeTrainers(
                 trainerList.getUsername(),
-                trainerList.getPassword(),
                 trainerList.getTrainerUsernames()
         );
 
@@ -136,9 +149,8 @@ public class TraineeController {
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
+        authentication.auth(authUsername, authPassword);
         List<TraineeTrainingDto> trainingDtoList = trainingFacade.getTraineeTrainings(
-                authUsername,
-                authPassword,
                 traineeUsername,
                 fromDate,
                 toDate,
@@ -151,12 +163,15 @@ public class TraineeController {
 
     @PatchMapping("/profile/status")
     ResponseEntity<Void> updateTraineeStatus (
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
             @RequestBody ActiveDto activeDto
     ) {
+        authentication.auth(authUsername, authPassword);
         if (activeDto.isActive()) {
-            traineeFacade.activateTrainee(activeDto.getUsername(), activeDto.getPassword());
+            traineeFacade.activateTrainee(activeDto.getUsername());
         } else {
-            traineeFacade.deactivateTrainee(activeDto.getUsername(), activeDto.getPassword());
+            traineeFacade.deactivateTrainee(activeDto.getUsername());
 
         }
 

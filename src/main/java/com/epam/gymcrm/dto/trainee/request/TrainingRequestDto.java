@@ -5,30 +5,12 @@ import com.epam.gymcrm.dto.TrainingTypeDto;
 import java.time.LocalDate;
 
 public class TrainingRequestDto {
-    private String authUsername;
-    private String authPassword;
     private String name;
     private LocalDate date;
     private TrainingTypeDto type;
     private Integer duration;
     private String traineeUsername;
     private String trainerUsername;
-
-    public String getAuthUsername() {
-        return authUsername;
-    }
-
-    public void setAuthUsername(String authUsername) {
-        this.authUsername = authUsername;
-    }
-
-    public String getAuthPassword() {
-        return authPassword;
-    }
-
-    public void setAuthPassword(String authPassword) {
-        this.authPassword = authPassword;
-    }
 
     public String getName() {
         return name;

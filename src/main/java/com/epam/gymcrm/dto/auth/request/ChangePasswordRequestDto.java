@@ -1,8 +1,9 @@
-package com.epam.gymcrm.dto.auth;
+package com.epam.gymcrm.dto.auth.request;
 
-public class AuthenticationDto {
+public class ChangePasswordRequestDto {
     private String username;
     private String password;
+    private String newPassword;
 
     public String getUsername() {
         return username;
@@ -18,5 +19,13 @@ public class AuthenticationDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 }

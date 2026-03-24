@@ -2,15 +2,12 @@ package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.dto.trainee.response.TraineeTrainingDto;
-import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.mapper.TraineeMapper;
 import com.epam.gymcrm.mapper.TrainerMapper;
-import com.epam.gymcrm.service.TrainerService;
 import com.epam.gymcrm.service.TrainingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,16 +22,11 @@ import static org.mockito.Mockito.*;
 class TrainingFacadeTest {
 
     private static final String TRAINER_USERNAME = "trainer.user";
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "password";
     private static final LocalDate FROM = LocalDate.of(2024, 1, 1);
     private static final LocalDate TO = LocalDate.of(2026, 3, 16);
 
     @Mock
     private TrainingService trainingService;
-
-    @Mock
-    private TrainerService trainerService;
 
     @Mock
     private TraineeMapper traineeMapper;
@@ -45,21 +37,6 @@ class TrainingFacadeTest {
     @InjectMocks
     private TrainingFacade trainingFacade;
 
-    @Test
-    void addTrainingAuthenticatesTrainerThenCreatesTraining() {
-        TrainingRequestDto trainingDto = new TrainingRequestDto();
-        trainingDto.setName("Martial Art");
-        trainingDto.setDate(FROM);
-        trainingDto.setDuration(90);
-        trainingDto.setTrainerUsername(TRAINER_USERNAME);
-
-        when(trainerService.authenticateTrainer(trainingDto.getAuthUsername(), trainingDto.getAuthPassword())).thenReturn(true);
-
-        trainingFacade.addTraining(trainingDto);
-
-        InOrder inOrder = inOrder(trainerService, trainingService);
-        inOrder.verify(trainerService).authenticateTrainer(trainingDto.getAuthUsername(), trainingDto.getAuthPassword());
-    }
 
     @Test
     void getTraineeTrainingsDelegatesToService() {
@@ -67,14 +44,14 @@ class TrainingFacadeTest {
         List<Training> trainings = List.of(training);
         TraineeTrainingDto trainingDto = new TraineeTrainingDto();
         List<TraineeTrainingDto> expectedDtoList = List.of(trainingDto);
-        when(trainingService.getTraineeTrainings(USERNAME, PASSWORD, "trainee.username", FROM, TO, TRAINER_USERNAME,"MMA"))
+        when(trainingService.getTraineeTrainings("trainee.username", FROM, TO, TRAINER_USERNAME,"MMA"))
                 .thenReturn(trainings);
 
         when(traineeMapper.toTrainingDto(training)).thenReturn(trainingDto);
 
-        List<TraineeTrainingDto> result = trainingFacade.getTraineeTrainings(USERNAME, PASSWORD, "trainee.username", FROM, TO, TRAINER_USERNAME,"MMA");
+        List<TraineeTrainingDto> result = trainingFacade.getTraineeTrainings("trainee.username", FROM, TO, TRAINER_USERNAME,"MMA");
         assertEquals(expectedDtoList, result);
-        verify(trainingService).getTraineeTrainings(USERNAME, PASSWORD, "trainee.username" ,FROM, TO, TRAINER_USERNAME, "MMA");
+        verify(trainingService).getTraineeTrainings("trainee.username" ,FROM, TO, TRAINER_USERNAME, "MMA");
     }
     @Test
     void getTrainerTrainingsDelegatesToService() {
@@ -84,15 +61,15 @@ class TrainingFacadeTest {
         TrainerTrainingDto trainingDto = new TrainerTrainingDto();
         List<TrainerTrainingDto> expectedDtoList = List.of(trainingDto);
 
-        when(trainingService.getTrainerTrainings(USERNAME, PASSWORD, TRAINER_USERNAME, FROM, TO, "Toby"))
+        when(trainingService.getTrainerTrainings(TRAINER_USERNAME, FROM, TO, "Toby"))
                 .thenReturn(trainings);
 
         when(trainerMapper.toTrainingDto(training)).thenReturn(trainingDto);
 
         List<TrainerTrainingDto> result =
-                trainingFacade.getTrainerTrainings(USERNAME, PASSWORD, TRAINER_USERNAME, FROM, TO, "Toby");
+                trainingFacade.getTrainerTrainings(TRAINER_USERNAME, FROM, TO, "Toby");
 
         assertEquals(expectedDtoList, result);
-        verify(trainingService).getTrainerTrainings(USERNAME, PASSWORD, TRAINER_USERNAME, FROM, TO, "Toby");
+        verify(trainingService).getTrainerTrainings(TRAINER_USERNAME, FROM, TO, "Toby");
     }
 }

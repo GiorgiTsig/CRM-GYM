@@ -1,12 +1,12 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.repository.TrainingRepository;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.exception.EntityNotFoundException;
+import com.epam.gymcrm.util.Authentication;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
@@ -79,17 +79,12 @@ public class TrainingService {
 
     @Transactional(readOnly = true)
     public List<Training> getTraineeTrainings(
-            @NotBlank String username,
-            @NotBlank String password,
             @NotBlank String traineeUsername,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
             String trainerUsername,
             String trainingType
     ) {
-        if (!traineeService.authenticateTrainee(username, password)) {
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
         log.info("Selecting trainee trainings with username: {}", traineeUsername);
         return trainingRepository.findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeNameAndTrainerUserUsername(
                 traineeUsername,
@@ -102,16 +97,11 @@ public class TrainingService {
 
     @Transactional(readOnly = true)
     public List<Training> getTrainerTrainings(
-            @NotBlank String username,
-            @NotBlank String password,
             @NotBlank String trainerUsername,
             @DateTimeFormat LocalDate fromDate,
             @DateTimeFormat LocalDate toDate,
             String traineeUsername
     ) {
-        if (!trainerService.authenticateTrainer(username, password)) {
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
         log.info("Selecting trainer trainings with username: {}", trainerUsername);
         return trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(
                 trainerUsername,

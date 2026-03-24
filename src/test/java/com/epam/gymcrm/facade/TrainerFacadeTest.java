@@ -3,7 +3,7 @@ package com.epam.gymcrm.facade;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
 import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
 import com.epam.gymcrm.mapper.TrainerMapper;
@@ -62,43 +62,29 @@ class TrainerFacadeTest {
     void getTrainerProfileAuthenticatesBeforeFetching() {
         Trainer trainer = new Trainer();
         TrainerProfileDto trainerDto = new TrainerProfileDto();
-        when(trainerService.authenticateTrainer(USERNAME, PASSWORD)).thenReturn(true);
         when(trainerService.getTrainer(USERNAME)).thenReturn(Optional.of(trainer));
         when(trainerMapper.toTrainerDto(trainer)).thenReturn(trainerDto);
 
-        TrainerProfileDto result = trainerFacade.getTrainerProfile(USERNAME, PASSWORD);
+        TrainerProfileDto result = trainerFacade.getTrainerProfile(USERNAME);
 
         assertSame(trainerDto, result);
         InOrder inOrder = inOrder(trainerService);
-        inOrder.verify(trainerService).authenticateTrainer(USERNAME, PASSWORD);
         inOrder.verify(trainerService).getTrainer(USERNAME);
     }
 
     @Test
     void updateTrainerProfileDelegatesAllArguments() {
-        trainerFacade.updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", true);
+        trainerFacade.updateTrainerProfile(USERNAME, "John", "Doe", true);
 
-        verify(trainerService).updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", true);
-    }
-
-    @Test
-    void authenticateTrainerReturnsServiceResult() {
-        when(trainerService.authenticateTrainer(USERNAME, PASSWORD)).thenReturn(true);
-
-        boolean authenticated = trainerFacade.authenticateTrainer(USERNAME, PASSWORD);
-
-        assertTrue(authenticated);
-        verify(trainerService).authenticateTrainer(USERNAME, PASSWORD);
+        verify(trainerService).updateTrainerProfile(USERNAME, "John", "Doe", true);
     }
 
     @Test
     void forwardsPasswordAndActivationCommands() {
-        trainerFacade.changeTrainerPassword(USERNAME, PASSWORD, "newPass");
-        trainerFacade.activateTrainer(USERNAME, PASSWORD);
-        trainerFacade.deactivateTrainer(USERNAME, PASSWORD);
+        trainerFacade.activateTrainer(USERNAME);
+        trainerFacade.deactivateTrainer(USERNAME);
 
-        verify(trainerService).changeTrainerPassword(USERNAME, PASSWORD, "newPass");
-        verify(trainerService).activateTrainer(USERNAME, PASSWORD);
-        verify(trainerService).deactivateTrainer(USERNAME, PASSWORD);
+        verify(trainerService).activateTrainer(USERNAME);
+        verify(trainerService).deactivateTrainer(USERNAME);
     }
 }

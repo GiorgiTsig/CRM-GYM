@@ -1,9 +1,8 @@
-package com.epam.gymcrm.dto.auth;
+package com.epam.gymcrm.dto.auth.response;
 
-public class ActiveDto {
+public class AuthenticationDto {
     private String username;
     private String password;
-    private boolean isActive;
 
     public String getUsername() {
         return username;
@@ -19,13 +18,5 @@ public class ActiveDto {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
     }
 }

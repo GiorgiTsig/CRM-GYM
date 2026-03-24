@@ -1,7 +1,7 @@
 package com.epam.gymcrm.mapper;
 
 import com.epam.gymcrm.domain.*;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.dto.trainee.response.TraineeTrainingDto;
 import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
 import com.epam.gymcrm.dto.trainee.response.TraineeProfileDto;

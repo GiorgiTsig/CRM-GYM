@@ -30,7 +30,6 @@ public class TraineeService {
     private TraineeRepository traineeRepository;
     private UsernameGenerator usernameGenerator;
     private PasswordGenerator passwordGenerator;
-    private Authentication authentication;
     private TrainerService trainerService;
     private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
 
@@ -42,11 +41,6 @@ public class TraineeService {
     @Autowired
     public void setTrainerService(TrainerService trainerService) {
         this.trainerService = trainerService;
-    }
-
-    @Autowired
-    public void setAuthentication(Authentication authentication) {
-        this.authentication = authentication;
     }
 
     @Autowired
@@ -87,23 +81,11 @@ public class TraineeService {
         return traineeRepository.getTraineeByUserUsername(username);
     }
 
-    @Transactional(readOnly = true)
-    public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {
-        if (!authentication.auth(username, password)) {
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
-        return traineeRepository.getTraineeByUserUsername(username).isPresent();
-    }
-
     @Transactional
     public List<Trainer> updateTraineeTrainers(
-            @NotBlank String username, @NotBlank String password,
+            @NotBlank String username,
             Set<@NotNull String> trainerUsernames
     ) {
-        log.info("Checking user with Username/Password");
-        if (!authenticateTrainee(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-        }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
 
@@ -127,7 +109,6 @@ public class TraineeService {
     @Transactional
     public Trainee updateTraineeProfile(
             @NotBlank String username,
-            @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
             LocalDate dateOfBirth,
@@ -135,9 +116,6 @@ public class TraineeService {
             @NotNull boolean isActive
     ) {
         log.info("Checking user with Username/Password");
-        if (!authenticateTrainee(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-        }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
         User user = trainee.getUser();
@@ -153,26 +131,10 @@ public class TraineeService {
         return trainee;
     }
 
-    @Transactional
-    public void changeTraineePassword(@NotBlank String username, @NotBlank String password, @NotBlank String newPassword) {
-        log.info("Checking user with Username/Password");
-        if (!authenticateTrainee(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-        }
-
-        Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
-        trainee.getUser().setPassword(newPassword);
-        traineeRepository.save(trainee);
-        log.info("Trainee password changed successfully with username: {}", username);
-    }
-
 
     @Transactional
-    public void deleteTrainee(@NotBlank String username, @NotBlank String password) {
+    public void deleteTrainee(@NotBlank String username) {
         log.info("Checking user with Username/Password");
-        if (!authenticateTrainee(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-        }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
 
@@ -181,11 +143,8 @@ public class TraineeService {
     }
 
     @Transactional
-    public void activateTrainee(@NotBlank String username, @NotBlank String password) {
+    public void activateTrainee(@NotBlank String username) {
         log.info("Checking user with Username/Password");
-        if (!authenticateTrainee(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-        }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
         if (trainee.getUser().isActive()) {
@@ -198,11 +157,8 @@ public class TraineeService {
     }
 
     @Transactional
-    public void deactivateTrainee(@NotBlank String username, @NotBlank String password) {
+    public void deactivateTrainee(@NotBlank String username) {
         log.info("Checking user with Username/Password");
-        if (!authenticateTrainee(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-        }
 
         Trainee trainee = traineeRepository.getTraineeByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("User doesn't exist"));
         if (!trainee.getUser().isActive()) {

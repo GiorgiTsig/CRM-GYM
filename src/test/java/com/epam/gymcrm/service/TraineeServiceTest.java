@@ -35,8 +35,6 @@ class TraineeServiceTest {
     @Mock
     private PasswordGenerator passwordGenerator;
     @Mock
-    private Authentication authentication;
-    @Mock
     private TrainerService trainerService;
 
     @InjectMocks
@@ -66,22 +64,6 @@ class TraineeServiceTest {
     }
 
     @Test
-    void authenticateTrainee_returnsTrueWhenCredentialsValidAndUserExists() {
-        when(authentication.auth("john", "pw")).thenReturn(true);
-        when(traineeRepository.getTraineeByUserUsername("john")).thenReturn(Optional.of(new Trainee()));
-
-        assertTrue(traineeService.authenticateTrainee("john", "pw"));
-    }
-
-    @Test
-    void authenticateTrainee_throwsWhenCredentialsInvalid() {
-        when(authentication.auth("john", "bad")).thenReturn(false);
-
-        assertThrows(AuthenticationFailedException.class, () -> traineeService.authenticateTrainee("john", "bad"));
-        verify(traineeRepository, never()).getTraineeByUserUsername("john");
-    }
-
-    @Test
     void updateTraineeProfile_updatesFieldsAndSaves() {
         User user = new User();
         user.setFirstName("Old");
@@ -89,13 +71,11 @@ class TraineeServiceTest {
         Trainee trainee = new Trainee();
         trainee.setUser(user);
 
-        when(authentication.auth("user", "pw")).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername("user"))
                 .thenReturn(Optional.of(trainee));
 
         traineeService.updateTraineeProfile(
                 "user",
-                "pw",
                 "New",
                 "Surname",
                 java.time.LocalDate.of(1990, 1, 1),
@@ -113,7 +93,6 @@ class TraineeServiceTest {
     @Test
     void updateTraineeTrainers_replacesOldAndAddsNew() {
         String username = "trainee.user";
-        String password = "pwd";
         Trainee trainee = new Trainee();
         User traineeUser = new User();
         traineeUser.setActive(true);
@@ -133,13 +112,12 @@ class TraineeServiceTest {
 
         trainee.setTrainers(new ArrayList<>(List.of(oldTrainer)));
 
-        when(authentication.auth(username, password)).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee));
 
         when(trainerService.getAllTrainersUserUsername(Set.of("old"))).thenReturn(Set.of(oldTrainer));
         when(trainerService.getAllTrainersUserUsername(Set.of("new"))).thenReturn(Set.of(newTrainer));
 
-        traineeService.updateTraineeTrainers(username, password, Set.of("new"));
+        traineeService.updateTraineeTrainers(username, Set.of("new"));
 
         Set<String> resultUsernames = trainee.getTrainers().stream()
                 .map(Trainer::getUser)
@@ -158,10 +136,9 @@ class TraineeServiceTest {
     void deleteTrainee_removesById() {
         Trainee trainee = new Trainee();
         trainee.setId(UUID.randomUUID());
-        when(authentication.auth("user", "pw")).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername("user")).thenReturn(Optional.of(trainee));
 
-        traineeService.deleteTrainee("user", "pw");
+        traineeService.deleteTrainee("user");
 
         verify(traineeRepository).deleteTraineeById(trainee.getId());
     }
@@ -173,10 +150,9 @@ class TraineeServiceTest {
         user.setActive(false);
         trainee.setUser(user);
 
-        when(authentication.auth("user", "pw")).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername("user")).thenReturn(Optional.of(trainee));
 
-        traineeService.activateTrainee("user", "pw");
+        traineeService.activateTrainee("user");
 
         assertTrue(user.isActive());
         verify(traineeRepository).save(trainee);
@@ -189,10 +165,9 @@ class TraineeServiceTest {
         user.setActive(true);
         trainee.setUser(user);
 
-        when(authentication.auth("user", "pw")).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername("user")).thenReturn(Optional.of(trainee));
 
-        assertThrows(IllegalStateException.class, () -> traineeService.activateTrainee("user", "pw"));
+        assertThrows(IllegalStateException.class, () -> traineeService.activateTrainee("user"));
         verify(traineeRepository, never()).save(trainee);
     }
 
@@ -203,10 +178,9 @@ class TraineeServiceTest {
         user.setActive(true);
         trainee.setUser(user);
 
-        when(authentication.auth("user", "pw")).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername("user")).thenReturn(Optional.of(trainee));
 
-        traineeService.deactivateTrainee("user", "pw");
+        traineeService.deactivateTrainee("user");
 
         assertFalse(user.isActive());
         verify(traineeRepository).save(trainee);
@@ -219,45 +193,10 @@ class TraineeServiceTest {
         user.setActive(false);
         trainee.setUser(user);
 
-        when(authentication.auth("user", "pw")).thenReturn(true);
         when(traineeRepository.getTraineeByUserUsername("user")).thenReturn(Optional.of(trainee));
 
-        assertThrows(IllegalStateException.class, () -> traineeService.deactivateTrainee("user", "pw"));
+        assertThrows(IllegalStateException.class, () -> traineeService.deactivateTrainee("user"));
         verify(traineeRepository, never()).save(trainee);
-    }
-
-    @Test
-    void changeTraineePassword_updatesPasswordWhenCredentialsAreValid() {
-        String username = "trainee.user";
-        String password = "oldPass";
-        String newPassword = "newPass";
-
-        User user = new User();
-        user.setPassword(password);
-        Trainee trainee = new Trainee();
-        trainee.setUser(user);
-
-        when(authentication.auth(username, password)).thenReturn(true);
-        when(traineeRepository.getTraineeByUserUsername(username)).thenReturn(Optional.of(trainee));
-
-        traineeService.changeTraineePassword(username, password, newPassword);
-
-        assertEquals(newPassword, trainee.getUser().getPassword());
-        verify(traineeRepository).save(trainee);
-    }
-
-    @Test
-    void changeTraineePassword_throwsWhenCredentialsAreInvalid() {
-        String username = "trainee.user";
-        String password = "wrongPass";
-
-        when(authentication.auth(username, password)).thenReturn(false);
-
-        assertThrows(
-                AuthenticationFailedException.class,
-                () -> traineeService.changeTraineePassword(username, password, "newPass")
-        );
-        verify(traineeRepository, never()).save(org.mockito.ArgumentMatchers.any());
     }
 
     @Test

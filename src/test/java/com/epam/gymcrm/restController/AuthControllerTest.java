@@ -1,7 +1,7 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.dto.auth.AuthenticationDto;
+import com.epam.gymcrm.dto.auth.request.ChangePasswordRequestDto;
 import com.epam.gymcrm.service.UserService;
 import com.epam.gymcrm.util.Authentication;
 import org.junit.jupiter.api.Test;
@@ -11,8 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -46,9 +44,10 @@ class AuthControllerTest {
 
     @Test
     void changePassword_shouldReturnOkMessage_whenPasswordUpdated() {
-        AuthenticationDto authControllerDto = new AuthenticationDto();
+        ChangePasswordRequestDto authControllerDto = new ChangePasswordRequestDto();
         authControllerDto.setUsername(USERNAME);
         authControllerDto.setPassword(PASSWORD);
+        authControllerDto.setNewPassword(NEW_PASSWORD);
 
         User user = new User();
         user.setUsername(USERNAME);
@@ -58,7 +57,7 @@ class AuthControllerTest {
         doReturn(user).when(userService).updatePassword(USERNAME, NEW_PASSWORD);
 
         ResponseEntity<String> response =
-                authController.changePassword(authControllerDto, NEW_PASSWORD, null);
+                authController.changePassword(authControllerDto, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Password changed successfully", response.getBody());
