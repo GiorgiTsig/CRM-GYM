@@ -1,8 +1,10 @@
 package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.dto.TrainingTypeDto;
+import com.epam.gymcrm.dto.TrainingType.TrainingTypeDetailsDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.facade.TrainingFacade;
+import com.epam.gymcrm.facade.TrainingTypesFacade;
 import com.epam.gymcrm.util.Authentication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -32,6 +36,9 @@ class TrainingControllerTest {
 
     @Mock
     private Authentication authentication;
+
+    @Mock
+    private TrainingTypesFacade trainingTypesFacade;
 
     @InjectMocks
     private TrainingController trainingController;
@@ -68,5 +75,23 @@ class TrainingControllerTest {
         assertEquals(TRAINING_NAME, trainingDto.getName());
         assertEquals(TRAINING_DATE, trainingDto.getDate());
         assertEquals(TRAINING_DURATION, trainingDto.getDuration());
+    }
+
+    @Test
+    void getTrainingType_shouldReturnOkWithBody_whenAuthenticated() {
+        TrainingTypeDetailsDto dto = new TrainingTypeDetailsDto();
+        dto.setId(UUID.randomUUID());
+        dto.setTrainingTypeName("MMA");
+        List<TrainingTypeDetailsDto> trainingTypes = List.of(dto);
+
+        when(authentication.auth("au", "ps")).thenReturn(true);
+        when(trainingTypesFacade.findAll()).thenReturn(trainingTypes);
+
+        ResponseEntity<List<TrainingTypeDetailsDto>> response = trainingController.getTrainingType("au", "ps");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(trainingTypes, response.getBody());
+        verify(authentication).auth("au", "ps");
+        verify(trainingTypesFacade).findAll();
     }
 }
