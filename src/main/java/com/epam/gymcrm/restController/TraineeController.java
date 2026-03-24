@@ -105,11 +105,11 @@ public class TraineeController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/profile/unassigned")
+    @GetMapping("{username}/unassigned-traineers")
     ResponseEntity<List<TrainerDto>> getActiveTrainersNotAssignedToTrainee(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
-            @RequestParam("traineeUsername") String traineeUsername,
+            @PathVariable("username") String traineeUsername,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
@@ -142,10 +142,10 @@ public class TraineeController {
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
             @RequestParam("traineeUsername") String traineeUsername,
-            @RequestParam("fromDate") LocalDate fromDate,
-            @RequestParam("toDate") LocalDate toDate,
-            @RequestParam("trainerUsername") String trainerUsername,
-            @RequestParam("trainingType") String trainingType,
+            @RequestParam(value = "fromDate", required = false) LocalDate fromDate,
+            @RequestParam(value = "toDate", required = false) LocalDate toDate,
+            @RequestParam(value = "trainerUsername", required = false) String trainerUsername,
+            @RequestParam(value = "trainingType", required = false) String trainingType,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);

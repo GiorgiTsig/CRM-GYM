@@ -35,7 +35,7 @@ public class TrainingController {
         this.authentication = authentication;
     }
 
-    @PostMapping("/profile")
+    @PostMapping
     ResponseEntity<Void> addTraining(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,

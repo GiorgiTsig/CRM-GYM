@@ -90,9 +90,9 @@ public class TrainerController {
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
             @RequestParam("trainerUsername") String trainerUsername,
-            @RequestParam("fromDate") LocalDate fromDate,
-            @RequestParam("toDate") LocalDate toDate,
-            @RequestParam("traineeUsername") String traineeUsername,
+            @RequestParam(value = "fromDate", required = false) LocalDate fromDate,
+            @RequestParam(value = "toDate", required = false) LocalDate toDate,
+            @RequestParam(value = "traineeUsername", required = false) String traineeUsername,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
