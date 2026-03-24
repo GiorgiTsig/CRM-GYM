@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
 
 @Entity
+@Table(name = "trainingType")
 public class TrainingType {
 
     @Id

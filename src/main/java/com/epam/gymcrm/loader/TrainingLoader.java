@@ -8,12 +8,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import java.util.stream.StreamSupport;
 
 @Component
 @Order(3)
+@Profile("stg")
 public class TrainingLoader extends AbstractDataLoader {
     private static final Logger logger = LoggerFactory.getLogger(TrainingLoader.class);
 

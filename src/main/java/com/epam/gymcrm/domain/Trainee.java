@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Entity
+@Table(name = "trainee")
 public class Trainee {
 
     @Id
