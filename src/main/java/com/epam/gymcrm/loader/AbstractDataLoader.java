@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-@Profile("stg")
 public abstract class AbstractDataLoader implements GymDataLoader {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractDataLoader.class);
