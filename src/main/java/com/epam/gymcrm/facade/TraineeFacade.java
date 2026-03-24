@@ -2,18 +2,21 @@ package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
+import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
+import com.epam.gymcrm.dto.trainee.response.TraineeProfileDto;
+import com.epam.gymcrm.dto.trainee.response.TrainerDto;
+import com.epam.gymcrm.exception.EntityNotFoundException;
+import com.epam.gymcrm.mapper.TraineeMapper;
 import com.epam.gymcrm.service.TraineeService;
-import jakarta.validation.Valid;
+import com.epam.gymcrm.service.TrainerService;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -21,61 +24,60 @@ import java.util.Set;
 public class TraineeFacade {
 
     private final TraineeService traineeService;
+    private final TrainerService trainerService;
+    private final TraineeMapper traineeMapper;
 
-    public TraineeFacade(TraineeService traineeService) {
+    public TraineeFacade(TraineeService traineeService, TrainerService trainerService, TraineeMapper traineeMapper) {
         this.traineeService = traineeService;
+        this.trainerService = trainerService;
+        this.traineeMapper = traineeMapper;
     }
 
-    public Trainee createTraineeProfile(@Valid User user, @Valid Trainee trainee) {
-       return traineeService.createTraineeProfile(user, trainee);
+    public AuthenticationDto createTraineeProfile(CreateTraineeDto createTraineeDto) {
+       Trainee trainee = traineeMapper.toTrainee(createTraineeDto);
+       Trainee createdTrainee = traineeService.createTraineeProfile(trainee);
+       return traineeMapper.toAuth(createdTrainee);
     }
 
-    public boolean authenticateTrainee(@NotBlank String username, @NotBlank String password) {
-        return traineeService.authenticateTrainee(username, password);
+    public TraineeProfileDto getTraineeProfile(@NotBlank String traineeProfile) {
+        Trainee trainee = traineeService.getTrainee(traineeProfile).orElseThrow(() -> new EntityNotFoundException("Trainee doesn't exist"));
+        return traineeMapper.toTraineeDto(trainee);
     }
 
-    public Optional<Trainee> getTraineeProfile(@NotBlank String username, @NotBlank String password) {
-        traineeService.authenticateTrainee(username, password);
-        return traineeService.getTrainee(username);
-    }
-
-    public void changeTraineePassword(@NotBlank String username, @NotBlank String password, @NotBlank String newPassword) {
-        traineeService.changeTraineePassword(username, password, newPassword);
-    }
-
-    public void updateTraineeProfile(
+    public TraineeProfileDto updateTraineeProfile(
             @NotBlank String username,
-            @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
-            @NotNull LocalDate dateOfBirth,
-            @NotBlank String address
+            LocalDate dateOfBirth,
+            String address,
+            @NotNull boolean isActive
     ) {
-        traineeService.updateTraineeProfile(username, password, firstName, lastName, dateOfBirth, address);
+       Trainee trainee = traineeService.updateTraineeProfile(username, firstName, lastName, dateOfBirth, address, isActive);
+       return traineeMapper.toTraineeDto(trainee);
     }
 
-    public void activateTrainee(@NotBlank String username, @NotBlank String password) {
-        traineeService.activateTrainee(username, password);
+    public void activateTrainee(@NotBlank String username) {
+        traineeService.activateTrainee(username);
     }
 
-    public void deactivateTrainee(@NotBlank String username, @NotBlank String password) {
-        traineeService.deactivateTrainee(username, password);
+    public void deactivateTrainee(@NotBlank String username) {
+        traineeService.deactivateTrainee(username);
     }
 
-    public void deleteTrainee(@NotBlank String username, @NotBlank String password) {
-        traineeService.deleteTrainee(username, password);
+    public void deleteTrainee(@NotBlank String username) {
+        traineeService.deleteTrainee(username);
     }
 
-    public void updateTraineeTrainers(
+    public List<TrainerDto> updateTraineeTrainers(
             @NotBlank String username,
-            @NotBlank String password,
             Set<@NotNull String> trainerUsernames
     ) {
-        traineeService.updateTraineeTrainers(username, password, trainerUsernames);
+        List<Trainer> trainers = traineeService.updateTraineeTrainers(username, trainerUsernames);
+        return trainers.stream().map(traineeMapper::toTrainerDto).toList();
     }
 
-    public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username, @NotBlank String password) {
-        traineeService.authenticateTrainee(username, password);
-        return traineeService.getUnassignedTrainersForTrainee(username);
+    public List<TrainerDto> getUnassignedTrainersForTrainee(@NotBlank String username) {
+        List<Trainer> trainers = trainerService.getUnassignedTrainersForTrainee(username);
+        return trainers.stream().map(traineeMapper::toTrainerDto).toList();
     }
 }

@@ -1,63 +1,61 @@
 package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
+import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
+import com.epam.gymcrm.exception.EntityNotFoundException;
+import com.epam.gymcrm.mapper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @Validated
 public class TrainerFacade {
 
     private final TrainerService trainerService;
+    private final TrainerMapper  trainerMapper;
 
-    public TrainerFacade(TrainerService trainerService) {
+    public TrainerFacade(TrainerService trainerService, TrainerMapper trainerMapper) {
         this.trainerService = trainerService;
+        this.trainerMapper = trainerMapper;
     }
 
-    public Trainer createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String trainingType) {
-       return trainerService.createTrainerProfile(user, trainer, trainingType);
+    public AuthenticationDto createTrainerProfile(CreateTrainerDto createTrainerDto) {
+       Trainer totrainer = trainerMapper.toTrainer(createTrainerDto);
+       Trainer trainer = trainerService.createTrainerProfile(totrainer.getUser(), totrainer, totrainer.getTrainingType().getTrainingTypeName());
+       return trainerMapper.toAuth(trainer);
     }
 
-    public boolean authenticateTrainer(@NotBlank String username, @NotBlank String password) {
-        return trainerService.authenticateTrainer(username, password);
+    public TrainerProfileDto getTrainerProfile(@NotBlank String username) {
+        Trainer trainer = trainerService.getTrainer(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
+        return trainerMapper.toTrainerDto(trainer);
     }
 
-    public Optional<Trainer> getTrainerProfile(@NotBlank String username, @NotBlank String password) {
-        trainerService.authenticateTrainer(username, password);
-        return trainerService.getTrainer(username);
-    }
-
-    public void changeTrainerPassword(@NotBlank String username, @NotBlank String password, @NotBlank String newPassword) {
-        trainerService.changeTrainerPassword(username, password, newPassword);
-    }
-
-    public void updateTrainerProfile(
+    public TrainerProfileDto updateTrainerProfile(
             @NotBlank String username,
-            @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
-            @NotBlank String specialization
+            @NotNull boolean isActive
     ) {
-        trainerService.updateTrainerProfile(username, password, firstName, lastName, specialization);
+       Trainer trainer = trainerService.updateTrainerProfile(username, firstName, lastName, isActive);
+       return trainerMapper.toTrainerDto(trainer);
     }
 
-    public void activateTrainer(@NotBlank String username, @NotBlank String password) {
-        trainerService.activateTrainer(username, password);
+    public void activateTrainer(@NotBlank String username) {
+        trainerService.activateTrainer(username);
     }
 
-    public void deactivateTrainer(@NotBlank String username, @NotBlank String password) {
-        trainerService.deactivateTrainer(username, password);
+    public void deactivateTrainer(@NotBlank String username) {
+        trainerService.deactivateTrainer(username);
     }
 
-    public List<Trainer> getAllTrainers(@NotBlank String username, @NotBlank String password) {
-        trainerService.authenticateTrainer(username, password);
+    public List<Trainer> getAllTrainers() {
         return trainerService.getAllTrainers();
     }
 }

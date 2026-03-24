@@ -54,8 +54,8 @@ class TrainingLoaderTest {
                       "name": "Session",
                       "date": "2024-01-01",
                       "duration": 45,
-                      "trainerId": { "user": { "username": "trainer" } },
-                      "traineeId": { "user": { "username": "trainee" } }
+                      "trainer": { "user": { "username": "trainer" } },
+                      "trainee": { "user": { "username": "trainee" } }
                     }
                 ] }
                 """;
@@ -72,7 +72,7 @@ class TrainingLoaderTest {
         ArgumentCaptor<String> trainerUser = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> traineeUser = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Training> trainingCaptor = ArgumentCaptor.forClass(Training.class);
-        verify(trainingService).createTraining(trainerUser.capture(), traineeUser.capture(), trainingCaptor.capture());
+        verify(trainingService).createTraining(traineeUser.capture(), trainerUser.capture(), trainingCaptor.capture());
         assertEquals("trainer", trainerUser.getValue());
         assertEquals("trainee", traineeUser.getValue());
         assertEquals("Session", trainingCaptor.getValue().getName());
@@ -88,8 +88,8 @@ class TrainingLoaderTest {
                       "name": "Session",
                       "date": "2024-01-01",
                       "duration": 45,
-                      "trainerId": { "user": { "username": "trainer" } },
-                      "traineeId": { "user": { "username": "trainee" } }
+                      "trainer": { "user": { "username": "trainer" } },
+                      "trainee": { "user": { "username": "trainee" } }
                     }
                 ] }
                 """;

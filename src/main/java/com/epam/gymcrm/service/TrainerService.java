@@ -12,6 +12,7 @@ import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,17 +31,11 @@ public class TrainerService {
     private TrainerRepository trainerRepository;
     private UsernameGenerator usernameGenerator;
     private PasswordGenerator passwordGenerator;
-    private Authentication authentication;
     private static final Logger log = LoggerFactory.getLogger(TrainerService.class);
 
     @Autowired
     public void setTrainerRepository(TrainerRepository trainerRepository) {
         this.trainerRepository = trainerRepository;
-    }
-
-    @Autowired
-    public void setAuthentication(Authentication authentication) {
-        this.authentication = authentication;
     }
 
     @Autowired
@@ -67,6 +62,7 @@ public class TrainerService {
 
         String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName());
         user.setUsername(username);
+        user.setActive(true);
 
         trainer.setUser(user);
         TrainingType trainingType = trainingType(type);
@@ -84,46 +80,30 @@ public class TrainerService {
         return trainerRepository.getTrainerByUserUsername(username);
     }
 
-    @Transactional(readOnly = true)
-    public boolean authenticateTrainer(@NotBlank String username, @NotBlank String password) {
-        if (!authentication.auth(username, password)) {
-            return false;
-        }
-        return trainerRepository.getTrainerByUserUsername(username).isPresent();
-    }
-
     @Transactional
-    public void updateTrainerProfile(
+    public Trainer updateTrainerProfile(
             @NotBlank String username,
-            @NotBlank String password,
             @NotBlank String firstName,
             @NotBlank String lastName,
-            @NotBlank String specialization
+            @NotNull boolean isActive
     ) {
         log.info("Checking user with Username/Password");
-        if (!authenticateTrainer(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
 
         Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         User user = trainer.getUser();
 
+        user.setActive(isActive);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-        trainer.setTrainingType(trainingType(specialization));
 
         trainerRepository.save(trainer);
         log.info("Trainer profile updated successfully for username: {}", username);
+        return trainer;
     }
 
     @Transactional
-    public void deleteTrainer(UUID id, @NotBlank String username, @NotBlank String password) {
+    public void deleteTrainer(UUID id) {
         log.info("Checking user with Username/Password");
-        if (!authenticateTrainer(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
 
         log.info("Deleting Trainer with id: {}", id);
         trainerRepository.deleteTrainerById(id);
@@ -131,26 +111,8 @@ public class TrainerService {
     }
 
     @Transactional
-    public void changeTrainerPassword(@NotBlank String username, @NotBlank String password, @NotBlank String newPassword) {
+    public void activateTrainer(@NotBlank String username) {
         log.info("Checking user with Username/Password");
-        if (!authenticateTrainer(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
-
-        Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
-        trainer.getUser().setPassword(newPassword);
-        trainerRepository.save(trainer);
-        log.info("Trainer password changed successfully with username: {}", username);
-    }
-
-    @Transactional
-    public void activateTrainer(@NotBlank String username, @NotBlank String password) {
-        log.info("Checking user with Username/Password");
-        if (!authenticateTrainer(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
 
         Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         if (trainer.getUser().isActive()) {
@@ -163,12 +125,8 @@ public class TrainerService {
     }
 
     @Transactional
-    public void deactivateTrainer(@NotBlank String username, @NotBlank String password) {
+    public void deactivateTrainer(@NotBlank String username) {
         log.info("Checking user with Username/Password");
-        if (!authenticateTrainer(username, password)) {
-            log.error("Username and Password are not correct: {}", username);
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
 
         Trainer trainer = trainerRepository.getTrainerByUserUsername(username).orElseThrow(() -> new EntityNotFoundException("Trainer doesn't exist"));
         if (!trainer.getUser().isActive()) {
@@ -178,6 +136,12 @@ public class TrainerService {
         trainer.getUser().setActive(false);
         trainerRepository.save(trainer);
         log.info("Trainer deactivated successfully with username: {}", username);
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<Trainer> getUnassignedTrainersForTrainee(@NotBlank String username) {
+        return trainerRepository.findUnassignedTrainersByTraineeUsername(username);
     }
 
     @Transactional(readOnly = true)

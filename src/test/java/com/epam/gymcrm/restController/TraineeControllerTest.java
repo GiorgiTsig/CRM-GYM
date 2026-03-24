@@ -1,0 +1,258 @@
+package com.epam.gymcrm.restController;
+
+import com.epam.gymcrm.dto.auth.request.ActiveDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
+import com.epam.gymcrm.dto.trainee.request.TraineeUpdateRequestDto;
+import com.epam.gymcrm.dto.trainee.request.TraineeTrainerAssignmentRequestDto;
+import com.epam.gymcrm.dto.trainee.request.CreateTraineeDto;
+import com.epam.gymcrm.dto.trainee.response.TraineeProfileDto;
+import com.epam.gymcrm.dto.trainee.response.TraineeTrainingDto;
+import com.epam.gymcrm.dto.trainee.response.TrainerDto;
+import com.epam.gymcrm.facade.TraineeFacade;
+import com.epam.gymcrm.facade.TrainingFacade;
+import com.epam.gymcrm.util.Authentication;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class TraineeControllerTest {
+    @Mock
+    private TraineeFacade traineeFacade;
+
+    @Mock
+    private TrainingFacade trainingFacade;
+
+    @Mock
+    private Authentication authentication;
+
+    @InjectMocks
+    private TraineeController traineeController;
+
+    private static final String USERNAME = "john";
+    private static final String PASSWORD = "123";
+
+    @Test
+    void create_shouldReturnCreatedResponse() {
+        CreateTraineeDto traineeDto = new CreateTraineeDto();
+        traineeDto.setFirstName("John");
+        traineeDto.setLastName("Doe");
+
+        AuthenticationDto authenticationDto = new AuthenticationDto();
+
+        when(traineeFacade.createTraineeProfile(traineeDto)).thenReturn(authenticationDto);
+
+        ResponseEntity<AuthenticationDto> response = traineeController.create(traineeDto);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(authenticationDto, response.getBody());
+
+        verify(traineeFacade).createTraineeProfile(traineeDto);
+    }
+
+    @Test
+    void traineeProfile_shouldReturnTraineeDto_whenCredentialsValid(){
+        String traineeProfile = "ad";
+        TraineeProfileDto traineeDto = new TraineeProfileDto();
+        traineeDto.setFirstName(USERNAME);
+
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+        when(traineeFacade.getTraineeProfile(traineeProfile)).thenReturn(traineeDto);
+
+        ResponseEntity<TraineeProfileDto> response =
+                traineeController.traineeProfile(USERNAME, PASSWORD, traineeProfile, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(traineeDto, response.getBody());
+
+        verify(traineeFacade).getTraineeProfile(traineeProfile);
+    }
+
+
+    @Test
+    void updateTraineeProfile_shouldReturnUpdatedTraineeDto_whenProfileUpdated() {
+        String firstName = "john";
+        String lastName = "moh";
+        LocalDate dateOfBirth = LocalDate.of(2026, 2, 2);
+        String address = "Fr";
+
+        TraineeUpdateRequestDto traineeUpdateRequestDto = new TraineeUpdateRequestDto();
+
+        traineeUpdateRequestDto.setUsername(USERNAME);
+        traineeUpdateRequestDto.setFirstName(firstName);
+        traineeUpdateRequestDto.setLastName(lastName);
+        traineeUpdateRequestDto.setDateOfBirth(dateOfBirth);
+        traineeUpdateRequestDto.setAddress(address);
+        traineeUpdateRequestDto.setActive(true);
+
+        TraineeProfileDto traineeDto = new TraineeProfileDto();
+
+        traineeDto.setFirstName(USERNAME);
+        traineeDto.setFirstName(firstName);
+        traineeDto.setLastName(lastName);
+        traineeDto.setAddress(address);
+        traineeDto.setDateOfBirth(dateOfBirth);
+        traineeDto.setActive(true);
+
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+        when(traineeFacade.updateTraineeProfile(USERNAME, firstName, lastName, LocalDate.of(2026, 2, 2), address, true)).thenReturn(traineeDto);
+
+        ResponseEntity<TraineeProfileDto> response = traineeController.updateTraineeProfile(USERNAME, PASSWORD, traineeUpdateRequestDto, null);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(traineeDto, response.getBody());
+
+        verify(traineeFacade).updateTraineeProfile(USERNAME, firstName, lastName, LocalDate.of(2026, 2, 2), address, true);
+    }
+
+    @Test
+    void deleteTraineeProfile_ShouldReturnOk_whenCredentialsValid() {
+        AuthenticationDto authController = new AuthenticationDto();
+        authController.setUsername(USERNAME);
+
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+        doNothing()
+                .when(traineeFacade)
+                .deleteTrainee("trainee");
+
+        ResponseEntity<Void> response =
+                traineeController.deleteTraineeProfile(USERNAME, PASSWORD, "trainee", null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getActiveTrainersNotAssignedToTrainee_shouldReturnTrainerDtoList_whenCredentialsValid() {
+        TrainerDto trainerDto1 = new TrainerDto();
+        trainerDto1.setUsername("trainer.one");
+
+        TrainerDto trainerDto2 = new TrainerDto();
+        trainerDto2.setUsername("trainer.two");
+
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+        List<TrainerDto> trainers = List.of(trainerDto1, trainerDto2);
+
+        when(traineeFacade.getUnassignedTrainersForTrainee("trainee")).thenReturn(trainers);
+
+        ResponseEntity<List<TrainerDto>> response =
+                traineeController.getActiveTrainersNotAssignedToTrainee(USERNAME, PASSWORD, "trainee", null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(List.of(trainerDto1, trainerDto2), response.getBody());
+
+        verify(traineeFacade).getUnassignedTrainersForTrainee("trainee");
+    }
+
+    @Test
+    void updateTraineeTrainers_shouldReturnTrainerDtoList_whenUpdateSuccessful() {
+        Set<String> trainerUsernames = Set.of("trainer.one", "trainer.two");
+        TraineeTrainerAssignmentRequestDto trainerList = new TraineeTrainerAssignmentRequestDto();
+        trainerList.setUsername(USERNAME);
+        trainerList.setTrainerUsernames(trainerUsernames);
+        TrainerDto dto1 = new TrainerDto();
+        dto1.setUsername("trainer.one");
+
+        TrainerDto dto2 = new TrainerDto();
+        dto2.setUsername("trainer.two");
+
+        List<TrainerDto> trainers = List.of(dto1, dto2);
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+
+        when(traineeFacade.updateTraineeTrainers(USERNAME, trainerUsernames))
+                .thenReturn(trainers);
+
+        ResponseEntity<List<TrainerDto>> response =
+                traineeController.updateTraineeTrainers(USERNAME, PASSWORD, trainerList, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(List.of(dto1, dto2), response.getBody());
+
+        verify(traineeFacade).updateTraineeTrainers(USERNAME, trainerUsernames);
+    }
+
+    @Test
+    void getTraineeTrainingsList_shouldReturnTrainingDtoList_whenRequestIsValid() {
+        TraineeTrainingDto trainingDto1 = new TraineeTrainingDto();
+        TraineeTrainingDto trainingDto2 = new TraineeTrainingDto();
+        List<TraineeTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+
+        when(trainingFacade.getTraineeTrainings(
+                "trainee.user",
+                LocalDate.of(1999, 1, 1),
+                LocalDate.of(1999, 1, 2),
+                "trainer.user",
+                "MMA"
+        )).thenReturn(trainings);
+
+
+        ResponseEntity<List<TraineeTrainingDto>> response =
+                traineeController.getTraineeTrainingsList(
+                        USERNAME,
+                        PASSWORD,
+                        "trainee.user",
+                        LocalDate.of(1999, 1, 1),
+                        LocalDate.of(1999, 1, 2),
+                        "trainer.user",
+                        "MMA",
+                        null
+                );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(List.of(trainingDto1, trainingDto2), response.getBody());
+
+        verify(trainingFacade).getTraineeTrainings(
+                "trainee.user",
+                LocalDate.of(1999, 1, 1),
+                LocalDate.of(1999, 1, 2),
+                "trainer.user",
+                "MMA"
+        );
+    }
+
+    @Test
+    void updateTraineeStatus_shouldActivateTrainee_whenIsActiveTrue() {
+        ActiveDto authController = new ActiveDto();
+        authController.setUsername(USERNAME);
+        authController.setActive(true);
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+
+        doNothing().when(traineeFacade).activateTrainee(authController.getUsername());
+
+        ResponseEntity<Void> response =
+                traineeController.updateTraineeStatus(USERNAME, PASSWORD, authController);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        verify(traineeFacade).activateTrainee(USERNAME);
+        verify(traineeFacade, never()).deactivateTrainee(USERNAME);
+    }
+
+    @Test
+    void updateTraineeStatus_shouldDeactivateTrainee_whenIsActiveFalse() {
+        ActiveDto authController = new ActiveDto();
+        authController.setUsername(USERNAME);
+        authController.setActive(false);
+        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
+
+        doNothing().when(traineeFacade).deactivateTrainee(authController.getUsername());
+
+        ResponseEntity<Void> response =
+                traineeController.updateTraineeStatus(USERNAME, PASSWORD, authController);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        verify(traineeFacade).deactivateTrainee(authController.getUsername());
+        verify(traineeFacade, never()).activateTrainee(authController.getUsername());
+    }
+}

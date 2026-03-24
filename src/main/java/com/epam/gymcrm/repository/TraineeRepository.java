@@ -2,6 +2,7 @@ package com.epam.gymcrm.repository;
 
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Repository
 public interface TraineeRepository extends JpaRepository<Trainee, UUID> {
 
+    @EntityGraph(attributePaths = {"trainers", "trainers.user", "user"})
     Optional<Trainee> getTraineeByUserUsername(String userUsername);
 
     @NonNull
@@ -26,16 +28,4 @@ public interface TraineeRepository extends JpaRepository<Trainee, UUID> {
     @NonNull
     @Override
     List<Trainee> findAll();
-
-    @Query("""
-            SELECT tr
-            FROM Trainer tr
-            WHERE tr NOT IN (
-                SELECT t2
-                FROM Trainee ta
-                JOIN ta.trainers t2
-                WHERE ta.user.username = :username
-            )
-    """)
-    List<Trainer> findUnassignedTrainersByTraineeUsername(@Param("username") String username);
 }

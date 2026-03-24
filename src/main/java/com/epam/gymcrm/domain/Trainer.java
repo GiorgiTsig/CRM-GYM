@@ -12,7 +12,7 @@ public class Trainer {
     private UUID id;
 
     @ManyToMany(mappedBy = "trainers")
-    private Set<Trainee> trainees;
+    private List<Trainee> trainees;
 
     @ManyToOne
     @JoinColumn(name = "specialization_id", nullable = false)
@@ -49,28 +49,11 @@ public class Trainer {
         this.trainingType = trainingType;
     }
 
-    public Set<Trainee> getTrainees() {
+    public List<Trainee> getTrainees() {
         return trainees;
     }
 
-    public void setTrainees(Set<Trainee> trainees) {
+    public void setTrainees(List<Trainee> trainees) {
         this.trainees = trainees;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Trainer trainer = (Trainer) o;
-        return user != null
-                && trainer.user != null
-                && user.getUsername() != null
-                && user.getUsername().equals(trainer.user.getUsername());
-    }
-
-    @Override
-    public int hashCode() {
-        return user != null && user.getUsername() != null
-                ? user.getUsername().hashCode()
-                : org.hibernate.Hibernate.getClass(this).hashCode();
     }
 }

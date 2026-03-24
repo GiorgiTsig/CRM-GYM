@@ -1,23 +1,23 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.searchCriteria.TrainerTrainingSearchCriteria;
-import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.repository.TrainingRepository;
-import com.epam.gymcrm.searchCriteria.TraineeTrainingSearchCriteria;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.exception.EntityNotFoundException;
+import com.epam.gymcrm.util.Authentication;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -45,9 +45,9 @@ public class TrainingService {
     }
 
     @Transactional
-    public Training createTraining(
-            @NotBlank String trainerUsername,
+    public void createTraining(
             @NotBlank String traineeUsername,
+            @NotBlank String trainerUsername,
             @Valid Training training
     ) {
         Trainer trainer = trainerService.getTrainer(trainerUsername)
@@ -65,13 +65,11 @@ public class TrainingService {
 
         TrainingType type = trainerService.trainingType(trainer.getTrainingType().getTrainingTypeName());
 
-        training.setTrainerId(trainer);
-        training.setTraineeId(trainee);
+        training.setTrainer(trainer);
+        training.setTrainee(trainee);
         training.setType(type);
 
         trainingRepository.save(training);
-
-        return training;
     }
 
     @Transactional
@@ -82,36 +80,34 @@ public class TrainingService {
     @Transactional(readOnly = true)
     public List<Training> getTraineeTrainings(
             @NotBlank String traineeUsername,
-            @NotBlank String password,
-            TraineeTrainingSearchCriteria criteria
+            @DateTimeFormat LocalDate fromDate,
+            @DateTimeFormat LocalDate toDate,
+            String trainerUsername,
+            String trainingType
     ) {
-        if (!traineeService.authenticateTrainee(traineeUsername, password)) {
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
         log.info("Selecting trainee trainings with username: {}", traineeUsername);
-        return trainingRepository.findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeName(
+        return trainingRepository.findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeNameAndTrainerUserUsername(
                 traineeUsername,
-                criteria.getFromDate(),
-                criteria.getToDate(),
-                criteria.getTrainingType()
+                fromDate,
+                toDate,
+                trainingType,
+                trainerUsername
         );
     }
 
     @Transactional(readOnly = true)
     public List<Training> getTrainerTrainings(
             @NotBlank String trainerUsername,
-            @NotBlank String password,
-            TrainerTrainingSearchCriteria criteria
+            @DateTimeFormat LocalDate fromDate,
+            @DateTimeFormat LocalDate toDate,
+            String traineeUsername
     ) {
-        if (!trainerService.authenticateTrainer(trainerUsername, password)) {
-            throw new AuthenticationFailedException("Invalid credentials");
-        }
         log.info("Selecting trainer trainings with username: {}", trainerUsername);
-        return trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserFirstName(
+        return trainingRepository.findTrainingByTrainerUserUsernameAndDateBetweenAndTraineeUserUsername(
                 trainerUsername,
-                criteria.getFromDate(),
-                criteria.getToDate(),
-                criteria.getTraineeName()
+                fromDate,
+                toDate,
+                traineeUsername
         );
     }
 }

@@ -1,0 +1,127 @@
+package com.epam.gymcrm.restController;
+
+import com.epam.gymcrm.dto.auth.request.ActiveDto;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
+import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
+import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
+import com.epam.gymcrm.facade.TrainerFacade;
+import com.epam.gymcrm.facade.TrainingFacade;
+import com.epam.gymcrm.util.Authentication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping(value = "/trainer")
+public class TrainerController {
+    private static final Logger log = LoggerFactory.getLogger(TrainerController.class);
+    private TrainerFacade trainerFacade;
+    private TrainingFacade trainingFacade;
+    private Authentication authentication;
+
+    @Autowired
+    public void setTrainingFacade(TrainingFacade trainingFacade) {
+        this.trainingFacade = trainingFacade;
+    }
+
+    @Autowired
+    public void setTrainerFacade(TrainerFacade trainerFacade) {
+        this.trainerFacade = trainerFacade;
+    }
+
+    @Autowired
+    public void setAuthentication(Authentication authentication) {
+        this.authentication = authentication;
+    }
+
+    @PostMapping("/profile")
+    ResponseEntity<AuthenticationDto> create(
+            @RequestBody CreateTrainerDto userTrainerDto
+    ) {
+        AuthenticationDto trainerCred = trainerFacade.createTrainerProfile(userTrainerDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(trainerCred);
+
+    }
+
+    @GetMapping("/profile")
+    ResponseEntity<TrainerProfileDto> getTrainerProfile(
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
+            @RequestParam("trainerProfile") String trainerProfile,
+            @RequestHeader(value = "transactionId", required = false) String transactionId
+    ) {
+        log.info("TransactionId: {}", transactionId);
+        authentication.auth(authUsername, authPassword);
+        TrainerProfileDto trainerDto = trainerFacade.getTrainerProfile(trainerProfile);
+        return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
+    }
+
+    @PutMapping("/profile")
+    ResponseEntity<TrainerProfileDto> updateTrainerStatus(
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
+            @RequestBody TrainerProfileUpdateRequestDto trainerRequestDto,
+            @RequestHeader(value = "transactionId", required = false) String transactionId
+    ) {
+        log.info("TransactionId: {}", transactionId);
+        authentication.auth(authUsername, authPassword);
+        TrainerProfileDto profileDTO = trainerFacade.updateTrainerProfile(
+                trainerRequestDto.getUsername(),
+                trainerRequestDto.getFirstName(),
+                trainerRequestDto.getLastName(),
+                trainerRequestDto.isActive()
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
+    }
+
+    @GetMapping("/profile/trainings")
+    ResponseEntity<List<TrainerTrainingDto>> getTrainerTrainingsList(
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
+            @RequestParam("trainerUsername") String trainerUsername,
+            @RequestParam(value = "fromDate", required = false) LocalDate fromDate,
+            @RequestParam(value = "toDate", required = false) LocalDate toDate,
+            @RequestParam(value = "traineeUsername", required = false) String traineeUsername,
+            @RequestHeader(value = "transactionId", required = false) String transactionId
+    ){
+        log.info("TransactionId: {}", transactionId);
+
+        authentication.auth(authUsername, authPassword);
+        List<TrainerTrainingDto> trainingDtoList = trainingFacade.getTrainerTrainings(
+                trainerUsername,
+                fromDate,
+                toDate,
+                traineeUsername
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);
+    }
+
+    @PatchMapping("/profile/status")
+    ResponseEntity<Void> updateTrainerProfile (
+            @RequestHeader("username") String authUsername,
+            @RequestHeader("password") String authPassword,
+            @RequestBody ActiveDto activeDto
+    ) {
+        authentication.auth(authUsername, authPassword);
+        if (activeDto.isActive()) {
+            trainerFacade.activateTrainer(activeDto.getUsername());
+        } else  {
+            trainerFacade.deactivateTrainer(activeDto.getUsername());
+
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+}

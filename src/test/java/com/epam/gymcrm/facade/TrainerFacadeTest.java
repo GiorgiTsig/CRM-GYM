@@ -1,7 +1,12 @@
 package com.epam.gymcrm.facade;
 
 import com.epam.gymcrm.domain.Trainer;
+import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
+import com.epam.gymcrm.dto.trainer.request.CreateTrainerDto;
+import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
+import com.epam.gymcrm.mapper.TrainerMapper;
 import com.epam.gymcrm.service.TrainerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +30,9 @@ class TrainerFacadeTest {
     @Mock
     private TrainerService trainerService;
 
+    @Mock
+    private TrainerMapper trainerMapper;
+
     @InjectMocks
     private TrainerFacade trainerFacade;
 
@@ -32,54 +40,51 @@ class TrainerFacadeTest {
     void createTrainerProfileDelegatesToService() {
         User user = new User();
         Trainer trainer = new Trainer();
+        CreateTrainerDto createTrainerDto = new CreateTrainerDto();
+        TrainingType type = new TrainingType();
+
+        AuthenticationDto authenticationDto = new AuthenticationDto();
+
+        type.setTrainingTypeName(TRAINING_TYPE);
+        trainer.setUser(user);
+        trainer.setTrainingType(type);
+        when(trainerMapper.toTrainer(createTrainerDto)).thenReturn(trainer);
         when(trainerService.createTrainerProfile(user, trainer, TRAINING_TYPE)).thenReturn(trainer);
+        when(trainerMapper.toAuth(trainer)).thenReturn(authenticationDto);
 
-        Trainer result = trainerFacade.createTrainerProfile(user, trainer, TRAINING_TYPE);
+        AuthenticationDto result = trainerFacade.createTrainerProfile(createTrainerDto);
 
-        assertSame(trainer, result);
+        assertSame(authenticationDto, result);
         verify(trainerService).createTrainerProfile(user, trainer, TRAINING_TYPE);
     }
 
     @Test
     void getTrainerProfileAuthenticatesBeforeFetching() {
         Trainer trainer = new Trainer();
-        when(trainerService.authenticateTrainer(USERNAME, PASSWORD)).thenReturn(true);
+        TrainerProfileDto trainerDto = new TrainerProfileDto();
         when(trainerService.getTrainer(USERNAME)).thenReturn(Optional.of(trainer));
+        when(trainerMapper.toTrainerDto(trainer)).thenReturn(trainerDto);
 
-        Optional<Trainer> result = trainerFacade.getTrainerProfile(USERNAME, PASSWORD);
+        TrainerProfileDto result = trainerFacade.getTrainerProfile(USERNAME);
 
-        assertTrue(result.isPresent());
-        assertSame(trainer, result.get());
+        assertSame(trainerDto, result);
         InOrder inOrder = inOrder(trainerService);
-        inOrder.verify(trainerService).authenticateTrainer(USERNAME, PASSWORD);
         inOrder.verify(trainerService).getTrainer(USERNAME);
     }
 
     @Test
     void updateTrainerProfileDelegatesAllArguments() {
-        trainerFacade.updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", "Strength");
+        trainerFacade.updateTrainerProfile(USERNAME, "John", "Doe", true);
 
-        verify(trainerService).updateTrainerProfile(USERNAME, PASSWORD, "John", "Doe", "Strength");
-    }
-
-    @Test
-    void authenticateTrainerReturnsServiceResult() {
-        when(trainerService.authenticateTrainer(USERNAME, PASSWORD)).thenReturn(true);
-
-        boolean authenticated = trainerFacade.authenticateTrainer(USERNAME, PASSWORD);
-
-        assertTrue(authenticated);
-        verify(trainerService).authenticateTrainer(USERNAME, PASSWORD);
+        verify(trainerService).updateTrainerProfile(USERNAME, "John", "Doe", true);
     }
 
     @Test
     void forwardsPasswordAndActivationCommands() {
-        trainerFacade.changeTrainerPassword(USERNAME, PASSWORD, "newPass");
-        trainerFacade.activateTrainer(USERNAME, PASSWORD);
-        trainerFacade.deactivateTrainer(USERNAME, PASSWORD);
+        trainerFacade.activateTrainer(USERNAME);
+        trainerFacade.deactivateTrainer(USERNAME);
 
-        verify(trainerService).changeTrainerPassword(USERNAME, PASSWORD, "newPass");
-        verify(trainerService).activateTrainer(USERNAME, PASSWORD);
-        verify(trainerService).deactivateTrainer(USERNAME, PASSWORD);
+        verify(trainerService).activateTrainer(USERNAME);
+        verify(trainerService).deactivateTrainer(USERNAME);
     }
 }
