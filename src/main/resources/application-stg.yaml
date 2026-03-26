@@ -1,0 +1,4 @@
+storage:
+  initialization:
+    file:
+      path: classpath:initial-data.json

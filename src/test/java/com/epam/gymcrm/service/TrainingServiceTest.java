@@ -6,6 +6,8 @@ import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.repository.TrainingRepository;
 import com.epam.gymcrm.domain.Training;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +24,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TrainingServiceTest {
-    private static final String PASSWORD = "password";
     private static final LocalDate FROM = LocalDate.of(2024, 1, 1);
     private static final LocalDate TO = LocalDate.of(2026, 3, 16);
 
@@ -32,6 +33,10 @@ class TrainingServiceTest {
     private TrainerService trainerService;
     @Mock
     private TraineeService traineeService;
+    @Mock
+    private MeterRegistry meterRegistry;
+    @Mock
+    private Counter counter;
 
     @InjectMocks
     private TrainingService trainingService;
@@ -66,6 +71,8 @@ class TrainingServiceTest {
         String trainerUsername = "trainer";
         String traineeUsername = "trainee";
         Training training = new Training();
+        Counter trainerSuccessCounter = mock(Counter.class);
+        Counter traineeFailureCounter = mock(Counter.class);
 
         Trainer trainer = new Trainer();
         trainer.setTrainingType(new TrainingType("YOGA"));
@@ -73,11 +80,35 @@ class TrainingServiceTest {
         when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.of(trainer));
         when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
-                () -> trainingService.createTraining(traineeUsername, trainerUsername, training));
+        when(meterRegistry.counter(
+                "crm_trainer_fetch_total",
+                "result", "success"
+        )).thenReturn(trainerSuccessCounter);
+
+        when(meterRegistry.counter(
+                "crm_trainee_fetch_total",
+                "result", "failure"
+        )).thenReturn(traineeFailureCounter);
+
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> trainingService.createTraining(traineeUsername, trainerUsername, training)
+        );
 
         verify(trainerService).getTrainer(trainerUsername);
         verify(traineeService).findTraineeByUsername(traineeUsername);
+
+        verify(meterRegistry).counter(
+                "crm_trainer_fetch_total",
+                "result", "success"
+        );
+        verify(meterRegistry).counter(
+                "crm_trainee_fetch_total",
+                "result", "failure"
+        );
+        verify(trainerSuccessCounter).increment();
+        verify(traineeFailureCounter).increment();
+
     }
 
     @Test
@@ -85,17 +116,55 @@ class TrainingServiceTest {
         String traineeUsername = "trainee";
         String trainerUsername = "trainer";
         Training training = new Training();
+        Counter trainerSuccessCounter = mock(Counter.class);
+        Counter traineeSuccessCounter = mock(Counter.class);
 
         Trainer trainer = new Trainer();
         Trainee trainee = new Trainee();
         trainee.setTrainers(new ArrayList<>());
 
+        when(meterRegistry.counter("crm_trainer_fetch_total", "result", "success")).thenReturn(trainerSuccessCounter);
+        when(meterRegistry.counter("crm_trainee_fetch_total", "result", "success")).thenReturn(traineeSuccessCounter);
         when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.of(trainer));
         when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.of(trainee));
 
         assertThrows(IllegalArgumentException.class,
                 () -> trainingService.createTraining(traineeUsername, trainerUsername, training));
 
+        verify(trainerSuccessCounter).increment();
+        verify(traineeSuccessCounter).increment();
+        verify(trainingRepository, never()).save(any(Training.class));
+
+    }
+
+    @Test
+    void createTraining_whenDataIsValid_savesTrainingAndIncrementsSuccessMetric() {
+        String traineeUsername = "trainee";
+        String trainerUsername = "trainer";
+        Training training = new Training();
+        Counter trainerSuccessCounter = mock(Counter.class);
+        Counter traineeSuccessCounter = mock(Counter.class);
+        Counter createSuccessCounter = mock(Counter.class);
+
+        Trainer trainer = new Trainer();
+        trainer.setTrainingType(new TrainingType("YOGA"));
+        Trainee trainee = new Trainee();
+        trainee.setTrainers(new ArrayList<>());
+        TrainingType trainingType = new TrainingType("YOGA");
+
+        when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.of(trainer));
+        when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.of(trainee));
+        when(trainerService.trainingType("YOGA")).thenReturn(trainingType);
+        when(meterRegistry.counter("crm_trainer_fetch_total", "result", "success")).thenReturn(trainerSuccessCounter);
+        when(meterRegistry.counter("crm_trainee_fetch_total", "result", "success")).thenReturn(traineeSuccessCounter);
+        when(meterRegistry.counter("crm_training_create_attempts_total", "result", "success")).thenReturn(createSuccessCounter);
+
+        trainingService.createTraining(traineeUsername, trainerUsername, training);
+
+        verify(trainingRepository).save(training);
+        verify(trainerSuccessCounter).increment();
+        verify(traineeSuccessCounter).increment();
+        verify(createSuccessCounter).increment();
     }
 
     @Test
@@ -161,11 +230,27 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_whenTrainerNotFound_throwsEntityNotFoundException() {
-        String traineeUsername = "trainer";
-        String trainerUsername = "bad";
+        String traineeUsername = "john";
+        String trainerUsername = "dsa";
         Training training = new Training();
 
         when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> trainingService.createTraining(traineeUsername, trainerUsername, training));
+
+        when(meterRegistry.counter(
+                "crm_trainer_fetch_total",
+                "result", "failure"
+        )).thenReturn(counter);
+
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> trainingService.createTraining(traineeUsername, trainerUsername, training)
+        );
+
+        verify(trainerService).getTrainer(trainerUsername);
+        verify(meterRegistry).counter(
+                "crm_trainer_fetch_total",
+                "result", "failure"
+        );
+        verify(counter).increment();
     }
 }

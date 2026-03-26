@@ -5,6 +5,10 @@ import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.facade.TrainingTypesFacade;
 import com.epam.gymcrm.util.Authentication;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/training")
+@Tag(name = "Training", description = "Operations for training creation and training type retrieval")
 public class TrainingController {
 
     private TrainingFacade trainingFacade;
@@ -36,6 +41,14 @@ public class TrainingController {
     }
 
     @PostMapping
+    @Operation(summary = "Add training")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Training added successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid training request"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Related trainee or trainer not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<Void> addTraining(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
@@ -47,6 +60,12 @@ public class TrainingController {
     }
 
     @GetMapping("/types")
+    @Operation(summary = "Get training types")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Training types returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<List<TrainingTypeDetailsDto>> getTrainingType(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword

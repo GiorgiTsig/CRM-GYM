@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Component
 @Order(1)
+@Profile("stg")
 public class TrainersLoader extends AbstractDataLoader {
     private static final Logger logger = LoggerFactory.getLogger(TrainersLoader.class);
 

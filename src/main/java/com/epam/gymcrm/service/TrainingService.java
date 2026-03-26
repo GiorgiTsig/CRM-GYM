@@ -6,7 +6,7 @@ import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.Training;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.exception.EntityNotFoundException;
-import com.epam.gymcrm.util.Authentication;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
@@ -27,6 +27,7 @@ public class TrainingService {
     private TrainingRepository trainingRepository;
     private TrainerService trainerService;
     private TraineeService traineeService;
+    private MeterRegistry meterRegistry;
     private static final Logger log = LoggerFactory.getLogger(TrainingService.class);
 
     @Autowired
@@ -44,6 +45,11 @@ public class TrainingService {
         this.traineeService = traineeService;
     }
 
+    @Autowired
+    public void setMeterRegistry(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
+
     @Transactional
     public void createTraining(
             @NotBlank String traineeUsername,
@@ -51,10 +57,33 @@ public class TrainingService {
             @Valid Training training
     ) {
         Trainer trainer = trainerService.getTrainer(trainerUsername)
-                .orElseThrow(() -> new EntityNotFoundException("Trainer not found"));
+                .orElseThrow(() -> {
+                    meterRegistry.counter(
+                            "crm_trainer_fetch_total",
+                            "result", "failure"
+                    ).increment();
+                    return new EntityNotFoundException("Trainer not found");
+                });
+
+        meterRegistry.counter(
+                "crm_trainer_fetch_total",
+                "result", "success"
+        ).increment();
+
 
         Trainee trainee = traineeService.findTraineeByUsername(traineeUsername)
-                .orElseThrow(() -> new EntityNotFoundException("Trainee not found"));
+                .orElseThrow(() -> {
+                    meterRegistry.counter(
+                            "crm_trainee_fetch_total",
+                            "result", "failure"
+                    ).increment();
+                    return new EntityNotFoundException("Trainee not found");
+                });
+
+        meterRegistry.counter(
+                "crm_trainee_fetch_total",
+                "result", "success"
+        ).increment();
 
 
         if (trainer.getTrainingType() == null) {
@@ -70,6 +99,7 @@ public class TrainingService {
         training.setType(type);
 
         trainingRepository.save(training);
+        meterRegistry.counter("crm_training_create_attempts_total", "result", "success").increment();
     }
 
     @Transactional
