@@ -9,6 +9,10 @@ import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.util.Authentication;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/trainer")
+@Tag(name = "Trainer", description = "Operations for trainer profile management and trainer training retrieval")
 public class TrainerController {
     private static final Logger log = LoggerFactory.getLogger(TrainerController.class);
     private TrainerFacade trainerFacade;
@@ -43,6 +48,13 @@ public class TrainerController {
     }
 
     @PostMapping("/profile")
+    @Operation(summary = "Create trainer profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Trainer profile created"),
+            @ApiResponse(responseCode = "400", description = "Invalid trainer data"),
+            @ApiResponse(responseCode = "409", description = "Trainer profile already exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<AuthenticationDto> create(
             @RequestBody CreateTrainerDto userTrainerDto
     ) {
@@ -53,6 +65,14 @@ public class TrainerController {
 
     }
 
+
+    @Operation(summary = "Get trainer profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainer profile returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainer not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/profile")
     ResponseEntity<TrainerProfileDto> getTrainerProfile(
             @RequestHeader("username") String authUsername,
@@ -66,6 +86,15 @@ public class TrainerController {
         return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
     }
 
+    @Operation(summary = "Update trainer profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainer profile updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid update request"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainer not found"),
+            @ApiResponse(responseCode = "409", description = "Update conflicts with current trainer state"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PutMapping("/profile")
     ResponseEntity<TrainerProfileDto> updateTrainerStatus(
             @RequestHeader("username") String authUsername,
@@ -85,6 +114,14 @@ public class TrainerController {
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
     }
 
+    @Operation(summary = "Get trainer training list")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainer training list returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid request filters"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainer not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/profile/trainings")
     ResponseEntity<List<TrainerTrainingDto>> getTrainerTrainingsList(
             @RequestHeader("username") String authUsername,
@@ -108,6 +145,15 @@ public class TrainerController {
         return ResponseEntity.status(HttpStatus.OK).body(trainingDtoList);
     }
 
+    @Operation(summary = "Update trainer active status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainer active status updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid status request"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainer not found"),
+            @ApiResponse(responseCode = "409", description = "Status update conflicts with current trainer state"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PatchMapping("/profile/status")
     ResponseEntity<Void> updateTrainerProfile (
             @RequestHeader("username") String authUsername,

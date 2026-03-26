@@ -11,6 +11,10 @@ import com.epam.gymcrm.dto.trainee.response.TrainerDto;
 import com.epam.gymcrm.facade.TraineeFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.util.Authentication;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/trainee")
+@Tag(name = "Trainee", description = "Operations for trainee profile, assignments, and trainee trainings")
 public class TraineeController {
 
     private static final Logger log = LoggerFactory.getLogger(TraineeController.class);
@@ -46,6 +51,13 @@ public class TraineeController {
     }
 
     @PostMapping("/profile")
+    @Operation(summary = "Create trainee profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Trainee profile created"),
+            @ApiResponse(responseCode = "400", description = "Invalid trainee data"),
+            @ApiResponse(responseCode = "409", description = "Trainee profile already exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<AuthenticationDto> create(
             @RequestBody CreateTraineeDto traineeDto
     ) {
@@ -56,6 +68,13 @@ public class TraineeController {
     }
 
     @GetMapping("/profile")
+    @Operation(summary = "Get trainee profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainee profile returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainee not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<TraineeProfileDto> traineeProfile(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
@@ -72,6 +91,15 @@ public class TraineeController {
 
 
     @PutMapping("/profile")
+    @Operation(summary = "Update trainee profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainee profile updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid update request"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainee not found"),
+            @ApiResponse(responseCode = "409", description = "Update conflicts with current trainee state"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<TraineeProfileDto> updateTraineeProfile(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
@@ -93,6 +121,13 @@ public class TraineeController {
     }
 
     @DeleteMapping("/profile")
+    @Operation(summary = "Delete trainee profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainee profile deleted"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainee not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<Void> deleteTraineeProfile(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
@@ -106,6 +141,13 @@ public class TraineeController {
     }
 
     @GetMapping("{username}/unassigned-traineers")
+    @Operation(summary = "Get active trainers not assigned to trainee")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Unassigned active trainers returned"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainee not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<List<TrainerDto>> getActiveTrainersNotAssignedToTrainee(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
@@ -119,6 +161,15 @@ public class TraineeController {
     }
 
     @PutMapping("/profile/trainers")
+    @Operation(summary = "Update trainee trainer assignments")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainee trainers updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid trainer assignment request"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainee or trainer not found"),
+            @ApiResponse(responseCode = "409", description = "Assignment conflicts with current trainee state"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<List<TrainerDto>> updateTraineeTrainers(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
@@ -138,6 +189,14 @@ public class TraineeController {
 
 
     @GetMapping("/profile/trainings")
+    @Operation(summary = "Get trainee training list")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainee training list returned"),
+            @ApiResponse(responseCode = "400", description = "Invalid request filters"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainee not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<List<TraineeTrainingDto>> getTraineeTrainingsList(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
@@ -162,6 +221,15 @@ public class TraineeController {
     }
 
     @PatchMapping("/profile/status")
+    @Operation(summary = "Update trainee active status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainee active status updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid status request"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
+            @ApiResponse(responseCode = "404", description = "Trainee not found"),
+            @ApiResponse(responseCode = "409", description = "Status update conflicts with current trainee state"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     ResponseEntity<Void> updateTraineeStatus (
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,

@@ -16,8 +16,11 @@ spring:
     open-in-view: false
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
   endpoint:
     health:
       show-details: always
       show-components: always
-
