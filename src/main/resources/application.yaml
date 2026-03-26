@@ -14,3 +14,14 @@ spring:
       ddl-auto: update
     defer-datasource-initialization: true
     open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+
