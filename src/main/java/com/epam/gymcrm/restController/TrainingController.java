@@ -4,7 +4,7 @@ import com.epam.gymcrm.dto.TrainingType.TrainingTypeDetailsDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.facade.TrainingTypesFacade;
-import com.epam.gymcrm.util.Authentication;
+import com.epam.gymcrm.util.AuthenticationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,7 +23,7 @@ public class TrainingController {
 
     private TrainingFacade trainingFacade;
     private TrainingTypesFacade trainingTypesFacade;
-    private Authentication authentication;
+    private AuthenticationUtil authentication;
 
     @Autowired
     public void setTrainingFacade(TrainingFacade trainingFacade) {
@@ -36,7 +36,7 @@ public class TrainingController {
     }
 
     @Autowired
-    public void setAuthentication(Authentication authentication) {
+    public void setAuthentication(AuthenticationUtil authentication) {
         this.authentication = authentication;
     }
 

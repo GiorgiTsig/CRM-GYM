@@ -3,7 +3,7 @@ package com.epam.gymcrm.restController;
 import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.auth.request.ChangePasswordRequestDto;
 import com.epam.gymcrm.service.UserService;
-import com.epam.gymcrm.util.Authentication;
+import com.epam.gymcrm.util.AuthenticationUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +23,7 @@ class AuthControllerTest {
     private static final String NEW_PASSWORD = "newPassword";
 
     @Mock
-    private Authentication authentication;
+    private AuthenticationUtil authentication;
 
     @Mock
     private UserService userService;
@@ -46,14 +46,12 @@ class AuthControllerTest {
     void changePassword_shouldReturnOkMessage_whenPasswordUpdated() {
         ChangePasswordRequestDto authControllerDto = new ChangePasswordRequestDto();
         authControllerDto.setUsername(USERNAME);
-        authControllerDto.setPassword(PASSWORD);
         authControllerDto.setNewPassword(NEW_PASSWORD);
 
         User user = new User();
         user.setUsername(USERNAME);
         user.setPassword(PASSWORD);
 
-        doReturn(true).when(authentication).auth(USERNAME, PASSWORD);
         doReturn(user).when(userService).updatePassword(USERNAME, NEW_PASSWORD);
 
         ResponseEntity<String> response =
@@ -62,7 +60,6 @@ class AuthControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Password changed successfully", response.getBody());
 
-        verify(authentication).auth(USERNAME, PASSWORD);
         verify(userService).updatePassword(USERNAME, NEW_PASSWORD);
     }
 }

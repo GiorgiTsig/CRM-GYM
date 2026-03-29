@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class Authentication {
+public class AuthenticationUtil {
 
     private UserService userService;
     private MeterRegistry meterRegistry;

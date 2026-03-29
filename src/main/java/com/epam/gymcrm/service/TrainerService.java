@@ -5,9 +5,7 @@ import com.epam.gymcrm.repository.TrainerRepository;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.exception.AuthenticationFailedException;
 import com.epam.gymcrm.exception.EntityNotFoundException;
-import com.epam.gymcrm.util.Authentication;
 import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import jakarta.validation.Valid;
@@ -17,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -31,6 +30,7 @@ public class TrainerService {
     private TrainerRepository trainerRepository;
     private UsernameGenerator usernameGenerator;
     private PasswordGenerator passwordGenerator;
+    private PasswordEncoder passwordEncoder;
     private static final Logger log = LoggerFactory.getLogger(TrainerService.class);
 
     @Autowired
@@ -53,12 +53,17 @@ public class TrainerService {
         this.passwordGenerator = passwordGenerator;
     }
 
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Transactional
     public Trainer createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String type) {
         log.info("Creating trainer profile for {} {}", user.getFirstName(), user.getLastName());
 
         String password = passwordGenerator.generatePassword();
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
 
         String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName());
         user.setUsername(username);
@@ -71,7 +76,7 @@ public class TrainerService {
 
         trainerRepository.save(trainer);
 
-        log.info("Trainer profile created with username: {}", user.getUsername());
+        log.info("Trainer profile created with username: {}, password: {}", user.getUsername(), password);
         return trainer;
     }
 

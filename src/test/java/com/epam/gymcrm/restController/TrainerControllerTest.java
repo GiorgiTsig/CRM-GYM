@@ -11,7 +11,7 @@ import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.util.Authentication;
+import com.epam.gymcrm.util.AuthenticationUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +42,7 @@ class TrainerControllerTest {
     private TrainingFacade trainingFacade;
 
     @Mock
-    private Authentication authentication;
+    private AuthenticationUtil authentication;
 
     @InjectMocks
     private TrainerController trainerController;
@@ -76,12 +76,11 @@ class TrainerControllerTest {
     @Test
     void getTrainerProfile_shouldReturnTrainerDto_whenCredentialsValid() {
         TrainerProfileDto trainerDto = new TrainerProfileDto();
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         when(trainerFacade.getTrainerProfile("trainer")).thenReturn(trainerDto);
 
         ResponseEntity<TrainerProfileDto> response =
-                trainerController.getTrainerProfile(USERNAME, PASSWORD, "trainer", null);
+                trainerController.getTrainerProfile( "trainer", null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(trainerDto, response.getBody());
@@ -102,7 +101,6 @@ class TrainerControllerTest {
         trainerDto.setLastName(LAST_NAME);
         trainerDto.setSpecialization(SPECIALIZATION);
         trainerDto.setActive(true);
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         when(trainerFacade.updateTrainerProfile(
                 USERNAME,
@@ -113,8 +111,6 @@ class TrainerControllerTest {
 
         ResponseEntity<TrainerProfileDto> response =
                 trainerController.updateTrainerStatus(
-                        USERNAME,
-                        PASSWORD,
                         trainerRequestDto,
                         null
                 );
@@ -135,7 +131,6 @@ class TrainerControllerTest {
         TrainerTrainingDto trainingDto1 = new TrainerTrainingDto();
         TrainerTrainingDto trainingDto2 = new TrainerTrainingDto();
         List<TrainerTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         when(trainingFacade.getTrainerTrainings(
                 "trainer.username",
@@ -147,8 +142,6 @@ class TrainerControllerTest {
 
         ResponseEntity<List<TrainerTrainingDto>> response =
                 trainerController.getTrainerTrainingsList(
-                        USERNAME,
-                        PASSWORD,
                         "trainer.username",
                         LocalDate.of(2026, 1, 1),
                         LocalDate.of(2026, 2, 1),
@@ -172,11 +165,10 @@ class TrainerControllerTest {
         ActiveDto activeDto = new ActiveDto();
         activeDto.setUsername(USERNAME);
         activeDto.setActive(true);
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
         doNothing().when(trainerFacade).activateTrainer(activeDto.getUsername());
 
         ResponseEntity<Void> response =
-                trainerController.updateTrainerProfile(USERNAME, PASSWORD, activeDto);
+                trainerController.updateTrainerProfile(activeDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
@@ -189,11 +181,10 @@ class TrainerControllerTest {
         ActiveDto activeDto = new ActiveDto();
         activeDto.setUsername(USERNAME);
         activeDto.setActive(false);
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
         doNothing().when(trainerFacade).deactivateTrainer(activeDto.getUsername());
 
         ResponseEntity<Void> response =
-                trainerController.updateTrainerProfile(USERNAME, PASSWORD, activeDto);
+                trainerController.updateTrainerProfile(activeDto);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 

@@ -2,3 +2,10 @@ storage:
   initialization:
     file:
       path: classpath:initial-data.json
+
+
+management:
+  endpoints:
+    web:
+      cors:
+        max-age: 5800s

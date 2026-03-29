@@ -4,8 +4,6 @@ import com.epam.gymcrm.repository.TraineeRepository;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.exception.AuthenticationFailedException;
-import com.epam.gymcrm.util.Authentication;
 import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import org.junit.jupiter.api.Test;
@@ -13,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,11 +36,15 @@ class TraineeServiceTest {
     @Mock
     private TrainerService trainerService;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private TraineeService traineeService;
 
     @Test
     void createTraineeProfile_populatesCredentialsAndLinksEntities() {
+        String password = passwordEncoder.encode("generatedPass");
         User user = new User();
         user.setFirstName("John");
         user.setLastName("Doe");
@@ -49,13 +52,13 @@ class TraineeServiceTest {
         trainee.setUser(user);
         user.setTrainee(trainee);
 
-        when(passwordGenerator.generatePassword()).thenReturn("generatedPass");
+        when(passwordGenerator.generatePassword()).thenReturn(password);
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(traineeRepository.save(trainee)).thenReturn(trainee);
 
         Trainee result = traineeService.createTraineeProfile(trainee);
 
-        assertEquals("generatedPass", user.getPassword());
+        assertEquals(password, user.getPassword());
         assertEquals("john.doe", user.getUsername());
         assertEquals(user, trainee.getUser());
         assertEquals(trainee, user.getTrainee());

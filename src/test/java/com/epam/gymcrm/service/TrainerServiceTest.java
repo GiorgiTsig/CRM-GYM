@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
 import java.util.Optional;
@@ -31,24 +32,28 @@ class TrainerServiceTest {
     @Mock
     private TrainingTypeRepository trainingTypeRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private TrainerService trainerService;
 
     @Test
     void createTrainerProfile_generatesCredentialsAndLinksEntities() {
+        String password = passwordEncoder.encode("generatedPass");
         User user = new User();
         user.setFirstName("John");
         user.setLastName("Doe");
         Trainer trainer = new Trainer();
         TrainingType yoga = new TrainingType("YOGA");
 
-        when(passwordGenerator.generatePassword()).thenReturn("secret");
+        when(passwordGenerator.generatePassword()).thenReturn(password);
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(trainingTypeRepository.findTrainingTypeByTrainingTypeName("YOGA")).thenReturn(yoga);
 
         Trainer result = trainerService.createTrainerProfile(user, trainer, "YOGA");
 
-        assertEquals("secret", user.getPassword());
+        assertEquals(password, user.getPassword());
         assertEquals("john.doe", user.getUsername());
         assertSame(user, trainer.getUser());
         assertSame(trainer, user.getTrainer());
