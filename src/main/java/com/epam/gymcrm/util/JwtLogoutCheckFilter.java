@@ -36,6 +36,7 @@ public class JwtLogoutCheckFilter implements Filter {
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
             String username = jwt.getSubject();
             Instant issuedAt = jwt.getIssuedAt();
+            assert issuedAt != null;
 
             User user = userService.getUser(username).orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
