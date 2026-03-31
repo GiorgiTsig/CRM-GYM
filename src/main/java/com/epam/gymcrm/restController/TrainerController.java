@@ -8,7 +8,6 @@ import com.epam.gymcrm.dto.trainer.response.TrainerProfileDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.util.AuthenticationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -30,7 +29,6 @@ public class TrainerController {
     private static final Logger log = LoggerFactory.getLogger(TrainerController.class);
     private TrainerFacade trainerFacade;
     private TrainingFacade trainingFacade;
-    private AuthenticationUtil authentication;
 
     @Autowired
     public void setTrainingFacade(TrainingFacade trainingFacade) {
@@ -42,10 +40,6 @@ public class TrainerController {
         this.trainerFacade = trainerFacade;
     }
 
-    @Autowired
-    public void setAuthentication(AuthenticationUtil authentication) {
-        this.authentication = authentication;
-    }
 
     @PostMapping("/profile")
     @Operation(summary = "Create trainer profile")

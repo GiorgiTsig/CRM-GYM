@@ -44,7 +44,8 @@ class TraineeServiceTest {
 
     @Test
     void createTraineeProfile_populatesCredentialsAndLinksEntities() {
-        String password = passwordEncoder.encode("generatedPass");
+        String plaintextPassword = "generatedPass";
+        String encodedPassword = "encodedGeneratedPass";
         User user = new User();
         user.setFirstName("John");
         user.setLastName("Doe");
@@ -52,13 +53,14 @@ class TraineeServiceTest {
         trainee.setUser(user);
         user.setTrainee(trainee);
 
-        when(passwordGenerator.generatePassword()).thenReturn(password);
+        when(passwordGenerator.generatePassword()).thenReturn(plaintextPassword);
+        when(passwordEncoder.encode(plaintextPassword)).thenReturn(encodedPassword);
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(traineeRepository.save(trainee)).thenReturn(trainee);
 
         Trainee result = traineeService.createTraineeProfile(trainee);
 
-        assertEquals(password, user.getPassword());
+        assertEquals(encodedPassword, user.getPassword());
         assertEquals("john.doe", user.getUsername());
         assertEquals(user, trainee.getUser());
         assertEquals(trainee, user.getTrainee());

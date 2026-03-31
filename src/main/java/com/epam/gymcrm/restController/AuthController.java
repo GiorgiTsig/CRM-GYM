@@ -11,7 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping(value = "/auth")
@@ -33,8 +36,8 @@ public class AuthController {
     @GetMapping("/login")
     @Operation(summary = "Authenticate user")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "AuthenticationUtil successful"),
-            @ApiResponse(responseCode = "401", description = "AuthenticationUtil failed"),
+            @ApiResponse(responseCode = "200", description = "Authentication successful"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<Void> auth(
@@ -53,16 +56,19 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Password changed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid password change request"),
-            @ApiResponse(responseCode = "401", description = "AuthenticationUtil failed"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed"),
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<String> changePassword(
+            Authentication authentication,
             @RequestBody ChangePasswordRequestDto credentials,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        userService.updatePassword(credentials.getUsername(), credentials.getNewPassword());
+
+        UserDetails username = (UserDetails) authentication.getPrincipal();
+        userService.updatePassword(username.getUsername(), credentials.getNewPassword());
 
         return ResponseEntity.status(HttpStatus.OK).body("Password changed successfully");
     }

@@ -40,20 +40,22 @@ class TrainerServiceTest {
 
     @Test
     void createTrainerProfile_generatesCredentialsAndLinksEntities() {
-        String password = passwordEncoder.encode("generatedPass");
+        String plaintextPassword = "generatedPass";
+        String encodedPassword = "encodedGeneratedPass";
         User user = new User();
         user.setFirstName("John");
         user.setLastName("Doe");
         Trainer trainer = new Trainer();
         TrainingType yoga = new TrainingType("YOGA");
 
-        when(passwordGenerator.generatePassword()).thenReturn(password);
+        when(passwordGenerator.generatePassword()).thenReturn(plaintextPassword);
+        when(passwordEncoder.encode(plaintextPassword)).thenReturn(encodedPassword);
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(trainingTypeRepository.findTrainingTypeByTrainingTypeName("YOGA")).thenReturn(yoga);
 
         Trainer result = trainerService.createTrainerProfile(user, trainer, "YOGA");
 
-        assertEquals(password, user.getPassword());
+        assertEquals(encodedPassword, user.getPassword());
         assertEquals("john.doe", user.getUsername());
         assertSame(user, trainer.getUser());
         assertSame(trainer, user.getTrainer());

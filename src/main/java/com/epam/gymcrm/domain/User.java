@@ -38,7 +38,7 @@ public class User {
     private Instant lastLogout;
 
     @ColumnDefault("0")
-    @Column(name = "failed_login_attempts")
+    @Column(name = "failed_login_attempts", nullable = false)
     private Integer failedLoginAttempts = 0;
 
     @Column(name = "lock_until")
