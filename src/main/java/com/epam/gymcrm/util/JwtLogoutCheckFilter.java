@@ -33,7 +33,7 @@ public class JwtLogoutCheckFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+        if (authentication != null && authentication.getCredentials() instanceof Jwt jwt) {
             String username = jwt.getSubject();
             Instant issuedAt = jwt.getIssuedAt();
             assert issuedAt != null;

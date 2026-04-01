@@ -12,7 +12,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -21,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -70,11 +68,12 @@ class AuthenticationFailureListenerTest {
     }
 
     @Test
-    void throwsWhenUserDoesNotExist() {
+    void doesNotPersistAnythingWhenUserDoesNotExist() {
         when(userService.getUser("ghost")).thenReturn(Optional.empty());
 
-        assertThrows(UsernameNotFoundException.class, () -> listener.onApplicationEvent(eventFor("ghost")));
+        listener.onApplicationEvent(eventFor("ghost"));
 
+        verify(userService).getUser("ghost");
         verify(userRepository, never()).save(any());
     }
 

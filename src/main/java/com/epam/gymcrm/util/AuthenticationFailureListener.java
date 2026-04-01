@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 public class AuthenticationFailureListener implements
@@ -34,21 +35,21 @@ public class AuthenticationFailureListener implements
     public void onApplicationEvent(AuthenticationFailureBadCredentialsEvent event) {
         log.info("Invalid credentials attempt received");
         String username = event.getAuthentication().getName();
-        User user = userService.getUser(username).orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        userService.getUser(username).ifPresentOrElse(user -> {
+            int previousAttempts = user.getFailedLoginAttempts();
+            int attempts = previousAttempts + 1;
+            user.setFailedLoginAttempts(attempts);
 
-        int previousAttempts = user.getFailedLoginAttempts();
-        int attempts = previousAttempts + 1;
-        user.setFailedLoginAttempts(attempts);
-        log.info("User {} failed login attempt count updated: {} -> {}", username, previousAttempts, attempts);
+            log.info("User {} failed login attempt count updated: {} -> {}", username, previousAttempts, attempts);
 
-        if (attempts >= MAX_ATTEMPTS) {
-            LocalDateTime lockUntilTime = LocalDateTime.now().plusMinutes(LOCK_TIME_MINUTES);
-            user.setLockUntil(lockUntilTime);
-            log.warn("User {} has been locked out due to {} failed attempts. Account locked until: {}", 
-                    username, attempts, lockUntilTime);
-        }
+            if (attempts >= MAX_ATTEMPTS) {
+                LocalDateTime lockUntilTime = LocalDateTime.now().plusMinutes(LOCK_TIME_MINUTES);
+                user.setLockUntil(lockUntilTime);
+                log.warn("User {} has been locked out due to {} failed attempts. Account locked until: {}",
+                        username, attempts, lockUntilTime);
+            }
 
-        userRepository.save(user);
-        log.debug("User {} authentication failure record saved to database", username);
+            userRepository.save(user);
+        }, () -> log.info("Invalid credentials attempt received for unknown user"));
     }
 }

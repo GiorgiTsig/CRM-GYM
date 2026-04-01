@@ -127,7 +127,7 @@ class JwtLogoutCheckFilterTest {
                 Map.of("alg", "none"),
                 Map.of("sub", subject)
         );
-        return new UsernamePasswordAuthenticationToken(jwt, null);
+        return new UsernamePasswordAuthenticationToken(subject, jwt);
     }
 }
 

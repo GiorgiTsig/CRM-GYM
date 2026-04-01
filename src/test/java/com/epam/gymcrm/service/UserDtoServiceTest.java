@@ -61,18 +61,19 @@ class UserDtoServiceTest {
     void updatePassword_whenUserExists_updatesAndSavesUser() {
         String username = "John.Doe";
         String newPassword = "new-secret";
-        String passwordEncode = passwordEncoder.encode(newPassword);
+        String encodedPassword = "encoded-new-secret";
         User user = new User();
         user.setUsername(username);
-        user.setPassword("old");
 
         when(userRepository.getUsersByUsername(username)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
         when(userRepository.save(user)).thenReturn(user);
 
-        User updatedUser = userService.updatePassword(username, passwordEncode);
+        User updatedUser = userService.updatePassword(username, newPassword);
 
-        assertEquals(passwordEncode, updatedUser.getPassword());
+        assertEquals(encodedPassword, updatedUser.getPassword());
         verify(userRepository).getUsersByUsername(username);
+        verify(passwordEncoder).encode(newPassword);
         verify(userRepository).save(user);
     }
 
