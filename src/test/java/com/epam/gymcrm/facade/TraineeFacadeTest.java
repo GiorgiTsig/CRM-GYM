@@ -50,8 +50,7 @@ class TraineeFacadeTest {
         AuthenticationDto authenticationDto = new AuthenticationDto();
         trainee.setUser(user);
         when(traineeMapper.toTrainee(createTraineeDto)).thenReturn(trainee);
-        when(traineeService.createTraineeProfile(trainee)).thenReturn(trainee);
-        when(traineeMapper.toAuth(trainee)).thenReturn(authenticationDto);
+        when(traineeService.createTraineeProfile(trainee)).thenReturn(authenticationDto);
 
         AuthenticationDto result = traineeFacade.createTraineeProfile(createTraineeDto);
 

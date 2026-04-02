@@ -29,8 +29,4 @@ public interface TrainerMapper {
 
     @Mapping(target = "traineeUsername", source = "trainee.user.username")
     TrainerTrainingDto toTrainingDto(Training training);
-
-    @Mapping(target = "username", source = "user.username")
-    @Mapping(target = "password", source = "user.password")
-    AuthenticationDto toAuth(Trainer trainer);
 }

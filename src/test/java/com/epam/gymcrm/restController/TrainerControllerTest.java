@@ -11,7 +11,7 @@ import com.epam.gymcrm.dto.trainer.response.TrainerTrainingDto;
 import com.epam.gymcrm.dto.trainer.request.TrainerProfileUpdateRequestDto;
 import com.epam.gymcrm.facade.TrainerFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.util.AuthenticationUtil;
+import com.epam.gymcrm.util.Authentication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +42,7 @@ class TrainerControllerTest {
     private TrainingFacade trainingFacade;
 
     @Mock
-    private AuthenticationUtil authentication;
+    private Authentication authentication;
 
     @InjectMocks
     private TrainerController trainerController;

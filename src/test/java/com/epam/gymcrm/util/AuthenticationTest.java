@@ -32,7 +32,7 @@ class AuthenticationTest {
     private Counter counter;
 
     @InjectMocks
-    private AuthenticationUtil authentication;
+    private Authentication authentication;
 
     @Test
     void returnsTrueWhenPasswordMatches() {

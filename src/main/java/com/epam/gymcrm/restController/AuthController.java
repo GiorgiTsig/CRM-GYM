@@ -2,7 +2,7 @@ package com.epam.gymcrm.restController;
 
 import com.epam.gymcrm.dto.auth.request.ChangePasswordRequestDto;
 import com.epam.gymcrm.service.UserService;
-import com.epam.gymcrm.util.AuthenticationUtil;
+import com.epam.gymcrm.util.Authentication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,12 +21,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    private final AuthenticationUtil authenticationUtil;
+    private final Authentication authenticationUtil;
     private final UserService userService;
 
     public AuthController(
             UserService userService,
-            AuthenticationUtil authenticationUtil
+            Authentication authenticationUtil
     ) {
         this.authenticationUtil = authenticationUtil;
         this.userService = userService;
@@ -62,7 +60,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<String> changePassword(
-            Authentication authentication,
+            org.springframework.security.core.Authentication authentication,
             @RequestBody ChangePasswordRequestDto credentials,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {

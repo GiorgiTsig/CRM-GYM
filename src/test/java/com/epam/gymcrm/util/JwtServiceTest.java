@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class JwtUtilsTest {
+class JwtServiceTest {
 
     private static final String VALID_SECRET_BASE64 = "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=";
 
@@ -33,16 +33,16 @@ class JwtUtilsTest {
     private Authentication authentication;
 
     @InjectMocks
-    private JwtUtils jwtUtils;
+    private JwtService jwtService;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(jwtUtils, "jwtSecret", VALID_SECRET_BASE64);
+        ReflectionTestUtils.setField(jwtService, "jwtSecret", VALID_SECRET_BASE64);
     }
 
     @Test
     void generateTokenIncludesExpectedSubjectAndLifetimeClaims() {
-        String token = jwtUtils.generateToken("john");
+        String token = jwtService.generateToken("john");
 
         Claims claims = Jwts.parser()
                 .verifyWith(signingKey())
@@ -58,10 +58,10 @@ class JwtUtilsTest {
 
     @Test
     void generateTokenThrowsForInvalidBase64Secret() {
-        ReflectionTestUtils.setField(jwtUtils, "jwtSecret", "%%%not-base64%%%");
+        ReflectionTestUtils.setField(jwtService, "jwtSecret", "%%%not-base64%%%");
 
 
-        assertThrows(DecodingException.class, () -> jwtUtils.generateToken("john"));
+        assertThrows(DecodingException.class, () -> jwtService.generateToken("john"));
     }
 
     @Test
@@ -71,7 +71,7 @@ class JwtUtilsTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        jwtUtils.onAuthenticationSuccess(request, response, authentication);
+        jwtService.onAuthenticationSuccess(request, response, authentication);
 
         assertEquals("application/json", response.getContentType());
         String responseBody = response.getContentAsString();

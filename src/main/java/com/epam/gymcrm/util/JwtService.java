@@ -16,7 +16,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
-public class JwtUtils implements AuthenticationSuccessHandler {
+public class JwtService implements AuthenticationSuccessHandler {
 
     @Value("${jwt.secret}")
     private String jwtSecret;

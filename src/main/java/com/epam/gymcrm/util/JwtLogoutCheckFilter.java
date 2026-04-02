@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Objects;
 
 @Component
 public class JwtLogoutCheckFilter implements Filter {
@@ -36,7 +37,7 @@ public class JwtLogoutCheckFilter implements Filter {
         if (authentication != null && authentication.getCredentials() instanceof Jwt jwt) {
             String username = jwt.getSubject();
             Instant issuedAt = jwt.getIssuedAt();
-            assert issuedAt != null;
+            Objects.requireNonNull(issuedAt);
 
             User user = userService.getUser(username).orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 

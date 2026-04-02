@@ -1,5 +1,6 @@
 package com.epam.gymcrm.service;
 
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.repository.TraineeRepository;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
@@ -50,6 +51,7 @@ class TraineeServiceTest {
         user.setFirstName("John");
         user.setLastName("Doe");
         Trainee trainee = new Trainee();
+        AuthenticationDto authenticationDto = new AuthenticationDto();
         trainee.setUser(user);
         user.setTrainee(trainee);
 
@@ -58,13 +60,15 @@ class TraineeServiceTest {
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(traineeRepository.save(trainee)).thenReturn(trainee);
 
-        Trainee result = traineeService.createTraineeProfile(trainee);
+        AuthenticationDto result = traineeService.createTraineeProfile(trainee);
+        authenticationDto.setUsername(trainee.getUser().getUsername());
+        authenticationDto.setPassword(plaintextPassword);
 
         assertEquals(encodedPassword, user.getPassword());
         assertEquals("john.doe", user.getUsername());
         assertEquals(user, trainee.getUser());
         assertEquals(trainee, user.getTrainee());
-        assertEquals(trainee, result);
+        assertEquals(authenticationDto.getUsername(), result.getUsername());
         verify(traineeRepository).save(trainee);
     }
 

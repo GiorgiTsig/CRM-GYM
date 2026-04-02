@@ -4,7 +4,6 @@ import com.epam.gymcrm.dto.TrainingType.TrainingTypeDetailsDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.facade.TrainingTypesFacade;
-import com.epam.gymcrm.util.AuthenticationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

@@ -35,8 +35,7 @@ public class TraineeFacade {
 
     public AuthenticationDto createTraineeProfile(CreateTraineeDto createTraineeDto) {
        Trainee trainee = traineeMapper.toTrainee(createTraineeDto);
-       Trainee createdTrainee = traineeService.createTraineeProfile(trainee);
-       return traineeMapper.toAuth(createdTrainee);
+        return traineeService.createTraineeProfile(trainee);
     }
 
     public TraineeProfileDto getTraineeProfile(@NotBlank String traineeProfile) {

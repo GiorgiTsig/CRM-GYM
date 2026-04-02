@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -16,7 +17,7 @@ public class AuthenticationConfig {
     public AuthenticationManager authenticationManager(
             CustomUserDetailsService customUserDetailsService
     ) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(customUserDetailsService);
+        DaoAuthenticationProvider authenticationProvider = daoAuthenticationProvider(customUserDetailsService);
         authenticationProvider.setPasswordEncoder(encoder());
 
         return new ProviderManager(authenticationProvider);
@@ -25,5 +26,10 @@ public class AuthenticationConfig {
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService) {
+        return new DaoAuthenticationProvider(userDetailsService);
     }
 }

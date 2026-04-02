@@ -3,6 +3,7 @@ package com.epam.gymcrm.service;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.repository.TraineeRepository;
 import com.epam.gymcrm.util.PasswordGenerator;
@@ -59,7 +60,7 @@ public class TraineeService {
     }
 
     @Transactional
-    public Trainee createTraineeProfile(@Valid Trainee trainee) {
+    public AuthenticationDto createTraineeProfile(@Valid Trainee trainee) {
         log.info("Creating trainee profile for {} {}", trainee.getUser().getFirstName(), trainee.getUser().getLastName());
 
         String password = passwordGenerator.generatePassword();
@@ -70,9 +71,12 @@ public class TraineeService {
         trainee.getUser().setActive(true);
 
         traineeRepository.save(trainee);
-        log.info("Trainee profile created with username: {}, password: {}", trainee.getUser().getUsername(), password);
+        log.info("Trainee profile created");
+        AuthenticationDto authenticationDto = new AuthenticationDto();
+        authenticationDto.setUsername(username);
+        authenticationDto.setPassword(password);
 
-        return trainee;
+        return authenticationDto;
     }
 
     @Transactional(readOnly = true)

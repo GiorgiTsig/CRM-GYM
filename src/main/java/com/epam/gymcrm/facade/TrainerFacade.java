@@ -28,8 +28,11 @@ public class TrainerFacade {
 
     public AuthenticationDto createTrainerProfile(CreateTrainerDto createTrainerDto) {
        Trainer totrainer = trainerMapper.toTrainer(createTrainerDto);
-       Trainer trainer = trainerService.createTrainerProfile(totrainer.getUser(), totrainer, totrainer.getTrainingType().getTrainingTypeName());
-       return trainerMapper.toAuth(trainer);
+       return trainerService.createTrainerProfile(
+               totrainer.getUser(),
+               totrainer,
+               totrainer.getTrainingType().getTrainingTypeName()
+       );
     }
 
     public TrainerProfileDto getTrainerProfile(@NotBlank String username) {

@@ -1,5 +1,6 @@
 package com.epam.gymcrm.service;
 
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.repository.TrainingTypeRepository;
 import com.epam.gymcrm.repository.TrainerRepository;
 import com.epam.gymcrm.domain.Trainer;
@@ -59,7 +60,7 @@ public class TrainerService {
     }
 
     @Transactional
-    public Trainer createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String type) {
+    public AuthenticationDto createTrainerProfile(@Valid User user, @Valid Trainer trainer, @NotBlank String type) {
         log.info("Creating trainer profile for {} {}", user.getFirstName(), user.getLastName());
 
         String password = passwordGenerator.generatePassword();
@@ -76,8 +77,12 @@ public class TrainerService {
 
         trainerRepository.save(trainer);
 
-        log.info("Trainer profile created with username: {}, password: {}", user.getUsername(), password);
-        return trainer;
+        log.info("Trainer profile created");
+        AuthenticationDto authenticationDto = new AuthenticationDto();
+        authenticationDto.setUsername(username);
+        authenticationDto.setPassword(password);
+
+        return authenticationDto;
     }
 
     @Transactional(readOnly = true)

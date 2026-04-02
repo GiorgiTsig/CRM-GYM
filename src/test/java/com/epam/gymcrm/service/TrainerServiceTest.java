@@ -3,6 +3,7 @@ package com.epam.gymcrm.service;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.TrainingType;
 import com.epam.gymcrm.domain.User;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.repository.TrainerRepository;
 import com.epam.gymcrm.repository.TrainingTypeRepository;
 import com.epam.gymcrm.util.PasswordGenerator;
@@ -47,20 +48,23 @@ class TrainerServiceTest {
         user.setLastName("Doe");
         Trainer trainer = new Trainer();
         TrainingType yoga = new TrainingType("YOGA");
+        AuthenticationDto authenticationDto = new AuthenticationDto();
 
         when(passwordGenerator.generatePassword()).thenReturn(plaintextPassword);
         when(passwordEncoder.encode(plaintextPassword)).thenReturn(encodedPassword);
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(trainingTypeRepository.findTrainingTypeByTrainingTypeName("YOGA")).thenReturn(yoga);
 
-        Trainer result = trainerService.createTrainerProfile(user, trainer, "YOGA");
+        AuthenticationDto result = trainerService.createTrainerProfile(user, trainer, "YOGA");
+        authenticationDto.setUsername("john.doe");
+        authenticationDto.setPassword(plaintextPassword);
 
         assertEquals(encodedPassword, user.getPassword());
         assertEquals("john.doe", user.getUsername());
         assertSame(user, trainer.getUser());
         assertSame(trainer, user.getTrainer());
         assertSame(yoga, trainer.getTrainingType());
-        assertSame(trainer, result);
+        assertSame(trainer.getUser().getUsername(), result.getUsername());
         verify(trainerRepository).save(trainer);
     }
 
