@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.POST,"/trainee/profile").permitAll()
                         .requestMatchers(HttpMethod.POST,"/trainer/profile").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterAfter(jwtLogoutCheckFilter, BearerTokenAuthenticationFilter.class)
@@ -64,8 +65,6 @@ public class SecurityConfig {
                         .logoutSuccessHandler(customLogoutSuccessHandler))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults());
-
-
         return http.build();
     }
 }
