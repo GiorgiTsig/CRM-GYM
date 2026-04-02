@@ -1,6 +1,5 @@
 package com.epam.gymcrm.config;
 
-import com.epam.gymcrm.util.JwtDecoderService;
 import com.epam.gymcrm.util.LogoutSuccessHandler;
 import com.epam.gymcrm.util.JwtService;
 import org.springframework.context.annotation.Bean;
@@ -24,20 +23,17 @@ public class SecurityConfig {
     private final JwtService jwtService;
     private final JwtLogoutCheckFilter jwtLogoutCheckFilter;
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
-    private final JwtDecoderService jwtDecoderService;
 
     public SecurityConfig(
             LogoutSuccessHandler customLogoutSuccessHandler,
             JwtService jwtService,
             JwtLogoutCheckFilter jwtLogoutCheckFilter,
-            JwtAuthenticationConverter jwtAuthenticationConverter,
-            JwtDecoderService jwtDecoderService
+            JwtAuthenticationConverter jwtAuthenticationConverter
     ) {
         this.customLogoutSuccessHandler = customLogoutSuccessHandler;
         this.jwtService = jwtService;
         this.jwtLogoutCheckFilter = jwtLogoutCheckFilter;
         this.jwtAuthenticationConverter = jwtAuthenticationConverter;
-        this.jwtDecoderService = jwtDecoderService;
     }
 
     @Bean
@@ -56,7 +52,7 @@ public class SecurityConfig {
                 .addFilterAfter(jwtLogoutCheckFilter, BearerTokenAuthenticationFilter.class)
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt((jwt) -> jwt
-                                .decoder(jwtDecoderService.jwtDecoder())
+                                .decoder(jwtService.jwtDecoder())
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter)
                         )
                 )
