@@ -21,14 +21,14 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    private final Authentication authenticationUtil;
+    private final Authentication authentication;
     private final UserService userService;
 
     public AuthController(
             UserService userService,
-            Authentication authenticationUtil
+            Authentication authentication
     ) {
-        this.authenticationUtil = authenticationUtil;
+        this.authentication = authentication;
         this.userService = userService;
     }
 
@@ -45,7 +45,7 @@ public class AuthController {
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authenticationUtil.auth(authUsername, authPassword);
+        authentication.auth(authUsername, authPassword);
 
         return ResponseEntity.ok().build();
     }
