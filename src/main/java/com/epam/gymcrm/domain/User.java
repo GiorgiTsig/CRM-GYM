@@ -1,11 +1,12 @@
 package com.epam.gymcrm.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.ColumnDefault;
 
-import java.util.Objects;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -32,6 +33,16 @@ public class User {
     @NotNull
     @Column(nullable = false)
     private boolean isActive;
+
+    @Column(name = "last_logout")
+    private Instant lastLogout;
+
+    @ColumnDefault("0")
+    @Column(name = "failed_login_attempts", nullable = false)
+    private Integer failedLoginAttempts = 0;
+
+    @Column(name = "lock_until")
+    private LocalDateTime lockUntil;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Trainee trainee;
@@ -97,6 +108,31 @@ public class User {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public Instant getLastLogout() {
+        return lastLogout;
+    }
+
+    public void setLastLogout(Instant lastLogout) {
+        this.lastLogout = lastLogout;
+    }
+
+
+    public Integer getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    public void setFailedLoginAttempts(Integer failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public LocalDateTime getLockUntil() {
+        return lockUntil;
+    }
+
+    public void setLockUntil(LocalDateTime lockUntil) {
+        this.lockUntil = lockUntil;
     }
 
     public Trainee getTrainee() {

@@ -1,6 +1,5 @@
 package com.epam.gymcrm.restController;
 
-import com.epam.gymcrm.domain.User;
 import com.epam.gymcrm.dto.auth.request.ChangePasswordRequestDto;
 import com.epam.gymcrm.service.UserService;
 import com.epam.gymcrm.util.Authentication;
@@ -11,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -45,24 +45,21 @@ class AuthControllerTest {
     @Test
     void changePassword_shouldReturnOkMessage_whenPasswordUpdated() {
         ChangePasswordRequestDto authControllerDto = new ChangePasswordRequestDto();
-        authControllerDto.setUsername(USERNAME);
-        authControllerDto.setPassword(PASSWORD);
         authControllerDto.setNewPassword(NEW_PASSWORD);
+        org.springframework.security.core.Authentication authentication = mock(org.springframework.security.core.Authentication.class);
+        UserDetails username = mock(UserDetails.class);
 
-        User user = new User();
-        user.setUsername(USERNAME);
-        user.setPassword(PASSWORD);
+        when(authentication.getPrincipal()).thenReturn(username);
 
-        doReturn(true).when(authentication).auth(USERNAME, PASSWORD);
-        doReturn(user).when(userService).updatePassword(USERNAME, NEW_PASSWORD);
+        when(username.getUsername()).thenReturn(USERNAME);
+
 
         ResponseEntity<String> response =
-                authController.changePassword(authControllerDto, null);
+                authController.changePassword(authentication, authControllerDto, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Password changed successfully", response.getBody());
 
-        verify(authentication).auth(USERNAME, PASSWORD);
         verify(userService).updatePassword(USERNAME, NEW_PASSWORD);
     }
 }

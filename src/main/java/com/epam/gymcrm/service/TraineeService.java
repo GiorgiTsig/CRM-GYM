@@ -3,10 +3,9 @@ package com.epam.gymcrm.service;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.exception.AuthenticationFailedException;
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.exception.EntityNotFoundException;
 import com.epam.gymcrm.repository.TraineeRepository;
-import com.epam.gymcrm.util.Authentication;
 import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import jakarta.validation.Valid;
@@ -15,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +30,7 @@ public class TraineeService {
     private TraineeRepository traineeRepository;
     private UsernameGenerator usernameGenerator;
     private PasswordGenerator passwordGenerator;
+    private PasswordEncoder passwordEncoder;
     private TrainerService trainerService;
     private static final Logger log = LoggerFactory.getLogger(TraineeService.class);
 
@@ -53,21 +54,29 @@ public class TraineeService {
         this.passwordGenerator = passwordGenerator;
     }
 
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Transactional
-    public Trainee createTraineeProfile(@Valid Trainee trainee) {
+    public AuthenticationDto createTraineeProfile(@Valid Trainee trainee) {
         log.info("Creating trainee profile for {} {}", trainee.getUser().getFirstName(), trainee.getUser().getLastName());
 
         String password = passwordGenerator.generatePassword();
-        trainee.getUser().setPassword(password);
+        trainee.getUser().setPassword(passwordEncoder.encode(password));
 
         String username = usernameGenerator.generateUsername(trainee.getUser().getFirstName(), trainee.getUser().getLastName());
         trainee.getUser().setUsername(username);
         trainee.getUser().setActive(true);
 
         traineeRepository.save(trainee);
-        log.info("Trainee profile created with username: {}", trainee.getUser().getUsername());
+        log.info("Trainee profile created");
+        AuthenticationDto authenticationDto = new AuthenticationDto();
+        authenticationDto.setUsername(username);
+        authenticationDto.setPassword(password);
 
-        return trainee;
+        return authenticationDto;
     }
 
     @Transactional(readOnly = true)

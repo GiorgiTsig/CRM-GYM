@@ -4,7 +4,6 @@ import com.epam.gymcrm.dto.TrainingType.TrainingTypeDetailsDto;
 import com.epam.gymcrm.dto.trainee.request.TrainingRequestDto;
 import com.epam.gymcrm.facade.TrainingFacade;
 import com.epam.gymcrm.facade.TrainingTypesFacade;
-import com.epam.gymcrm.util.Authentication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,7 +22,6 @@ public class TrainingController {
 
     private TrainingFacade trainingFacade;
     private TrainingTypesFacade trainingTypesFacade;
-    private Authentication authentication;
 
     @Autowired
     public void setTrainingFacade(TrainingFacade trainingFacade) {
@@ -33,11 +31,6 @@ public class TrainingController {
     @Autowired
     public void setTrainingTypesFacade(TrainingTypesFacade trainingTypesFacade) {
         this.trainingTypesFacade = trainingTypesFacade;
-    }
-
-    @Autowired
-    public void setAuthentication(Authentication authentication) {
-        this.authentication = authentication;
     }
 
     @PostMapping
@@ -50,11 +43,8 @@ public class TrainingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<Void> addTraining(
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword,
             @RequestBody TrainingRequestDto trainingRequestDto
     ) {
-        authentication.auth(authUsername, authPassword);
         trainingFacade.addTraining(trainingRequestDto);
         return ResponseEntity.ok().build();
     }
@@ -66,11 +56,7 @@ public class TrainingController {
             @ApiResponse(responseCode = "401", description = "Authentication failed"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    ResponseEntity<List<TrainingTypeDetailsDto>> getTrainingType(
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword
-    ) {
-        authentication.auth(authUsername, authPassword);
+    ResponseEntity<List<TrainingTypeDetailsDto>> getTrainingType() {
         List<TrainingTypeDetailsDto> trainingTypesDto =  trainingTypesFacade.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(trainingTypesDto);
     }

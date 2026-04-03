@@ -10,7 +10,6 @@ import com.epam.gymcrm.dto.trainee.response.TraineeTrainingDto;
 import com.epam.gymcrm.dto.trainee.response.TrainerDto;
 import com.epam.gymcrm.facade.TraineeFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.util.Authentication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,14 +33,10 @@ class TraineeControllerTest {
     @Mock
     private TrainingFacade trainingFacade;
 
-    @Mock
-    private Authentication authentication;
-
     @InjectMocks
     private TraineeController traineeController;
 
     private static final String USERNAME = "john";
-    private static final String PASSWORD = "123";
 
     @Test
     void create_shouldReturnCreatedResponse() {
@@ -67,11 +62,10 @@ class TraineeControllerTest {
         TraineeProfileDto traineeDto = new TraineeProfileDto();
         traineeDto.setFirstName(USERNAME);
 
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
         when(traineeFacade.getTraineeProfile(traineeProfile)).thenReturn(traineeDto);
 
         ResponseEntity<TraineeProfileDto> response =
-                traineeController.traineeProfile(USERNAME, PASSWORD, traineeProfile, null);
+                traineeController.traineeProfile(traineeProfile, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(traineeDto, response.getBody());
@@ -105,10 +99,9 @@ class TraineeControllerTest {
         traineeDto.setDateOfBirth(dateOfBirth);
         traineeDto.setActive(true);
 
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
         when(traineeFacade.updateTraineeProfile(USERNAME, firstName, lastName, LocalDate.of(2026, 2, 2), address, true)).thenReturn(traineeDto);
 
-        ResponseEntity<TraineeProfileDto> response = traineeController.updateTraineeProfile(USERNAME, PASSWORD, traineeUpdateRequestDto, null);
+        ResponseEntity<TraineeProfileDto> response = traineeController.updateTraineeProfile(traineeUpdateRequestDto, null);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(traineeDto, response.getBody());
 
@@ -120,13 +113,12 @@ class TraineeControllerTest {
         AuthenticationDto authController = new AuthenticationDto();
         authController.setUsername(USERNAME);
 
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
         doNothing()
                 .when(traineeFacade)
                 .deleteTrainee("trainee");
 
         ResponseEntity<Void> response =
-                traineeController.deleteTraineeProfile(USERNAME, PASSWORD, "trainee", null);
+                traineeController.deleteTraineeProfile("trainee", null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -139,13 +131,12 @@ class TraineeControllerTest {
         TrainerDto trainerDto2 = new TrainerDto();
         trainerDto2.setUsername("trainer.two");
 
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
         List<TrainerDto> trainers = List.of(trainerDto1, trainerDto2);
 
         when(traineeFacade.getUnassignedTrainersForTrainee("trainee")).thenReturn(trainers);
 
         ResponseEntity<List<TrainerDto>> response =
-                traineeController.getActiveTrainersNotAssignedToTrainee(USERNAME, PASSWORD, "trainee", null);
+                traineeController.getActiveTrainersNotAssignedToTrainee("trainee", null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(List.of(trainerDto1, trainerDto2), response.getBody());
@@ -166,13 +157,12 @@ class TraineeControllerTest {
         dto2.setUsername("trainer.two");
 
         List<TrainerDto> trainers = List.of(dto1, dto2);
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         when(traineeFacade.updateTraineeTrainers(USERNAME, trainerUsernames))
                 .thenReturn(trainers);
 
         ResponseEntity<List<TrainerDto>> response =
-                traineeController.updateTraineeTrainers(USERNAME, PASSWORD, trainerList, null);
+                traineeController.updateTraineeTrainers(trainerList, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(List.of(dto1, dto2), response.getBody());
@@ -185,7 +175,6 @@ class TraineeControllerTest {
         TraineeTrainingDto trainingDto1 = new TraineeTrainingDto();
         TraineeTrainingDto trainingDto2 = new TraineeTrainingDto();
         List<TraineeTrainingDto> trainings = List.of(trainingDto1, trainingDto2);
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         when(trainingFacade.getTraineeTrainings(
                 "trainee.user",
@@ -198,8 +187,6 @@ class TraineeControllerTest {
 
         ResponseEntity<List<TraineeTrainingDto>> response =
                 traineeController.getTraineeTrainingsList(
-                        USERNAME,
-                        PASSWORD,
                         "trainee.user",
                         LocalDate.of(1999, 1, 1),
                         LocalDate.of(1999, 1, 2),
@@ -225,12 +212,11 @@ class TraineeControllerTest {
         ActiveDto authController = new ActiveDto();
         authController.setUsername(USERNAME);
         authController.setActive(true);
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         doNothing().when(traineeFacade).activateTrainee(authController.getUsername());
 
         ResponseEntity<Void> response =
-                traineeController.updateTraineeStatus(USERNAME, PASSWORD, authController);
+                traineeController.updateTraineeStatus(authController);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
@@ -243,12 +229,11 @@ class TraineeControllerTest {
         ActiveDto authController = new ActiveDto();
         authController.setUsername(USERNAME);
         authController.setActive(false);
-        when(authentication.auth(USERNAME, PASSWORD)).thenReturn(true);
 
         doNothing().when(traineeFacade).deactivateTrainee(authController.getUsername());
 
         ResponseEntity<Void> response =
-                traineeController.updateTraineeStatus(USERNAME, PASSWORD, authController);
+                traineeController.updateTraineeStatus(authController);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 

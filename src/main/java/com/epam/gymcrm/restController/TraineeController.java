@@ -10,7 +10,6 @@ import com.epam.gymcrm.dto.trainee.response.TraineeTrainingDto;
 import com.epam.gymcrm.dto.trainee.response.TrainerDto;
 import com.epam.gymcrm.facade.TraineeFacade;
 import com.epam.gymcrm.facade.TrainingFacade;
-import com.epam.gymcrm.util.Authentication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -33,7 +32,6 @@ public class TraineeController {
     private static final Logger log = LoggerFactory.getLogger(TraineeController.class);
     private TraineeFacade traineeFacade;
     private TrainingFacade trainingFacade;
-    private Authentication authentication;
 
     @Autowired
     public void setTraineeFacade(TraineeFacade traineeFacade) {
@@ -43,11 +41,6 @@ public class TraineeController {
     @Autowired
     public void setTrainingFacade(TrainingFacade trainingFacade) {
         this.trainingFacade = trainingFacade;
-    }
-
-    @Autowired
-    public void setAuthentication(Authentication authentication) {
-        this.authentication = authentication;
     }
 
     @PostMapping("/profile")
@@ -76,14 +69,11 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<TraineeProfileDto> traineeProfile(
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword,
             @RequestParam("traineeProfile") String traineeProfile,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        authentication.auth(authUsername, authPassword);
         TraineeProfileDto profileDTO = traineeFacade.getTraineeProfile(traineeProfile);
 
         return ResponseEntity.status(HttpStatus.OK).body(profileDTO);
@@ -101,13 +91,10 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<TraineeProfileDto> updateTraineeProfile(
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword,
             @RequestBody TraineeUpdateRequestDto traineeDto,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(authUsername, authPassword);
         TraineeProfileDto profileDTO = traineeFacade.updateTraineeProfile(
                 traineeDto.getUsername(),
                 traineeDto.getFirstName(),
@@ -129,13 +116,10 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<Void> deleteTraineeProfile(
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword,
             @RequestParam("traineeUsername") String traineeUsername,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(authUsername, authPassword);
         traineeFacade.deleteTrainee(traineeUsername);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -149,13 +133,10 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<List<TrainerDto>> getActiveTrainersNotAssignedToTrainee(
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword,
             @PathVariable("username") String traineeUsername,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(authUsername, authPassword);
         List<TrainerDto> trainerDtoList = traineeFacade.getUnassignedTrainersForTrainee(traineeUsername);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDtoList);
     }
@@ -171,14 +152,11 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<List<TrainerDto>> updateTraineeTrainers(
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword,
             @RequestBody TraineeTrainerAssignmentRequestDto trainerList,
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ) {
         log.info("TransactionId: {}", transactionId);
 
-        authentication.auth(authUsername, authPassword);
         List<TrainerDto> trainerDtoList = traineeFacade.updateTraineeTrainers(
                 trainerList.getUsername(),
                 trainerList.getTrainerUsernames()
@@ -198,8 +176,6 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<List<TraineeTrainingDto>> getTraineeTrainingsList(
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword,
             @RequestParam("traineeUsername") String traineeUsername,
             @RequestParam(value = "fromDate", required = false) LocalDate fromDate,
             @RequestParam(value = "toDate", required = false) LocalDate toDate,
@@ -208,7 +184,6 @@ public class TraineeController {
             @RequestHeader(value = "transactionId", required = false) String transactionId
     ){
         log.info("TransactionId: {}", transactionId);
-        authentication.auth(authUsername, authPassword);
         List<TraineeTrainingDto> trainingDtoList = trainingFacade.getTraineeTrainings(
                 traineeUsername,
                 fromDate,
@@ -231,11 +206,8 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<Void> updateTraineeStatus (
-            @RequestHeader("username") String authUsername,
-            @RequestHeader("password") String authPassword,
             @RequestBody ActiveDto activeDto
     ) {
-        authentication.auth(authUsername, authPassword);
         if (activeDto.isActive()) {
             traineeFacade.activateTrainee(activeDto.getUsername());
         } else {

@@ -8,7 +8,6 @@ spring:
     init:
       mode: never
 
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,3 +23,11 @@ management:
     health:
       show-details: always
       show-components: always
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.web.FilterChainProxy: DEBUG
+
+jwt:
+  secret: "1OLC84w+VsjVtqCuYOPgnQ9UOXy5aAFQP5BLgoeBEf0="

@@ -49,8 +49,7 @@ class TrainerFacadeTest {
         trainer.setUser(user);
         trainer.setTrainingType(type);
         when(trainerMapper.toTrainer(createTrainerDto)).thenReturn(trainer);
-        when(trainerService.createTrainerProfile(user, trainer, TRAINING_TYPE)).thenReturn(trainer);
-        when(trainerMapper.toAuth(trainer)).thenReturn(authenticationDto);
+        when(trainerService.createTrainerProfile(user, trainer, TRAINING_TYPE)).thenReturn(authenticationDto);
 
         AuthenticationDto result = trainerFacade.createTrainerProfile(createTrainerDto);
 

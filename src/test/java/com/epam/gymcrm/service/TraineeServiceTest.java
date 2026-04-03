@@ -1,11 +1,10 @@
 package com.epam.gymcrm.service;
 
+import com.epam.gymcrm.dto.auth.response.AuthenticationDto;
 import com.epam.gymcrm.repository.TraineeRepository;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
 import com.epam.gymcrm.domain.User;
-import com.epam.gymcrm.exception.AuthenticationFailedException;
-import com.epam.gymcrm.util.Authentication;
 import com.epam.gymcrm.util.PasswordGenerator;
 import com.epam.gymcrm.util.UsernameGenerator;
 import org.junit.jupiter.api.Test;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,29 +37,38 @@ class TraineeServiceTest {
     @Mock
     private TrainerService trainerService;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private TraineeService traineeService;
 
     @Test
     void createTraineeProfile_populatesCredentialsAndLinksEntities() {
+        String plaintextPassword = "generatedPass";
+        String encodedPassword = "encodedGeneratedPass";
         User user = new User();
         user.setFirstName("John");
         user.setLastName("Doe");
         Trainee trainee = new Trainee();
+        AuthenticationDto authenticationDto = new AuthenticationDto();
         trainee.setUser(user);
         user.setTrainee(trainee);
 
-        when(passwordGenerator.generatePassword()).thenReturn("generatedPass");
+        when(passwordGenerator.generatePassword()).thenReturn(plaintextPassword);
+        when(passwordEncoder.encode(plaintextPassword)).thenReturn(encodedPassword);
         when(usernameGenerator.generateUsername("John", "Doe")).thenReturn("john.doe");
         when(traineeRepository.save(trainee)).thenReturn(trainee);
 
-        Trainee result = traineeService.createTraineeProfile(trainee);
+        AuthenticationDto result = traineeService.createTraineeProfile(trainee);
+        authenticationDto.setUsername(trainee.getUser().getUsername());
+        authenticationDto.setPassword(plaintextPassword);
 
-        assertEquals("generatedPass", user.getPassword());
+        assertEquals(encodedPassword, user.getPassword());
         assertEquals("john.doe", user.getUsername());
         assertEquals(user, trainee.getUser());
         assertEquals(trainee, user.getTrainee());
-        assertEquals(trainee, result);
+        assertEquals(authenticationDto.getUsername(), result.getUsername());
         verify(traineeRepository).save(trainee);
     }
 
