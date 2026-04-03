@@ -31,3 +31,10 @@ logging:
 
 jwt:
   secret: "1OLC84w+VsjVtqCuYOPgnQ9UOXy5aAFQP5BLgoeBEf0="
+
+security:
+  cors:
+    allowed-origin: http://localhost:8080
+    methods: "*"
+    headers: "*"
+    credentials: true
