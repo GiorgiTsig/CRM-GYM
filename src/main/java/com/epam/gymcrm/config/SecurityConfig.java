@@ -2,6 +2,7 @@ package com.epam.gymcrm.config;
 
 import com.epam.gymcrm.util.LogoutSuccessHandler;
 import com.epam.gymcrm.util.JwtService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,6 +29,18 @@ public class SecurityConfig {
     private final JwtService jwtService;
     private final JwtLogoutCheckFilter jwtLogoutCheckFilter;
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
+
+    @Value("${security.cors.allowed-origin}")
+    private List<String> corsAllowedOrigin;
+
+    @Value("${security.cors.methods}")
+    private List<String> methods;
+
+    @Value("${security.cors.headers}")
+    private List<String> header;
+
+    @Value("${security.cors.credentials}")
+    private boolean credentials;
 
     public SecurityConfig(
             LogoutSuccessHandler customLogoutSuccessHandler,
@@ -72,10 +85,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:8080"));
-        config.setAllowedMethods(List.of("*"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(credentials);
+        config.setAllowedOrigins(corsAllowedOrigin);
+        config.setAllowedMethods(methods);
+        config.setAllowedHeaders(header);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
