@@ -10,9 +10,12 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
-    defer-datasource-initialization: true
+      ddl-auto: none
     open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
 
 management:
   endpoints:
@@ -38,3 +41,4 @@ security:
     methods: "*"
     headers: "*"
     credentials: true
+
