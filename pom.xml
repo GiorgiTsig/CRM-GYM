@@ -18,6 +18,7 @@
     <modules>
         <module>training-report-service</module>
         <module>gym-crm</module>
+        <module>eureka-server</module>
     </modules>
 
     <properties>
