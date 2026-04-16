@@ -68,4 +68,8 @@ public class TrainingFacade {
         List<Training> trainings =  trainingService.getTrainerTrainings(trainerUsername, fromDate, toDate, traineeUsername);
         return trainings.stream().map(training -> trainerMapper.toTrainingDto(training)).toList();
     }
+
+    public void deleteTraining(@NotBlank String traineeUsername) {
+        trainingService.delete(traineeUsername);
+    }
 }
