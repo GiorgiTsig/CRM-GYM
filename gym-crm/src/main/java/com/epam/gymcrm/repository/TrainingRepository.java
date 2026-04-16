@@ -2,6 +2,8 @@ package com.epam.gymcrm.repository;
 
 import com.epam.gymcrm.domain.Training;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +18,8 @@ public interface TrainingRepository extends JpaRepository<Training, UUID> {
     @Override
     <S extends Training> S save(@NonNull S entity);
 
+    @Modifying
+    @Query("DELETE FROM Training t WHERE t.trainee.user.username = :traineeUserUsername")
     void deleteTrainingByTraineeUserUsername(String traineeUserUsername);
 
     List<Training> findTrainingByTraineeUserUsernameAndDateBetweenAndTrainerTrainingTypeTrainingTypeNameAndTrainerUserUsername(
