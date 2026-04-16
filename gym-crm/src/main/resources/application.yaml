@@ -33,6 +33,8 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.security.web.FilterChainProxy: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name}] [correlationId=%X{correlationId}]"
 
 jwt:
   secret: "1OLC84w+VsjVtqCuYOPgnQ9UOXy5aAFQP5BLgoeBEf0="

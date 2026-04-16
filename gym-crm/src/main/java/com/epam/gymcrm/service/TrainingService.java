@@ -1,5 +1,9 @@
 package com.epam.gymcrm.service;
 
+import com.epam.gymcrm.client.ReportClient;
+import com.epam.gymcrm.dto.training.ActionType;
+import com.epam.gymcrm.dto.training.TrainingEventDto;
+import com.epam.gymcrm.mapper.TrainingMapper;
 import com.epam.gymcrm.repository.TrainingRepository;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
@@ -11,6 +15,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
@@ -28,11 +33,18 @@ public class TrainingService {
     private TrainerService trainerService;
     private TraineeService traineeService;
     private MeterRegistry meterRegistry;
+    private final TrainingMapper trainingMapper;
+    private final ReportClient reportClient;
     private static final Logger log = LoggerFactory.getLogger(TrainingService.class);
 
     @Autowired
     public void setTrainingRepository(TrainingRepository trainingRepository) {
         this.trainingRepository = trainingRepository;
+    }
+
+    public TrainingService(ReportClient reportClient, TrainingMapper trainingMapper) {
+        this.reportClient = reportClient;
+        this.trainingMapper = trainingMapper;
     }
 
     @Autowired
@@ -99,6 +111,10 @@ public class TrainingService {
         training.setType(type);
 
         trainingRepository.save(training);
+        TrainingEventDto trainingEventDto = trainingMapper.toEventDto(training);
+        String correlationId = MDC.get("correlationId");
+        trainingEventDto.setAction(ActionType.ADD);
+        reportClient.sendWorkload(trainingEventDto, correlationId);
         meterRegistry.counter("crm_training_create_attempts_total", "result", "success").increment();
     }
 
