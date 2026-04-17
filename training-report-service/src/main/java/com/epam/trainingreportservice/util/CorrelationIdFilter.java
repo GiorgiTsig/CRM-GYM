@@ -1,4 +1,4 @@
-package com.epam.trainingreportservice.utill;
+package com.epam.trainingreportservice.util;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

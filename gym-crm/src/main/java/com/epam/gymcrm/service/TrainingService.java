@@ -107,7 +107,7 @@ public class TrainingService {
 
     @Transactional
     public void delete(String username) {
-        List<Training> training = findTrainingTraineeUsers(username);
+        List<Training> training = findTrainingsByTraineeUsername(username);
         for (Training t : training) {
             TrainingEventDto trainingEventDto = trainingMapper.toEventDto(t);
             trainingEventDto.setAction(ActionType.DELETE);
@@ -117,7 +117,7 @@ public class TrainingService {
     }
 
     @Transactional(readOnly = true)
-    public List<Training> findTrainingTraineeUsers(String username) {
+    public List<Training> findTrainingsByTraineeUsername(String username) {
         return trainingRepository.findByTraineeUserUsername(username);
     }
 

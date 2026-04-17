@@ -3,6 +3,7 @@ package com.epam.trainingreportservice.restController;
 import com.epam.trainingreportservice.domain.TrainerMonthlySummary;
 import com.epam.trainingreportservice.dto.TrainingEventDto;
 import com.epam.trainingreportservice.service.TrainerSummaryService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class ReportController {
 
     @PostMapping("/trainer-workload")
     public ResponseEntity<Void> handle(
-            @RequestBody TrainingEventDto trainingDto,
+            @Valid @RequestBody TrainingEventDto trainingDto,
             @RequestHeader("X-Correlation-Id") String correlationId
     ) {
         log.info("Received workload event with correlationId={}", correlationId);

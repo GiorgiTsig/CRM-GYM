@@ -59,7 +59,7 @@ eureka:
 
 auth:
   client:
-    id : "gym-crm"
+    id: "gym-crm"
     secret: "secret"
 
 resilience4j:

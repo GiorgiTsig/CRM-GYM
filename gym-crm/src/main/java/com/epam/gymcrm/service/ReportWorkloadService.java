@@ -16,7 +16,7 @@ public class ReportWorkloadService {
         this.reportClient = reportClient;
     }
 
-    @CircuitBreaker(name = "reportService", fallbackMethod = "fallback")
+    @CircuitBreaker(name = "training-report-service", fallbackMethod = "fallback")
     public void sendWorkloadSafe(TrainingEventDto dto) {
         reportClient.sendWorkload(dto);
     }
