@@ -1,6 +1,31 @@
 spring:
   application:
     name: training-report-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+  datasource:
+    url: jdbc:h2:file:./data/reportdb;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name}] [correlationId=%X{correlationId}]"
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+
+
 server:
   port: 8081
 
@@ -8,13 +33,3 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
-
-jwt:
-  secret: "DIJMbOKj0rpWVC3GiK6dP+dCVaF0zaGHJH+Qq/ji9SI="
-
-security:
-  cors:
-    allowed-origin: http://localhost:8081
-    methods: "*"
-    headers: "*"
-    credentials: true

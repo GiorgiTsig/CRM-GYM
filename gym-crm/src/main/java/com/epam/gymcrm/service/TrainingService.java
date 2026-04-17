@@ -1,6 +1,5 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.client.ReportClient;
 import com.epam.gymcrm.dto.training.ActionType;
 import com.epam.gymcrm.dto.training.TrainingEventDto;
 import com.epam.gymcrm.mapper.TrainingMapper;
@@ -15,8 +14,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,37 +26,28 @@ import java.util.List;
 @Validated
 public class TrainingService {
 
-    private TrainingRepository trainingRepository;
-    private TrainerService trainerService;
-    private TraineeService traineeService;
-    private MeterRegistry meterRegistry;
+    private final TrainingRepository trainingRepository;
+    private final TrainerService trainerService;
+    private final TraineeService traineeService;
+    private final MeterRegistry meterRegistry;
     private final TrainingMapper trainingMapper;
-    private final ReportClient reportClient;
+    private final ReportWorkloadService  reportWorkloadService;
     private static final Logger log = LoggerFactory.getLogger(TrainingService.class);
 
-    @Autowired
-    public void setTrainingRepository(TrainingRepository trainingRepository) {
+    public TrainingService(
+            TrainingRepository trainingRepository,
+            TrainerService trainerService,
+            TraineeService traineeService,
+            MeterRegistry meterRegistry,
+            ReportWorkloadService reportWorkloadService,
+            TrainingMapper trainingMapper
+    ) {
         this.trainingRepository = trainingRepository;
-    }
-
-    public TrainingService(ReportClient reportClient, TrainingMapper trainingMapper) {
-        this.reportClient = reportClient;
-        this.trainingMapper = trainingMapper;
-    }
-
-    @Autowired
-    public void setTrainerService(TrainerService trainerService) {
         this.trainerService = trainerService;
-    }
-
-    @Autowired
-    public void setTraineeService(TraineeService traineeService) {
         this.traineeService = traineeService;
-    }
-
-    @Autowired
-    public void setMeterRegistry(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
+        this.reportWorkloadService = reportWorkloadService;
+        this.trainingMapper = trainingMapper;
     }
 
     @Transactional
@@ -112,15 +100,25 @@ public class TrainingService {
 
         trainingRepository.save(training);
         TrainingEventDto trainingEventDto = trainingMapper.toEventDto(training);
-        String correlationId = MDC.get("correlationId");
         trainingEventDto.setAction(ActionType.ADD);
-        reportClient.sendWorkload(trainingEventDto, correlationId);
+        reportWorkloadService.sendWorkloadSafe(trainingEventDto);
         meterRegistry.counter("crm_training_create_attempts_total", "result", "success").increment();
     }
 
     @Transactional
     public void delete(String username) {
+        List<Training> training = findTrainingTraineeUsers(username);
+        for (Training t : training) {
+            TrainingEventDto trainingEventDto = trainingMapper.toEventDto(t);
+            trainingEventDto.setAction(ActionType.DELETE);
+            reportWorkloadService.sendWorkloadSafe(trainingEventDto);
+        }
         trainingRepository.deleteTrainingByTraineeUserUsername(username);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Training> findTrainingTraineeUsers(String username) {
+        return trainingRepository.findByTraineeUserUsername(username);
     }
 
     @Transactional(readOnly = true)

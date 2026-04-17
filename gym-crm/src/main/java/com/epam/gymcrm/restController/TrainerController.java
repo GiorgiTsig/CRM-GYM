@@ -69,9 +69,9 @@ public class TrainerController {
     @GetMapping("/profile")
     ResponseEntity<TrainerProfileDto> getTrainerProfile(
             @RequestParam("trainerProfile") String trainerProfile,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("correlationId: {}", correlationId);
         TrainerProfileDto trainerDto = trainerFacade.getTrainerProfile(trainerProfile);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
     }
@@ -88,9 +88,9 @@ public class TrainerController {
     @PutMapping("/profile")
     ResponseEntity<TrainerProfileDto> updateTrainerStatus(
             @RequestBody TrainerProfileUpdateRequestDto trainerRequestDto,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
         TrainerProfileDto profileDTO = trainerFacade.updateTrainerProfile(
                 trainerRequestDto.getUsername(),
                 trainerRequestDto.getFirstName(),
@@ -115,9 +115,9 @@ public class TrainerController {
             @RequestParam(value = "fromDate", required = false) LocalDate fromDate,
             @RequestParam(value = "toDate", required = false) LocalDate toDate,
             @RequestParam(value = "traineeUsername", required = false) String traineeUsername,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ){
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
 
         List<TrainerTrainingDto> trainingDtoList = trainingFacade.getTrainerTrainings(
                 trainerUsername,
