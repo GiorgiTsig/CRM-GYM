@@ -1,11 +1,14 @@
 package com.epam.gymcrm.service;
 
+import com.epam.gymcrm.client.ReportClient;
 import com.epam.gymcrm.domain.Trainee;
 import com.epam.gymcrm.domain.Trainer;
-import com.epam.gymcrm.domain.TrainingType;
-import com.epam.gymcrm.exception.EntityNotFoundException;
-import com.epam.gymcrm.repository.TrainingRepository;
 import com.epam.gymcrm.domain.Training;
+import com.epam.gymcrm.domain.TrainingType;
+import com.epam.gymcrm.dto.training.TrainingEventDto;
+import com.epam.gymcrm.exception.EntityNotFoundException;
+import com.epam.gymcrm.mapper.TrainingMapper;
+import com.epam.gymcrm.repository.TrainingRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,10 @@ class TrainingServiceTest {
     private MeterRegistry meterRegistry;
     @Mock
     private Counter counter;
+    @Mock
+    private TrainingMapper trainingMapper;
+    @Mock
+    private ReportClient reportClient;
 
     @InjectMocks
     private TrainingService trainingService;
@@ -151,6 +158,7 @@ class TrainingServiceTest {
         Trainee trainee = new Trainee();
         trainee.setTrainers(new ArrayList<>());
         TrainingType trainingType = new TrainingType("YOGA");
+        TrainingEventDto eventDto = new TrainingEventDto();
 
         when(trainerService.getTrainer(trainerUsername)).thenReturn(Optional.of(trainer));
         when(traineeService.findTraineeByUsername(traineeUsername)).thenReturn(Optional.of(trainee));
@@ -158,10 +166,12 @@ class TrainingServiceTest {
         when(meterRegistry.counter("crm_trainer_fetch_total", "result", "success")).thenReturn(trainerSuccessCounter);
         when(meterRegistry.counter("crm_trainee_fetch_total", "result", "success")).thenReturn(traineeSuccessCounter);
         when(meterRegistry.counter("crm_training_create_attempts_total", "result", "success")).thenReturn(createSuccessCounter);
+        when(trainingMapper.toEventDto(training)).thenReturn(eventDto);
 
         trainingService.createTraining(traineeUsername, trainerUsername, training);
 
         verify(trainingRepository).save(training);
+        verify(reportClient).sendWorkload(eventDto);
         verify(trainerSuccessCounter).increment();
         verify(traineeSuccessCounter).increment();
         verify(createSuccessCounter).increment();

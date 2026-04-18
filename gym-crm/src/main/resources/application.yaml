@@ -9,6 +9,21 @@ spring:
   sql:
     init:
       mode: never
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+      client:
+        registration:
+          my-client:
+            client-id: gym-crm
+            client-secret: secret
+            authorization-grant-type: client_credentials
+        provider:
+          my-client:
+            token-uri: http://localhost:9000/oauth2/token
+
 
   jpa:
     hibernate:
@@ -33,6 +48,8 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.security.web.FilterChainProxy: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name}] [correlationId=%X{correlationId}]"
 
 jwt:
   secret: "1OLC84w+VsjVtqCuYOPgnQ9UOXy5aAFQP5BLgoeBEf0="
@@ -49,3 +66,15 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+auth:
+  client:
+    id: "gym-crm"
+    secret: "secret"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      training-report-service:
+        failure-rate-threshold: 50
+        sliding-window-size: 10

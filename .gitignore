@@ -9,6 +9,11 @@ target/
 *.iml
 *.ipr
 
+# H2 database files
+*.mv.db
+*.trace.db
+/data/
+
 ### Eclipse ###
 .apt_generated
 .classpath

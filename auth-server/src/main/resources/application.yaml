@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: auth-server
+  security:
+    oauth2:
+      authorizationserver:
+        client:
+          gym-crm:
+            registration:
+              client-id: "gym-crm"
+              client-secret: "{noop}secret"
+              client-authentication-methods: "client_secret_basic"
+              authorization-grant-types: "client_credentials"
+              scopes:
+                - "internal"
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+
+server:
+  port: 9000
+
+

@@ -70,9 +70,9 @@ public class TraineeController {
     })
     ResponseEntity<TraineeProfileDto> traineeProfile(
             @RequestParam("traineeProfile") String traineeProfile,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
 
         TraineeProfileDto profileDTO = traineeFacade.getTraineeProfile(traineeProfile);
 
@@ -92,9 +92,9 @@ public class TraineeController {
     })
     ResponseEntity<TraineeProfileDto> updateTraineeProfile(
             @RequestBody TraineeUpdateRequestDto traineeDto,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
         TraineeProfileDto profileDTO = traineeFacade.updateTraineeProfile(
                 traineeDto.getUsername(),
                 traineeDto.getFirstName(),
@@ -117,9 +117,9 @@ public class TraineeController {
     })
     ResponseEntity<Void> deleteTraineeProfile(
             @RequestParam("traineeUsername") String traineeUsername,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
         traineeFacade.deleteTrainee(traineeUsername);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -134,9 +134,9 @@ public class TraineeController {
     })
     ResponseEntity<List<TrainerDto>> getActiveTrainersNotAssignedToTrainee(
             @PathVariable("username") String traineeUsername,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
         List<TrainerDto> trainerDtoList = traineeFacade.getUnassignedTrainersForTrainee(traineeUsername);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDtoList);
     }
@@ -153,9 +153,9 @@ public class TraineeController {
     })
     ResponseEntity<List<TrainerDto>> updateTraineeTrainers(
             @RequestBody TraineeTrainerAssignmentRequestDto trainerList,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
 
         List<TrainerDto> trainerDtoList = traineeFacade.updateTraineeTrainers(
                 trainerList.getUsername(),
@@ -181,9 +181,9 @@ public class TraineeController {
             @RequestParam(value = "toDate", required = false) LocalDate toDate,
             @RequestParam(value = "trainerUsername", required = false) String trainerUsername,
             @RequestParam(value = "trainingType", required = false) String trainingType,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ){
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
         List<TraineeTrainingDto> trainingDtoList = trainingFacade.getTraineeTrainings(
                 traineeUsername,
                 fromDate,

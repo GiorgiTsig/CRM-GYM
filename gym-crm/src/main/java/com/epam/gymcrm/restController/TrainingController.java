@@ -75,9 +75,9 @@ public class TrainingController {
     })
     ResponseEntity<Void> deleteTraining(
             @RequestParam("traineeUsername") String traineeUsername,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
         trainingFacade.deleteTraining(traineeUsername);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

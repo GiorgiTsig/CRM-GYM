@@ -36,4 +36,6 @@ public interface TrainingRepository extends JpaRepository<Training, UUID> {
             LocalDate dateBefore,
             String traineeUserUsername
     );
+
+    List<Training> findByTraineeUserUsername(String traineeUserUsername);
 }
