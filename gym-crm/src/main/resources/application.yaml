@@ -14,6 +14,16 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:9000
+      client:
+        registration:
+          my-client:
+            client-id: gym-crm
+            client-secret: secret
+            authorization-grant-type: client_credentials
+        provider:
+          my-client:
+            token-uri: http://localhost:9000/oauth2/token
+
 
   jpa:
     hibernate:
