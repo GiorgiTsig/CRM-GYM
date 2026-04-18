@@ -1,20 +1,24 @@
 package com.epam.trainingreportservice.service;
 
 import com.epam.trainingreportservice.domain.TrainerMonthlySummary;
-import com.epam.trainingreportservice.dto.ActionType;
+import com.epam.trainingreportservice.dto.request.ActionType;
+import com.epam.trainingreportservice.dto.response.TrainerWorkloadResponse;
+import com.epam.trainingreportservice.mapper.WorkloadMapper;
 import com.epam.trainingreportservice.repository.TrainerMonthlySummaryRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class TrainerSummaryService {
 
     private final TrainerMonthlySummaryRepository repository;
+    private final WorkloadMapper workloadMapper;
 
-    public TrainerSummaryService(TrainerMonthlySummaryRepository repository) {
+    public TrainerSummaryService(TrainerMonthlySummaryRepository repository,  WorkloadMapper workloadMapper) {
         this.repository = repository;
+        this.workloadMapper = workloadMapper;
     }
 
 
@@ -68,7 +72,7 @@ public class TrainerSummaryService {
         return summary;
     }
 
-    public Optional<TrainerMonthlySummary> getTrainerSummary(String username, int year, int month) {
-        return repository.findByTrainerUsernameAndYearAndMonthValue(username, year, month);
+    public List<TrainerWorkloadResponse> getTrainerByUsername(String username) {
+        return repository.findByTrainerUsername(username).stream().map(workloadMapper::toDto).toList();
     }
 }

@@ -1,4 +1,4 @@
-package com.epam.trainingreportservice.dto;
+package com.epam.trainingreportservice.dto.request;
 
 import java.time.LocalDate;
 
