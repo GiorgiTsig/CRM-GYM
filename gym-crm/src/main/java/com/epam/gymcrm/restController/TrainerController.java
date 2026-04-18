@@ -71,7 +71,7 @@ public class TrainerController {
             @RequestParam("trainerProfile") String trainerProfile,
             @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("correlationId: {}", correlationId);
+        log.info("X-Correlation-Id: {}", correlationId);
         TrainerProfileDto trainerDto = trainerFacade.getTrainerProfile(trainerProfile);
         return ResponseEntity.status(HttpStatus.OK).body(trainerDto);
     }
