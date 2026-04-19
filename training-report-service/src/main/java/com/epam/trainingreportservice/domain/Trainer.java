@@ -2,30 +2,28 @@ package com.epam.trainingreportservice.domain;
 
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "trainer_summary")
-public class TrainerMonthlySummary {
+@Table(name = "trainer")
+public class Trainer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, unique = true)
     private String trainerUsername;
+
     private String firstName;
     private String lastName;
     private Boolean active;
 
-    @Column(name = "year_value")
-    private int year;
+    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TrainerYear> years;
 
-    @Column(name = "month_value")
-    private int monthValue;
-
-    private int totalDuration;
-
-    public TrainerMonthlySummary() {
+    public Trainer() {
     }
 
     public UUID getId() {
@@ -68,27 +66,11 @@ public class TrainerMonthlySummary {
         this.active = active;
     }
 
-    public int getYear() {
-        return year;
+    public List<TrainerYear> getYears() {
+        return years;
     }
 
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public int getMonthValue() {
-        return monthValue;
-    }
-
-    public void setMonthValue(int monthValue) {
-        this.monthValue = monthValue;
-    }
-
-    public int getTotalDuration() {
-        return totalDuration;
-    }
-
-    public void setTotalDuration(int totalDuration) {
-        this.totalDuration = totalDuration;
+    public void setYears(List<TrainerYear> years) {
+        this.years = years;
     }
 }

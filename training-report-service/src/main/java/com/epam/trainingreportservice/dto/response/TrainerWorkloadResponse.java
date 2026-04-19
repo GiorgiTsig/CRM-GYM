@@ -7,9 +7,7 @@ public class TrainerWorkloadResponse {
     private String firstName;
     private String lastName;
     private boolean active;
-    private int year;
-    private int monthValue;
-    private int totalDuration;
+    private List<YearSummaryDto> years;
 
     public String getTrainerUsername() {
         return trainerUsername;
@@ -43,27 +41,11 @@ public class TrainerWorkloadResponse {
         this.active = active;
     }
 
-    public int getYear() {
-        return year;
+    public List<YearSummaryDto> getYears() {
+        return years;
     }
 
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public int getMonthValue() {
-        return monthValue;
-    }
-
-    public void setMonthValue(int monthValue) {
-        this.monthValue = monthValue;
-    }
-
-    public int getTotalDuration() {
-        return totalDuration;
-    }
-
-    public void setTotalDuration(int totalDuration) {
-        this.totalDuration = totalDuration;
+    public void setYears(List<YearSummaryDto> years) {
+        this.years = years;
     }
 }

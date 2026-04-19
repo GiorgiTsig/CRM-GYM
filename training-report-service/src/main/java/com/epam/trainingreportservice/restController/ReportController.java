@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 public class ReportController {
@@ -40,11 +39,10 @@ public class ReportController {
     }
 
     @GetMapping("/workload")
-    public ResponseEntity<List<TrainerWorkloadResponse>> get(
+    public ResponseEntity<TrainerWorkloadResponse> get(
             @RequestParam String username
     ) {
-        List<TrainerWorkloadResponse> result =
-                trainerSummaryService.getTrainerByUsername(username);
+        TrainerWorkloadResponse result = trainerSummaryService.getTrainerByUsername(username);
 
 
         log.info("Received workload event for trainer={}", username);

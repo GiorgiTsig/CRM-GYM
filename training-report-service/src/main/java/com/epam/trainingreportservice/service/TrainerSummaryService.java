@@ -1,26 +1,28 @@
 package com.epam.trainingreportservice.service;
 
-import com.epam.trainingreportservice.domain.TrainerMonthlySummary;
+import com.epam.trainingreportservice.domain.TrainerMonth;
+import com.epam.trainingreportservice.domain.TrainerYear;
+import com.epam.trainingreportservice.mapper.TrainerMapper;
+import com.epam.trainingreportservice.domain.Trainer;
 import com.epam.trainingreportservice.dto.request.ActionType;
 import com.epam.trainingreportservice.dto.response.TrainerWorkloadResponse;
-import com.epam.trainingreportservice.mapper.WorkloadMapper;
-import com.epam.trainingreportservice.repository.TrainerMonthlySummaryRepository;
+import com.epam.trainingreportservice.repository.TrainerRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 public class TrainerSummaryService {
 
-    private final TrainerMonthlySummaryRepository repository;
-    private final WorkloadMapper workloadMapper;
+    private final TrainerRepository repository;
+    private final TrainerMapper trainerMapper;
 
-    public TrainerSummaryService(TrainerMonthlySummaryRepository repository,  WorkloadMapper workloadMapper) {
+    public TrainerSummaryService(TrainerRepository repository,  TrainerMapper trainerMapper) {
         this.repository = repository;
-        this.workloadMapper = workloadMapper;
+        this.trainerMapper = trainerMapper;
     }
-
 
     public void updateSummary(
             String username,
@@ -35,44 +37,74 @@ public class TrainerSummaryService {
         int year = date.getYear();
         int month = date.getMonthValue();
 
-        TrainerMonthlySummary summary = repository
-                .findByTrainerUsernameAndYearAndMonthValue(username,  year, month)
-                .orElseGet(() -> createNewSummary(username, firstName, lastName, active, year, month));
+        Trainer summary = Optional.ofNullable(repository.findByTrainerUsername(username))
+                .orElseGet(() -> createNewTrainer(username, firstName, lastName, active));
+
+        TrainerYear summaryYear = getOrCreateTrainerYear(summary, year);
+        TrainerMonth summaryMonth = getOrCreateTrainerMonth(summaryYear, month);
 
         if (ActionType.ADD == action) {
-            summary.setTotalDuration(summary.getTotalDuration() + duration);
+            summaryMonth.setTotalDuration(summaryMonth.getTotalDuration() + duration);
         }
 
         if (ActionType.DELETE == action) {
-            summary.setTotalDuration(
-                    Math.max(0, summary.getTotalDuration() - duration)
-            );
+            summaryMonth.setTotalDuration(Math.max(0, summaryMonth.getTotalDuration() - duration));
         }
 
         repository.save(summary);
     }
 
 
-    private TrainerMonthlySummary createNewSummary(
+    private Trainer createNewTrainer(
             String username,
             String firstName,
             String lastName,
-            boolean active,
-            int year,
-            int month
+            boolean active
     ) {
-        TrainerMonthlySummary summary = new TrainerMonthlySummary();
-        summary.setTrainerUsername(username);
-        summary.setFirstName(firstName);
-        summary.setLastName(lastName);
-        summary.setActive(active);
-        summary.setYear(year);
-        summary.setMonthValue(month);
-        summary.setTotalDuration(0);
-        return summary;
+        Trainer trainer = new Trainer();
+
+        trainer.setTrainerUsername(username);
+        trainer.setFirstName(firstName);
+        trainer.setLastName(lastName);
+        trainer.setActive(active);
+        trainer.setYears(new ArrayList<>());
+        return trainer;
     }
 
-    public List<TrainerWorkloadResponse> getTrainerByUsername(String username) {
-        return repository.findByTrainerUsername(username).stream().map(workloadMapper::toDto).toList();
+    private TrainerYear getOrCreateTrainerYear(Trainer trainer, int year) {
+        return trainer.getYears().stream()
+                .filter(existingYear -> existingYear.getYear() == year)
+                .findFirst()
+                .orElseGet(() -> createTrainerYear(trainer, year));
+    }
+
+    private TrainerYear createTrainerYear(Trainer trainer, int year) {
+        TrainerYear trainerYear = new TrainerYear();
+        trainerYear.setYear(year);
+        trainerYear.setMonths(new ArrayList<>());
+        trainerYear.setTrainer(trainer);
+        trainer.getYears().add(trainerYear);
+        return trainerYear;
+    }
+
+    private TrainerMonth getOrCreateTrainerMonth(TrainerYear trainerYear, int month) {
+        return trainerYear.getMonths().stream()
+                .filter(existingMonth -> existingMonth.getMonth() == month)
+                .findFirst()
+                .orElseGet(() -> createTrainerMonth(trainerYear, month));
+    }
+
+    private TrainerMonth createTrainerMonth(TrainerYear trainerYear, int month) {
+        TrainerMonth trainerMonth = new TrainerMonth();
+        trainerMonth.setMonth(month);
+        trainerMonth.setTotalDuration(0);
+        trainerMonth.setTrainerYear(trainerYear);
+        trainerYear.getMonths().add(trainerMonth);
+        return trainerMonth;
+    }
+
+    public TrainerWorkloadResponse getTrainerByUsername(String username) {
+        Trainer trainers =  repository.findByTrainerUsername(username);
+        return trainerMapper.toDto(trainers);
     }
 }
