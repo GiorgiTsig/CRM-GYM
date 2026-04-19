@@ -42,9 +42,9 @@ public class AuthController {
     ResponseEntity<Void> auth(
             @RequestHeader("username") String authUsername,
             @RequestHeader("password") String authPassword,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
         authentication.auth(authUsername, authPassword);
 
         return ResponseEntity.ok().build();
@@ -62,9 +62,9 @@ public class AuthController {
     ResponseEntity<String> changePassword(
             org.springframework.security.core.Authentication authentication,
             @RequestBody ChangePasswordRequestDto credentials,
-            @RequestHeader(value = "transactionId", required = false) String transactionId
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId
     ) {
-        log.info("TransactionId: {}", transactionId);
+        log.info("X-Correlation-Id: {}", correlationId);
 
         UserDetails username = (UserDetails) authentication.getPrincipal();
         userService.updatePassword(username.getUsername(), credentials.getNewPassword());
