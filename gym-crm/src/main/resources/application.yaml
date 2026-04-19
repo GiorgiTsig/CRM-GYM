@@ -23,7 +23,8 @@ spring:
         provider:
           my-client:
             token-uri: http://localhost:9000/oauth2/token
-
+  activemq:
+    broker-url: tcp://localhost:61616
 
   jpa:
     hibernate:
@@ -78,3 +79,7 @@ resilience4j:
       training-report-service:
         failure-rate-threshold: 50
         sliding-window-size: 10
+
+app:
+  messaging:
+    workload-queue: trainer.workload.queue

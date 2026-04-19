@@ -8,6 +8,7 @@ import com.epam.trainingreportservice.dto.request.ActionType;
 import com.epam.trainingreportservice.dto.response.TrainerWorkloadResponse;
 import com.epam.trainingreportservice.repository.TrainerRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class TrainerSummaryService {
         this.trainerMapper = trainerMapper;
     }
 
+    @Transactional
     public void updateSummary(
             String username,
             String firstName,
@@ -103,6 +105,7 @@ public class TrainerSummaryService {
         return trainerMonth;
     }
 
+    @Transactional(readOnly = true)
     public TrainerWorkloadResponse getTrainerByUsername(String username) {
         Trainer trainers =  repository.findByTrainerUsername(username);
         return trainerMapper.toDto(trainers);

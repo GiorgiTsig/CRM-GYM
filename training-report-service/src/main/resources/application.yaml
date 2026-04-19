@@ -1,6 +1,8 @@
 spring:
   application:
     name: training-report-service
+  activemq:
+    broker-url: tcp://localhost:61616
   security:
     oauth2:
       resourceserver:
@@ -33,3 +35,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+app:
+  messaging:
+    workload-queue: trainer.workload.queue
