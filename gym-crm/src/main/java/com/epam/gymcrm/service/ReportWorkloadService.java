@@ -1,7 +1,7 @@
 package com.epam.gymcrm.service;
 
-import com.epam.gymcrm.client.ReportClient;
 import com.epam.gymcrm.dto.training.TrainingEventDto;
+import com.epam.gymcrm.jms.MessageProducer;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -10,15 +10,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportWorkloadService {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(ReportWorkloadService.class);
-    private final ReportClient reportClient;
+    private final MessageProducer producer;
 
-    public ReportWorkloadService(ReportClient reportClient) {
-        this.reportClient = reportClient;
+    public ReportWorkloadService(MessageProducer producer) {
+        this.producer = producer;
     }
 
     @CircuitBreaker(name = "training-report-service", fallbackMethod = "fallback")
     public void sendWorkloadSafe(TrainingEventDto dto) {
-        reportClient.sendWorkload(dto);
+        producer.send(dto);
     }
 
     public void fallback(TrainingEventDto dto, Throwable ex) {

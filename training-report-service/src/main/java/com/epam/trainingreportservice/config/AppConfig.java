@@ -1,10 +1,11 @@
-package com.epam.gymcrm.config;
+package com.epam.trainingreportservice.config;
 
-import com.epam.gymcrm.dto.training.TrainingEventDto;
+import com.epam.trainingreportservice.dto.request.TrainingEventDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -30,6 +31,7 @@ public class AppConfig {
         converter.setObjectMapper(objectMapper);
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
+
         Map<String, Class<?>> typeIdMappings = new HashMap<>();
         typeIdMappings.put("trainingEvent", TrainingEventDto.class);
 
