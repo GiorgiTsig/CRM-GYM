@@ -1,6 +1,7 @@
 package com.epam.trainingreportservice.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -8,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 
 @Document(collection = "trainers")
+@CompoundIndex(name = "trainer_name_idx", def = "{'firstName': 1, 'lastName': 1}")
 public class Trainer {
 
     @Id
