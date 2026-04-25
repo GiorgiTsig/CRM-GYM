@@ -3,7 +3,7 @@ package com.epam.trainingreportservice.dto.response;
 public class MonthSummaryDto {
     private int month;
 
-    private int totalDuration;
+    private int trainingsSummaryDuration;
 
     public int getMonth() {
         return month;
@@ -13,11 +13,11 @@ public class MonthSummaryDto {
         this.month = month;
     }
 
-    public int getTotalDuration() {
-        return totalDuration;
+    public int getTrainingsSummaryDuration() {
+        return trainingsSummaryDuration;
     }
 
-    public void setTotalDuration(int totalDuration) {
-        this.totalDuration = totalDuration;
+    public void setTrainingsSummaryDuration(int trainingsSummaryDuration) {
+        this.trainingsSummaryDuration = trainingsSummaryDuration;
     }
 }

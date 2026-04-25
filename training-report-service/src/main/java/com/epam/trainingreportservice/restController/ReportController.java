@@ -4,14 +4,17 @@ import com.epam.trainingreportservice.dto.request.TrainingEventDto;
 import com.epam.trainingreportservice.dto.response.TrainerWorkloadResponse;
 import com.epam.trainingreportservice.service.TrainerSummaryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@Validated
 public class ReportController {
     private static final Logger log = LoggerFactory.getLogger(ReportController.class);
     private final TrainerSummaryService trainerSummaryService;
@@ -26,27 +29,26 @@ public class ReportController {
             @RequestHeader("X-Correlation-Id") String correlationId
     ) {
         log.info("Received workload event with correlationId={}", correlationId);
-        trainerSummaryService.updateSummary(
-                trainingDto.getTrainerUsername(),
-                trainingDto.getFirstName(),
-                trainingDto.getLastName(),
-                trainingDto.isActive(),
-                trainingDto.getTrainingDate(),
-                trainingDto.getDuration(),
-                trainingDto.getAction()
-        );
+        trainerSummaryService.updateSummary(trainingDto);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/workload")
     public ResponseEntity<TrainerWorkloadResponse> get(
-            @RequestParam String username
+            @RequestParam
+            @NotBlank(message = "Username is required")
+            String username
     ) {
-        TrainerWorkloadResponse result = trainerSummaryService.getTrainerByUsername(username);
+        TrainerWorkloadResponse result =
+                trainerSummaryService.getTrainerByUsername(username);
 
+        if (result == null) {
+            log.info("Trainer not found for username={}", username);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
         log.info("Received workload event for trainer={}", username);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+        return ResponseEntity.ok(result);
     }
 
 }

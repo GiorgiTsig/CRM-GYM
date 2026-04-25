@@ -6,5 +6,6 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface TrainerMapper {
+    @Mapping(target = "status", source = "status")
     TrainerWorkloadResponse toDto(Trainer trainer);
 }

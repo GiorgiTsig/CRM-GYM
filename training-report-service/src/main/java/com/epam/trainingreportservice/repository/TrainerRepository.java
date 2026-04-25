@@ -1,14 +1,12 @@
 package com.epam.trainingreportservice.repository;
 
 import com.epam.trainingreportservice.domain.Trainer;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface TrainerRepository extends JpaRepository<Trainer, UUID> {
-    Trainer findByTrainerUsername(String trainerUsername);
+public interface TrainerRepository extends MongoRepository<Trainer, String> {
+    Optional<Trainer> findByTrainerUsername(String trainerUsername);
 }

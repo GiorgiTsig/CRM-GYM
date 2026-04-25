@@ -2,19 +2,21 @@ package com.epam.trainingreportservice.service;
 
 import com.epam.trainingreportservice.domain.TrainerMonth;
 import com.epam.trainingreportservice.domain.TrainerYear;
+import com.epam.trainingreportservice.dto.request.TrainingEventDto;
 import com.epam.trainingreportservice.mapper.TrainerMapper;
 import com.epam.trainingreportservice.domain.Trainer;
 import com.epam.trainingreportservice.dto.request.ActionType;
 import com.epam.trainingreportservice.dto.response.TrainerWorkloadResponse;
 import com.epam.trainingreportservice.repository.TrainerRepository;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Optional;
 
 @Service
+@Validated
 public class TrainerSummaryService {
 
     private final TrainerRepository repository;
@@ -26,49 +28,33 @@ public class TrainerSummaryService {
     }
 
     @Transactional
-    public void updateSummary(
-            String username,
-            String firstName,
-            String lastName,
-            boolean active,
-            LocalDate date,
-            int duration,
-            ActionType action
-    ) {
+    public void updateSummary(@Valid TrainingEventDto trainingEventDto) {
+        Trainer trainer = repository.findByTrainerUsername(trainingEventDto.getTrainerUsername())
+                .orElseGet(() -> createNewTrainer(trainingEventDto));
 
-        int year = date.getYear();
-        int month = date.getMonthValue();
 
-        Trainer summary = Optional.ofNullable(repository.findByTrainerUsername(username))
-                .orElseGet(() -> createNewTrainer(username, firstName, lastName, active));
+        TrainerYear summaryYear = getOrCreateTrainerYear(trainer, trainingEventDto.getTrainingDate().getYear());
+        TrainerMonth summaryMonth = getOrCreateTrainerMonth(summaryYear, trainingEventDto.getTrainingDate().getMonthValue());
 
-        TrainerYear summaryYear = getOrCreateTrainerYear(summary, year);
-        TrainerMonth summaryMonth = getOrCreateTrainerMonth(summaryYear, month);
-
-        if (ActionType.ADD == action) {
-            summaryMonth.setTotalDuration(summaryMonth.getTotalDuration() + duration);
+        if (ActionType.ADD == trainingEventDto.getAction()) {
+            summaryMonth.setTrainingsSummaryDuration(summaryMonth.getTrainingsSummaryDuration() + trainingEventDto.getDuration());
         }
 
-        if (ActionType.DELETE == action) {
-            summaryMonth.setTotalDuration(Math.max(0, summaryMonth.getTotalDuration() - duration));
+        if (ActionType.DELETE == trainingEventDto.getAction()) {
+            summaryMonth.setTrainingsSummaryDuration(Math.max(0, summaryMonth.getTrainingsSummaryDuration() - trainingEventDto.getDuration()));
         }
 
-        repository.save(summary);
+        repository.save(trainer);
     }
 
 
-    private Trainer createNewTrainer(
-            String username,
-            String firstName,
-            String lastName,
-            boolean active
-    ) {
+    private Trainer createNewTrainer(TrainingEventDto trainingEventDto) {
         Trainer trainer = new Trainer();
 
-        trainer.setTrainerUsername(username);
-        trainer.setFirstName(firstName);
-        trainer.setLastName(lastName);
-        trainer.setActive(active);
+        trainer.setTrainerUsername(trainingEventDto.getTrainerUsername());
+        trainer.setFirstName(trainingEventDto.getFirstName());
+        trainer.setLastName(trainingEventDto.getLastName());
+        trainer.setStatus(trainingEventDto.isActive());
         trainer.setYears(new ArrayList<>());
         return trainer;
     }
@@ -84,7 +70,6 @@ public class TrainerSummaryService {
         TrainerYear trainerYear = new TrainerYear();
         trainerYear.setYear(year);
         trainerYear.setMonths(new ArrayList<>());
-        trainerYear.setTrainer(trainer);
         trainer.getYears().add(trainerYear);
         return trainerYear;
     }
@@ -99,15 +84,15 @@ public class TrainerSummaryService {
     private TrainerMonth createTrainerMonth(TrainerYear trainerYear, int month) {
         TrainerMonth trainerMonth = new TrainerMonth();
         trainerMonth.setMonth(month);
-        trainerMonth.setTotalDuration(0);
-        trainerMonth.setTrainerYear(trainerYear);
+        trainerMonth.setTrainingsSummaryDuration(0);
         trainerYear.getMonths().add(trainerMonth);
         return trainerMonth;
     }
 
     @Transactional(readOnly = true)
     public TrainerWorkloadResponse getTrainerByUsername(String username) {
-        Trainer trainers =  repository.findByTrainerUsername(username);
-        return trainerMapper.toDto(trainers);
+        return repository.findByTrainerUsername(username)
+                .map(trainerMapper::toDto)
+                .orElse(null);
     }
 }
