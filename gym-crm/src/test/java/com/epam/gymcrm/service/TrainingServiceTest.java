@@ -43,7 +43,7 @@ class TrainingServiceTest {
     @Mock
     private TrainingMapper trainingMapper;
     @Mock
-    private ReportClient reportClient;
+    private ReportWorkloadService reportWorkloadService;
 
     @InjectMocks
     private TrainingService trainingService;
@@ -171,7 +171,7 @@ class TrainingServiceTest {
         trainingService.createTraining(traineeUsername, trainerUsername, training);
 
         verify(trainingRepository).save(training);
-        verify(reportClient).sendWorkload(eventDto);
+        verify(reportWorkloadService).sendWorkloadSafe(eventDto);
         verify(trainerSuccessCounter).increment();
         verify(traineeSuccessCounter).increment();
         verify(createSuccessCounter).increment();
@@ -180,7 +180,10 @@ class TrainingServiceTest {
     @Test
     void delete_whenUsernameProvided_callsRepositoryDelete() {
         String username = "john";
+        when(trainingRepository.findByTraineeUserUsername(username)).thenReturn(List.of());
+
         trainingService.delete(username);
+
         verify(trainingRepository).deleteTrainingByTraineeUserUsername(username);
     }
 
