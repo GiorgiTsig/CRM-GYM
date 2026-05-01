@@ -40,7 +40,7 @@ CREATE TABLE training_type
     CONSTRAINT pk_training_type PRIMARY KEY (id)
 );
 
-CREATE TABLE user
+CREATE TABLE users
 (
     id                    BINARY(16)    NOT NULL,
     first_name            VARCHAR(255)  NOT NULL,
@@ -63,17 +63,17 @@ ALTER TABLE trainer
 ALTER TABLE training_type
     ADD CONSTRAINT uc_training_type_trainingtypename UNIQUE (training_type_name);
 
-ALTER TABLE user
+ALTER TABLE users
     ADD CONSTRAINT uc_user_username UNIQUE (username);
 
 ALTER TABLE trainee
-    ADD CONSTRAINT FK_TRAINEE_ON_USER FOREIGN KEY (user_id) REFERENCES user (id);
+    ADD CONSTRAINT FK_TRAINEE_ON_USER FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE trainer
     ADD CONSTRAINT FK_TRAINER_ON_SPECIALIZATION FOREIGN KEY (specialization_id) REFERENCES training_type (id);
 
 ALTER TABLE trainer
-    ADD CONSTRAINT FK_TRAINER_ON_USER FOREIGN KEY (user_id) REFERENCES user (id);
+    ADD CONSTRAINT FK_TRAINER_ON_USER FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE training
     ADD CONSTRAINT FK_TRAINING_ON_TRAINEE FOREIGN KEY (trainee_id) REFERENCES trainee (id);
