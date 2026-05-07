@@ -8,24 +8,15 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:9000
-  datasource:
-    url: jdbc:h2:file:./data/reportdb;AUTO_SERVER=TRUE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: ""
+  data:
+    mongodb:
+      uri: mongodb://admin:password@localhost:27017/reportdb?authSource=admin
+      auto-index-creation: true
+
 
 logging:
   pattern:
     level: "%5p [${spring.application.name}] [correlationId=%X{correlationId}]"
-
-jpa:
-  hibernate:
-    ddl-auto: none
-  show-sql: true
-flyway:
-  enabled: true
-  baseline-on-migrate: true
-  baseline-version: 0
 
 
 server:

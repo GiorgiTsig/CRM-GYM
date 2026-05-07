@@ -1,15 +1,32 @@
 package com.epam.trainingreportservice.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.time.LocalDate;
 
 public class TrainingEventDto {
 
+    @NotBlank(message = "Trainer username is required")
     private String trainerUsername;
+
+    @NotBlank(message = "Trainer first name is required")
     private String firstName;
+
+    @NotBlank(message = "Trainer last name is required")
     private String lastName;
+
     private boolean active;
+
+    @NotNull(message = "Training date is required")
     private LocalDate trainingDate;
+
+    @NotNull(message = "Training duration is required")
+    @Positive(message = "Training duration must be greater than 0")
     private Integer duration;
+
+    @NotNull(message = "Action is required")
     private ActionType action;
 
     public TrainingEventDto() {}

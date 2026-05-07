@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:password@localhost:27017/reportdb_test?authSource=admin
+      auto-index-creation: true
+
+eureka:
+  client:
+    enabled: false
+
+app:
+  messaging:
+    workload-queue: trainer.workload.queue.integration

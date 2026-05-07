@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  mongoDB:
+    image: mongodb/mongodb-community-server:8.0-ubuntu2204-slim
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password

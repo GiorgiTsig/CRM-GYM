@@ -1,36 +1,42 @@
 package com.epam.trainingreportservice.domain;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
-import java.util.UUID;
 
-@Entity
-@Table(name = "trainer")
+@Document(collection = "trainers")
+@CompoundIndex(name = "trainer_name_idx", def = "{'firstName': 1, 'lastName': 1}")
 public class Trainer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String trainerUsername;
 
+    @Field("firstName")
     private String firstName;
-    private String lastName;
-    private Boolean active;
 
-    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Field("lastName")
+    private String lastName;
+
+    @Field("status")
+    private Boolean status;
+
     private List<TrainerYear> years;
 
     public Trainer() {
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -58,12 +64,12 @@ public class Trainer {
         this.lastName = lastName;
     }
 
-    public Boolean getActive() {
-        return active;
+    public Boolean getStatus() {
+        return status;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 
     public List<TrainerYear> getYears() {

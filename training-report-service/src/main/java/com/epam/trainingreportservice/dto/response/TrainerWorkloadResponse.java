@@ -6,7 +6,7 @@ public class TrainerWorkloadResponse {
     private String trainerUsername;
     private String firstName;
     private String lastName;
-    private boolean active;
+    private boolean status;
     private List<YearSummaryDto> years;
 
     public String getTrainerUsername() {
@@ -33,12 +33,12 @@ public class TrainerWorkloadResponse {
         this.lastName = lastName;
     }
 
-    public boolean isActive() {
-        return active;
+    public boolean isStatus() {
+        return status;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 
     public List<YearSummaryDto> getYears() {
